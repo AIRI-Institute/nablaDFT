@@ -1,0 +1,6 @@
+numpy
+psi4
+apsw>=3.36.0
+ase
+tensorboardX
+torch

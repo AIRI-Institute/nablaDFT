@@ -1,0 +1,16 @@
+{
+  "train_databases": {
+    "dataset_train_100k": "https://sc.link/x4W9",
+    "dataset_train_10k": "https://sc.link/Gm75",
+    "dataset_train_5k": "https://sc.link/380p",
+    "dataset_train_2k": "https://sc.link/2ZAA"
+  },
+  "test_databases": {
+    "dataset_test_structures": "https://sc.link/617N",
+    "dataset_test_scaffolds": "https://sc.link/pPmN",
+    "dataset_test_conformations_100k": "https://sc.link/8Z7r",
+    "dataset_test_conformations_10k": "https://sc.link/5ZEX",
+    "dataset_test_conformations_5k": "https://sc.link/9Z7z",
+    "dataset_test_conformations_2k": "https://sc.link/0ZyN"
+  }
+}
