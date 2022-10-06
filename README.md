@@ -16,6 +16,12 @@ Links to energy databases including different train and test subsets are in file
 #### Raw psi4 wave functions
 Links to tarballs: [wave functions](./nablaDFT/links/nablaDFT_psi4wfn_links.txt)
 
+#### Summary file
+The csv file with conformations index, SMILES, atomic DFT properties and wfn archive names: [summary.csv](https://n-usr-31b1j.s3pd02.sbercloud.ru/b-usr-31b1j-qz9/data/nablaDFT/summary.csv) 
+
+#### Conformations files
+Tar archive with xyz files [archive](https://n-usr-31b1j.s3pd02.sbercloud.ru/b-usr-31b1j-qz9/data/nablaDFT/conformations_archive.tar)
+
 ### Accessing elements of the dataset
 #### Hamiltonian database
 
