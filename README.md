@@ -1,7 +1,32 @@
-# nablaDFT: Energy and Hamiltonian prediction on a large scale
+# nablaDFT: Large-Scale Conformational Energy and Hamiltonian Prediction benchmark and dataset
+
+Electronic wave function calculation is a fundamental task of computational quantum chemistry. Knowledge of the wave function parameters allows one to compute physical and chemical properties of molecules and materials.<br/>
+In this work we: introduce a new curated large-scale dataset of electron structures of drug-like molecules, establish a novel benchmark for the estimation of molecular properties in the multi-molecule setting, and evaluate a wide range of methods with this benchmark.<br/>
+
+More details can be found in the [paper](https://pubs.rsc.org/en/content/articlelanding/2022/CP/D2CP03966D).
+
+
+If you are using nablaDFT in your research paper, please cite us as
+```
+@article{10.1039/D2CP03966D,
+author ="Khrabrov, Kuzma and Shenbin, Ilya and Ryabov, Alexander and Tsypin, Artem and Telepov, Alexander and Alekseev, Anton and Grishin, Alexander and Strashnov, Pavel and Zhilyaev, Petr and Nikolenko, Sergey and Kadurin, Artur",
+title  ="nablaDFT: Large-Scale Conformational Energy and Hamiltonian Prediction benchmark and dataset",
+journal  ="Phys. Chem. Chem. Phys.",
+year  ="2022",
+volume  ="24",
+issue  ="42",
+pages  ="25853-25863",
+publisher  ="The Royal Society of Chemistry",
+doi  ="10.1039/D2CP03966D",
+url  ="http://dx.doi.org/10.1039/D2CP03966D"}
+```
+
+![pipeline](images/pipeline.png)
+
+
 ## Dataset
 
-We propose a benchmarking dataset based on a subset of [Molecular Sets (MOSES) dataset](https://github.com/molecularsets/moses). Resulting dataset contains 1 004 918 molecules with atoms C, N, S, O, F, Cl, Br, H. E It contains 226 424 unique Bemis-Murcko scaffolds and 34 572 unique BRICS fragments.<br/>
+We propose a benchmarking dataset based on a subset of [Molecular Sets (MOSES) dataset](https://github.com/molecularsets/moses). Resulting dataset contains 1 004 918 molecules with atoms C, N, S, O, F, Cl, Br, H. It contains 226 424 unique Bemis-Murcko scaffolds and 34 572 unique BRICS fragments.<br/>
 For each molecule in the dataset we provide from 1 to 62 unique conformations, with 5 340 152 total conformations. For each conformation, we have calculated its electronic properties including the energy (E), DFT Hamiltonian matrix (H), and DFT overlap matrix (S). All properties were calculated using the Kohn-Sham method at ωB97X-D/def2-SVP levels of theory using the quantum-chemical software package [Psi4](https://github.com/psi4/psi4), version 1.5. <br/>
 We provide several splits of the dataset that can serve as the basis for comparison across different models. First, we fix the training set that consists of 100 000 molecules with 436 581 conformations and its smaller subsets with 10 000, 5 000, and 2 000 molecules and 38 364, 20 349, and 5 768 conformations respectively; these subsets can help determine how much additional data helps various models. We choose another 100 000 random molecules as a structure test set. The scaffold test set has 100 000 molecules containing a Bemis-Murcko scaffold from a random subset of scaffolds which are not present in the training set. Finally, the conformation test set consists of 91 182 (resp., 10 000, 5 000, 2 000) molecules from the training set with new conformations, numbering in total 92 821 (8 892, 4 897, 1 724) conformations; this set can be used for the single-molecule setup. <br/>
 As part of the benchmark, we provide separate databases for each subset and task and a complete archive with wave function files produced by the Psi4 package that contains quantum chemical properties of the corresponding molecule and can be used in further computations.
@@ -74,6 +99,9 @@ lowdin_charges = wfn.array_variables()["LOWDIN CHARGES"]  # Löwdin atomic charg
 * [A continuous-filter convolutional neural network for modeling quantum interactions (SchNet)](./nablaDFT/schnet/README.md)
 * [Equivariant message passing for the prediction of tensorial properties and molecular spectra (PaiNN)](./nablaDFT/painn/README.md)
 * [Fast and Uncertainty-Aware Directional Message Passing for Non-Equilibrium Molecules (DimeNet++)](https://github.com/ilya-shenbin/dimenet)
+
+### Checkpoint
+Several checkpoints for each model is available here: [checkpoints links](./nablaDFT/links/models_checkpoints.json)
 
 ### Metrics
 In the tables below ST, SF, CF denote structures test set, scaffolds test set and conformations test set correspondingly.

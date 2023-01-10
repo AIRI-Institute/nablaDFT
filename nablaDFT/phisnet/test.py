@@ -54,7 +54,8 @@ if __name__ == "__main__":
 
     test_data_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False,
                                                    num_workers=args.num_workers, pin_memory=use_gpu,
-                                                   collate_fn=lambda batch: test_dataset.collate_fn(batch, return_filtered=True))
+                                                   collate_fn=lambda batch:
+                                                   test_dataset.collate_fn(batch, return_filtered=True))
 
     # model
     logging.info("Loading model... %s" % args.load_from)

@@ -94,16 +94,17 @@ if __name__ == '__main__':
                            num_train=int(dataset_length * 0.9),
                            num_val=int(dataset_length * 0.1),
                            transforms=[
-                            trn.ASENeighborList(cutoff=5.),
+                            trn.ASENeighborList(cutoff=args.cutoff),
                             trn.RemoveOffsets("energy", remove_mean=True, remove_atomrefs=False),
                             trn.CastTo32()
                            ],
                            split_file=os.path.join(workpath, "split.npz"))
 
     pairwise_distance = spk.atomistic.PairwiseDistances()
-    radial_basis = spk.nn.radial.GaussianRBF(n_rbf=20, cutoff=5.)
-    cutoff_fn = spk.nn.cutoff.CosineCutoff(5.)
-    representation = rep.PaiNN(n_interactions=3, n_atom_basis=128, radial_basis=radial_basis, cutoff_fn=cutoff_fn)
+    radial_basis = spk.nn.radial.GaussianRBF(n_rbf=args.n_rbf, cutoff=args.cutoff)
+    cutoff_fn = spk.nn.cutoff.CosineCutoff(args.cutoff)
+    representation = rep.PaiNN(n_interactions=args.n_interactions, n_atom_basis=args.n_atom_basis,
+                               radial_basis=radial_basis, cutoff_fn=cutoff_fn)
     pred_energy = spk.atomistic.Atomwise(n_in=representation.n_atom_basis, output_key="energy")
     nnpot = spk.model.NeuralNetworkPotential(representation=representation,
                                              input_modules=[pairwise_distance],
