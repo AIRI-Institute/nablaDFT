@@ -65,7 +65,7 @@ atoms_data = connect.get(1)
 ```
 #### Working with raw psi4 wavefunctions
 
-A variety of properties can also be loaded directly from the wavefunctions. See main paper for more details. Properties include DFT matrices:
+A variety of properties can also be loaded directly from the wavefunctions files. See main paper for more details. Properties include DFT matrices:
 ```python
 import numpy as np
 import psi4
@@ -101,7 +101,7 @@ lowdin_charges = wfn.array_variables()["LOWDIN CHARGES"]  # Löwdin atomic charg
 * [Fast and Uncertainty-Aware Directional Message Passing for Non-Equilibrium Molecules (DimeNet++)](https://github.com/ilya-shenbin/dimenet)
 
 ### Checkpoint
-Several checkpoints for each model is available here: [checkpoints links](./nablaDFT/links/models_checkpoints.json)
+Several checkpoints for each model are available here: [checkpoints links](./nablaDFT/links/models_checkpoints.json)
 
 ### Metrics
 In the tables below ST, SF, CF denote structures test set, scaffolds test set and conformations test set correspondingly.
