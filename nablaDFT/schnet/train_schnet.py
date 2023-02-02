@@ -17,10 +17,10 @@ import schnetpack as spk
 import schnetpack.representation as rep
 from schnetpack.data import AtomsDataModule
 from schnetpack.model.base import AtomisticModel
-from schnetpack.data import *
 import sys
 sys.path.append('../')
-from dataset.nablaDFT import NablaDFT # поправить
+from dataset.nablaDFT import ASENablaDFT # поправить
+from dataset.nablaDFT import nablaDFT
 
 
 def seed_everything(seed=42):
@@ -92,19 +92,19 @@ if __name__ == '__main__':
     workpath = args.logspath
     if not os.path.exists(workpath):
         os.makedirs(workpath)
-
-    data = NablaDFT(args.dataset_name,
-                    args.datapath,
-                           data_workdir=workpath,
-                           batch_size=args.batch_size,
-                           num_workers=4,
-                           num_train=None,
-                           num_val=None,
-                           transforms=[
-                            trn.ASENeighborList(cutoff=args.cutoff),
-                            trn.RemoveOffsets("energy", remove_mean=True, remove_atomrefs=False),
-                            trn.CastTo32()],
-                           split_file=os.path.join(workpath, "split.npz"))
+    
+    data = nablaDFT("ASE",args.dataset_name,
+                       datapath = args.datapath,
+                       data_workdir=workpath,
+                       batch_size=args.batch_size,
+                       num_workers=4,
+                       transforms=[
+                        trn.ASENeighborList(cutoff=args.cutoff),
+                        trn.RemoveOffsets("energy", remove_mean=True, remove_atomrefs=False),
+                        trn.CastTo32()
+                       ],
+                       split_file=os.path.join(workpath, "split.npz"))
+    
     pairwise_distance = spk.atomistic.PairwiseDistances()
     radial_basis = spk.nn.radial.GaussianRBF(n_rbf=args.n_rbf, cutoff=args.cutoff)
     cutoff_fn = spk.nn.cutoff.CosineCutoff(args.cutoff)

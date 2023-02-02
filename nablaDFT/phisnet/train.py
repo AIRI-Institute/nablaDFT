@@ -15,6 +15,11 @@ from nn import NeuralNetwork
 from training import HamiltonianDataset, ExponentialMovingAverage, Lookahead
 from training import seeded_random_split, parse_command_line_arguments, generate_id, empty_error_dict, compute_error_dict
 
+import sys
+sys.path.append('../')
+from dataset.nablaDFT import HamiltonianNablaDFT # поправить
+from dataset.nablaDFT import nablaDFT
+
 # without this, some things from torch don't
 # work correctly in newer versions of python
 multiprocessing.set_start_method('fork')
@@ -77,8 +82,8 @@ if __name__ == "__main__":
     use_gpu = args.use_gpu and torch.cuda.is_available()
 
     # load dataset(s)
-    logging.info("Loading " + args.dataset + "...")
-    dataset = HamiltonianDataset(args.dataset, dtype=args.dtype, subset=args.subset)
+    logging.info("Loading " + args.dataset_name + "...")
+    dataset = nablaDFT('Hamiltonian', args.datapath, args.dataset_name)
     # split into train/valid/test
     
     train_dataset, valid_dataset, test_dataset = seeded_random_split(dataset, [args.num_train, args.num_valid,

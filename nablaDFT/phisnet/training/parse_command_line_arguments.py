@@ -81,7 +81,8 @@ def parse_command_line_arguments():
     # arguments for training
     args_training = parser.add_argument_group("training hyperparameters")
     args_training.add_argument("--max_steps", metavar='INT', type=int, help="maximum number of training steps")
-    args_training.add_argument("--dataset", metavar='STR', type=str, help="filepath to dataset")
+    args_training.add_argument("--datapath", metavar='STR', type=str, help="filepath to dataset")
+    args_training.add_argument("--dataset_name", metavar='STR', type=str, help="name of the dataset")
     args_training.add_argument("--splits_file", metavar='STR', type=str, help="filepath to splitfile")
     args_training.add_argument("--subset", metavar='STR', type=str, default="", help="filepath to subset file")
     args_training.add_argument("--num_train", metavar='INT', type=int, help="size of training set")
