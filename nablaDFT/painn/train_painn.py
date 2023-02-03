@@ -1,26 +1,23 @@
 import argparse
 import os
-import numpy as np
 import random
-from typing import Optional, Dict, List, Type, Any, Union
+import sys
+from typing import Any, Dict, List, Optional, Type
 
-from ase.db import connect
-
-import torch
-from torch import nn as nn
-from torch.optim.lr_scheduler import OneCycleLR, ReduceLROnPlateau
-import torchmetrics
+import numpy as np
 import pytorch_lightning as pl
-
-import schnetpack.transform as trn
 import schnetpack as spk
 import schnetpack.representation as rep
-from schnetpack.data import AtomsDataModule
+import schnetpack.transform as trn
+import torch
+import torchmetrics
 from schnetpack.model.base import AtomisticModel
-import sys
+from torch import nn
+from torch.optim.lr_scheduler import ReduceLROnPlateau
+
 sys.path.append('../')
-from dataset.nablaDFT import ASENablaDFT # поправить
 from dataset.nablaDFT import nablaDFT
+
 
 def seed_everything(seed=42):
     random.seed(seed)
@@ -62,19 +59,20 @@ class AtomisticTaskFixed(spk.task.AtomisticTask):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run PAINN training')
     parser.add_argument('--dataset_name',  type=str,
-                                help='dataset name',
+                        help='dataset name',
                         default='dataset_train_2k')
     parser.add_argument('--datapath',  type=str,
-                                help='path to data',
+                        help='path to data',
                         default='database')
     parser.add_argument('--logspath',  type=str,
-                                help='path to logs', default='logs/model_moses_10k_split')
+                        help='path to logs',
+                        default='logs/model_moses_10k_split')
     parser.add_argument('--nepochs',  type=int, default=2000,
-                                help='epochs number')
+                        help='epochs number')
     parser.add_argument('--seed',  type=int, default=1799,
-                                help='random seed')
+                        help='random seed')
     parser.add_argument('--batch_size',  type=int, default=2000,
-                                            help='batch size')
+                        help='batch size')
     parser.add_argument('--n_interactions', type=int, default=6,
                         help='interactions number')
     parser.add_argument('--n_atom_basis', type=int, default=128,
@@ -93,28 +91,33 @@ if __name__ == '__main__':
         os.makedirs(workpath)
 
     data = nablaDFT("ASE", args.dataset_name,
-                       datapath = args.datapath,
-                       data_workdir=workpath,
-                       batch_size=args.batch_size,
-                       num_workers=4,
-                       transforms=[
-                        trn.ASENeighborList(cutoff=args.cutoff),
-                        trn.RemoveOffsets("energy", remove_mean=True, remove_atomrefs=False),
-                        trn.CastTo32()
-                       ],
-                       split_file=os.path.join(workpath, "split.npz"))
+                    datapath=args.datapath,
+                    data_workdir=workpath,
+                    batch_size=args.batch_size,
+                    num_workers=4,
+                    transforms=[
+                     trn.ASENeighborList(cutoff=args.cutoff),
+                     trn.RemoveOffsets("energy", remove_mean=True,
+                                       remove_atomrefs=False),
+                     trn.CastTo32()
+                    ],
+                    split_file=os.path.join(workpath, "split.npz"))
 
     pairwise_distance = spk.atomistic.PairwiseDistances()
-    radial_basis = spk.nn.radial.GaussianRBF(n_rbf=args.n_rbf, cutoff=args.cutoff)
+    radial_basis = spk.nn.radial.GaussianRBF(n_rbf=args.n_rbf,
+                                             cutoff=args.cutoff)
     cutoff_fn = spk.nn.cutoff.CosineCutoff(args.cutoff)
-    representation = rep.PaiNN(n_interactions=args.n_interactions, n_atom_basis=args.n_atom_basis,
-                               radial_basis=radial_basis, cutoff_fn=cutoff_fn)
-    pred_energy = spk.atomistic.Atomwise(n_in=representation.n_atom_basis, output_key="energy")
+    representation = rep.PaiNN(n_interactions=args.n_interactions,
+                               n_atom_basis=args.n_atom_basis,
+                               radial_basis=radial_basis,
+                               cutoff_fn=cutoff_fn)
+    pred_energy = spk.atomistic.Atomwise(n_in=representation.n_atom_basis,
+                                         output_key="energy")
+    postprocessors = [trn.CastTo64(), trn.AddOffsets("energy", add_mean=True)]
     nnpot = spk.model.NeuralNetworkPotential(representation=representation,
                                              input_modules=[pairwise_distance],
                                              output_modules=[pred_energy],
-                                             postprocessors=[trn.CastTo64(),
-                                                             trn.AddOffsets("energy", add_mean=True)])
+                                             postprocessors=postprocessors)
     output_energy = spk.task.ModelOutput(
         name="energy",
         loss_fn=torch.nn.MSELoss(),
