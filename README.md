@@ -100,6 +100,22 @@ lowdin_charges = wfn.array_variables()["LOWDIN CHARGES"]  # Löwdin atomic charg
 * [Equivariant message passing for the prediction of tensorial properties and molecular spectra (PaiNN)](./nablaDFT/painn/README.md)
 * [Fast and Uncertainty-Aware Directional Message Passing for Non-Equilibrium Molecules (DimeNet++)](https://github.com/ilya-shenbin/dimenet)
 
+### Dataloaders
+To create a dataset, nablaDFT class is used. Arguments of the function depend on the type of the model(which is specified by the first argument.)
+
+An example of the initialisation of ASE-type models (SchNet, PAINN) is presented below:
+```python
+model = NablaDFT(type_of_nn=“ASE”,  dataset_name="dataset_train_2k")
+```
+Similarly, Hamiltonian-type models (SchNOrb, PhiSNet) are initialised:
+```python
+model = NablaDFT(type_of_nn=“Hamiltonian”,  dataset_name="dataset_train_2k")
+```
+Dataset itself could be acquired in the following way:
+```python
+model.dataset
+```
+
 ### Checkpoint
 Several checkpoints for each model is available here: [checkpoints links](./nablaDFT/links/models_checkpoints.json)
 

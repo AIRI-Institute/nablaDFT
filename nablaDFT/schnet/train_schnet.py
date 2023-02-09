@@ -16,7 +16,7 @@ from torch import nn
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 sys.path.append('../')
-from dataset.nablaDFT import nablaDFT
+from dataset.nablaDFT import NablaDFT
 
 
 def seed_everything(seed=42):
@@ -90,7 +90,7 @@ if __name__ == '__main__':
     if not os.path.exists(workpath):
         os.makedirs(workpath)
 
-    data = nablaDFT("ASE", args.dataset_name,
+    data = NablaDFT("ASE", args.dataset_name,
                     datapath=args.datapath,
                     data_workdir=workpath,
                     batch_size=args.batch_size,
@@ -157,4 +157,4 @@ if __name__ == '__main__':
         default_root_dir=workpath,
         max_epochs=args.nepochs,
         )
-    trainer.fit(task, datamodule=data)
+    trainer.fit(task, datamodule=data.dataset)

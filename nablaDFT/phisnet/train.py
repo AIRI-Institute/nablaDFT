@@ -17,7 +17,7 @@ from training import seeded_random_split, parse_command_line_arguments, generate
 
 import sys
 sys.path.append('../')
-from dataset.nablaDFT import nablaDFT
+from dataset.nablaDFT import NablaDFT
 
 # without this, some things from torch don't
 # work correctly in newer versions of python
@@ -82,17 +82,17 @@ if __name__ == "__main__":
 
     # load dataset(s)
     logging.info("Loading " + args.dataset_name + "...")
-    dataset = nablaDFT('Hamiltonian', args.datapath, args.dataset_name)
+    dataset = NablaDFT('Hamiltonian', args.datapath, args.dataset_name)
     # split into train/valid/test
 
-    train_dataset, valid_dataset, test_dataset = seeded_random_split(dataset, [args.num_train, args.num_valid,
-                                                                               len(dataset) - (
+    train_dataset, valid_dataset, test_dataset = seeded_random_split(dataset.dataset, [args.num_train, args.num_valid,
+                                                                               len(dataset.dataset) - (
                                                                                        args.num_train + args.num_valid)],
                                                                      seed=args.split_seed)
 
-    logging.info(str([args.num_train, args.num_valid, len(dataset) - (args.num_train + args.num_valid)]))
+    logging.info(str([args.num_train, args.num_valid, len(dataset.dataset) - (args.num_train + args.num_valid)]))
 
-    # train_dataset, valid_dataset, test_dataset = file_split(dataset, args.splits_file)
+    # train_dataset, valid_dataset, test_dataset = file_split(dataset.dataset, args.splits_file)
 
     # save indices for splits
     np.savez(os.path.join(directory, 'datasplits.npz'), train=train_dataset.indices, valid=valid_dataset.indices,
@@ -119,15 +119,15 @@ if __name__ == "__main__":
     # prepare data loaders
     train_data_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.train_batch_size, shuffle=True,
                                                     num_workers=args.num_workers, pin_memory=use_gpu,
-                                                    collate_fn=lambda batch: dataset.collate_fn(batch))
+                                                    collate_fn=lambda batch: dataset.dataset.collate_fn(batch))
     valid_data_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=args.valid_batch_size, shuffle=False,
                                                     num_workers=args.num_workers, pin_memory=use_gpu,
-                                                    collate_fn=lambda batch: dataset.collate_fn(batch))
+                                                    collate_fn=lambda batch: dataset.dataset.collate_fn(batch))
 
     # define model
     if args.load_from is None:
         model = NeuralNetwork(
-            max_orbitals=dataset.max_orbitals,
+            max_orbitals=dataset.dataset.max_orbitals,
             order=args.order,
             num_features=args.num_features,
             num_basis_functions=args.num_basis_functions,

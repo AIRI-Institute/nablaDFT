@@ -1,13 +1,14 @@
 import json
 import os
 import sys
-from typing import Optional
+from typing import Optional, List
 from urllib import request as request
 
 import numpy as np
 import torch
 from ase.db import connect
 from schnetpack.data import AtomsDataFormat, AtomsDataModule, load_dataset
+import schnetpack.transform as trn
 
 sys.path.append('../')
 from phisnet.training.hamiltonian_dataset import HamiltonianDataset
@@ -16,11 +17,25 @@ from phisnet.training.sqlite_database import HamiltonianDatabase
 
 class ASENablaDFT(AtomsDataModule):
 
-    def __init__(self, dataset_name: str,
+    def __init__(self, dataset_name: str = "dataset_train_2k",
+                 datapath: str = "database",
+                 data_workdir: Optional[str] = "logs",
+                 batch_size: int = 2000,
+                 transforms: Optional[List[torch.nn.Module]] = [
+                  trn.ASENeighborList(cutoff=5.0),
+                  trn.RemoveOffsets("energy", remove_mean=True,
+                                    remove_atomrefs=False),
+                  trn.CastTo32()
+                 ],
                  format: Optional[AtomsDataFormat] = AtomsDataFormat.ASE,
                  **kwargs):
 
-        super().__init__(format=format, **kwargs)
+        super().__init__(datapath=datapath,
+                         data_workdir=data_workdir,
+                         batch_size=batch_size,
+                         transforms=transforms,
+                         format=format,
+                         **kwargs)
         self.dataset_name = dataset_name
 
     def prepare_data(self):
@@ -49,7 +64,8 @@ class ASENablaDFT(AtomsDataModule):
 
 class HamiltonianNablaDFT(HamiltonianDataset):
 
-    def __init__(self, datapath, dataset_name, max_batch_orbitals=1200,
+    def __init__(self, datapath="database", dataset_name="dataset_train_2k",
+                 max_batch_orbitals=1200,
                  max_batch_atoms=150, max_squares=4802,
                  subset=None, dtype=torch.float32):
 
@@ -62,6 +78,7 @@ class HamiltonianNablaDFT(HamiltonianDataset):
         f.close()
         filepath = datapath + "/" + dataset_name + ".db"
         request.urlretrieve(url, filepath)
+        print("done")
         self.database = HamiltonianDatabase(filepath)
         max_orbitals = []
         for z in self.database.Z:
@@ -77,11 +94,14 @@ class HamiltonianNablaDFT(HamiltonianDataset):
             self.subset = np.load(subset)
 
 
-def nablaDFT(type_of_nn: str, *args, **kwargs):
-    valid = {"ASE", "Hamiltonian"}
-    if type_of_nn not in valid:
-        raise ValueError("results: type of nn must be one of %r." % valid)
-    if type_of_nn == "ASE":
-        return ASENablaDFT(*args, **kwargs)
-    else:
-        return HamiltonianNablaDFT(*args, **kwargs)
+class NablaDFT:
+
+    def __init__(self, type_of_nn, *args, **kwargs):
+        valid = {"ASE", "Hamiltonian"}
+        if type_of_nn not in valid:
+            raise ValueError("results: type of nn must be one of %r." % valid)
+        self.type_of_nn = type_of_nn
+        if self.type_of_nn == "ASE":
+            self.dataset = ASENablaDFT(*args, **kwargs)
+        else:
+            self.dataset = HamiltonianNablaDFT(*args, **kwargs)
