@@ -103,17 +103,17 @@ lowdin_charges = wfn.array_variables()["LOWDIN CHARGES"]  # Löwdin atomic charg
 ### Dataloaders
 To create a dataset, nablaDFT class is used. Arguments of the function depend on the type of the model(which is specified by the first argument.)
 
-An example of the initialisation of ASE-type models (SchNet, PAINN) is presented below:
+An example of the initialisation of ASE-type data classes (SchNet, PAINN) is presented below:
 ```python
-model = NablaDFT(type_of_nn=“ASE”,  dataset_name="dataset_train_2k")
+data = NablaDFT(type_of_nn="ASE",  dataset_name="dataset_train_2k")
 ```
-Similarly, Hamiltonian-type models (SchNOrb, PhiSNet) are initialised:
+Similarly, Hamiltonian-type data classes (SchNOrb, PhiSNet) are initialised:
 ```python
-model = NablaDFT(type_of_nn=“Hamiltonian”,  dataset_name="dataset_train_2k")
+data = NablaDFT(type_of_nn="Hamiltonian",  dataset_name="dataset_train_2k")
 ```
 Dataset itself could be acquired in the following way:
 ```python
-model.dataset
+data.dataset
 ```
 
 ### Checkpoint
