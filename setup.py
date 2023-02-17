@@ -14,7 +14,8 @@ setup(
     version="2.0.0",
     author="Khrabrov, Kuzma and Shenbin, Ilya and Ryabov, Alexander and Tsypin, Artem and Telepov, Alexander and Alekseev, Anton and Grishin, Alexander and Strashnov, Pavel and Zhilyaev, Petr and Nikolenko, Sergey and Kadurin, Artur",
     url="https://github.com/AIRI-Institute/nablaDFT",
-    packages=["nablaDFT"],
+    packages=find_packages(),
+    package_data={'nablaDFT': ['links/*']},
     python_requires=">=3.6",
     install_requires=[
         "numpy",
@@ -23,6 +24,7 @@ setup(
         "h5py",
         "torch",
         "apsw",
+        "schnetpack>=2.0.0",
         "tensorboardX",
         "pyyaml",
         "hydra-core>=1.1.0",

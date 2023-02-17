@@ -16,8 +16,8 @@ from training import ExponentialMovingAverage, Lookahead
 from training import seeded_random_split, parse_command_line_arguments, generate_id, empty_error_dict, compute_error_dict
 
 import sys
-sys.path.append('../')
-from dataset.nablaDFT import NablaDFT
+#sys.path.append('../')
+from nablaDFT.dataset.nablaDFT_dataset import NablaDFT
 
 # without this, some things from torch don't
 # work correctly in newer versions of python

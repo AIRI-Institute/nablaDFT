@@ -9,10 +9,10 @@ import torch
 from ase.db import connect
 from schnetpack.data import AtomsDataFormat, AtomsDataModule, load_dataset
 import schnetpack.transform as trn
-
-sys.path.append('../')
-from phisnet.training.hamiltonian_dataset import HamiltonianDataset
-from phisnet.training.sqlite_database import HamiltonianDatabase
+import nablaDFT
+#sys.path.append('../')
+from nablaDFT.phisnet.training.hamiltonian_dataset import HamiltonianDataset
+from nablaDFT.phisnet.training.sqlite_database import HamiltonianDatabase
 
 
 class ASENablaDFT(AtomsDataModule):
@@ -43,7 +43,7 @@ class ASENablaDFT(AtomsDataModule):
         suffix = os.path.splitext(self.datapath)[1]
         if not os.path.exists(datapath_with_no_suffix):
             os.makedirs(datapath_with_no_suffix)
-        f = open('../links/energy_databases.json')
+        f = open(nablaDFT.__path__[0] + '/links/energy_databases.json')
         data = json.load(f)
         url = data['train_databases'][self.dataset_name]
         f.close()
@@ -72,13 +72,12 @@ class HamiltonianNablaDFT(HamiltonianDataset):
         self.dtype = dtype
         if not os.path.exists(datapath):
             os.makedirs(datapath)
-        f = open('../links/hamiltonian_databases.json')
+        f = open(nablaDFT.__path__[0] + '/links/hamiltonian_databases.json')
         data = json.load(f)
         url = data['train_databases'][dataset_name]
         f.close()
         filepath = datapath + "/" + dataset_name + ".db"
         request.urlretrieve(url, filepath)
-        print("done")
         self.database = HamiltonianDatabase(filepath)
         max_orbitals = []
         for z in self.database.Z:

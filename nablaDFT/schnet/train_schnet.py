@@ -15,8 +15,8 @@ from schnetpack.model.base import AtomisticModel
 from torch import nn
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
-sys.path.append('../')
-from dataset.nablaDFT import NablaDFT
+#sys.path.append('../')
+from nablaDFT.dataset.nablaDFT_dataset import NablaDFT
 
 
 def seed_everything(seed=42):
