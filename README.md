@@ -101,7 +101,7 @@ lowdin_charges = wfn.array_variables()["LOWDIN CHARGES"]  # Löwdin atomic charg
 * [Fast and Uncertainty-Aware Directional Message Passing for Non-Equilibrium Molecules (DimeNet++)](https://github.com/ilya-shenbin/dimenet)
 
 ### Dataloaders
-To create a dataset, nablaDFT class is used. Arguments of the function depend on the type of the model(which is specified by the first argument.)
+To create a dataset, nablaDFT class is used. Arguments of the function depend on the type of the model(which is specified by the first argument).
 
 An example of the initialisation of ASE-type data classes (SchNet, PAINN) is presented below:
 ```python
