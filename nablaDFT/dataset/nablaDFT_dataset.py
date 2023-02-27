@@ -21,6 +21,7 @@ class ASENablaDFT(AtomsDataModule):
                  datapath: str = "database",
                  data_workdir: Optional[str] = "logs",
                  batch_size: int = 2000,
+                 train_ratio: float = 0.9,
                  transforms: Optional[List[torch.nn.Module]] = [
                   trn.ASENeighborList(cutoff=5.0),
                   trn.RemoveOffsets("energy", remove_mean=True,
@@ -37,16 +38,19 @@ class ASENablaDFT(AtomsDataModule):
                          format=format,
                          **kwargs)
         self.dataset_name = dataset_name
+        self.train_ratio = train_ratio
 
     def prepare_data(self):
         datapath_with_no_suffix = os.path.splitext(self.datapath)[0]
         suffix = os.path.splitext(self.datapath)[1]
         if not os.path.exists(datapath_with_no_suffix):
             os.makedirs(datapath_with_no_suffix)
-        f = open(nablaDFT.__path__[0] + '/links/energy_databases.json')
-        data = json.load(f)
-        url = data['train_databases'][self.dataset_name]
-        f.close()
+        with open(nablaDFT.__path__[0] + '/links/energy_databases.json') as f:
+            data = json.load(f)
+            if self.train_ratio != 0: 
+                url = data['train_databases'][self.dataset_name]
+            else:
+                url = data['test_databases'][self.dataset_name]
         self.datapath = (datapath_with_no_suffix +
                          "/" + self.dataset_name +
                          suffix)
@@ -57,8 +61,14 @@ class ASENablaDFT(AtomsDataModule):
                                    "_property_unit_dict": {"energy":
                                                            "Hartree"}}
             dataset_length = len(ase_db)
-            self.num_train = int(dataset_length * 0.9)
-            self.num_val = int(dataset_length * 0.1)
+            self.num_train = int(dataset_length * self.train_ratio)
+            self.num_val = int(dataset_length * (1 - self.train_ratio))
+            if self.num_val == 0: 
+                self.num_val = -1
+                self.num_test = 0
+            if self.num_train == 0: 
+                self.num_train = -1
+                self.num_test = 0
         self.dataset = load_dataset(self.datapath, self.format)
 
 

@@ -11,7 +11,7 @@ import schnetpack.transform as trn
 from schnetpack.data import AtomsDataModule
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Run PaiNN test')
+    parser = argparse.ArgumentParser(description='Run SchNet test')
     parser.add_argument('--datapath',  type=str,
                         help='path to data',
                         default='train_10k_energy.db')
