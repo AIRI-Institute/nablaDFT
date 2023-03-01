@@ -57,9 +57,11 @@ class ASENablaDFT(AtomsDataModule):
         request.urlretrieve(url, self.datapath)
         with connect(self.datapath) as ase_db:
             if not ase_db.metadata:
+                atomrefs = np.load(nablaDFT.__path__[0] + '/data/atomization_energies.npy')
                 ase_db.metadata = {"_distance_unit": "Bohr",
                                    "_property_unit_dict": {"energy":
-                                                           "Hartree"}}
+                                                           "Hartree"},
+                                   "atomrefs": {"energy" : list(atomrefs)}}
             dataset_length = len(ase_db)
             self.num_train = int(dataset_length * self.train_ratio)
             self.num_val = int(dataset_length * (1 - self.train_ratio))

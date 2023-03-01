@@ -15,7 +15,7 @@ setup(
     author="Khrabrov, Kuzma and Shenbin, Ilya and Ryabov, Alexander and Tsypin, Artem and Telepov, Alexander and Alekseev, Anton and Grishin, Alexander and Strashnov, Pavel and Zhilyaev, Petr and Nikolenko, Sergey and Kadurin, Artur",
     url="https://github.com/AIRI-Institute/nablaDFT",
     packages=find_packages(),
-    package_data={'nablaDFT': ['links/*']},
+    include_package_data=True,
     python_requires=">=3.6",
     install_requires=[
         "numpy",
