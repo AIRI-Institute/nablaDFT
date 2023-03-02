@@ -20,7 +20,7 @@ from nablaDFT.dataset import NablaDFT
 
 def seed_everything(seed=42):
     random.seed(seed)
-    os.environ['PYTHONHASHSEED'] = str(seed)
+    os.environ["PYTHONHASHSEED"] = str(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
@@ -52,36 +52,35 @@ class AtomisticTaskFixed(spk.task.AtomisticTask):
         self.grad_enabled = len(self.model.required_derivatives) > 0
         self.lr = optimizer_args["lr"]
         self.warmup_steps = warmup_steps
-        self.save_hyperparameters(ignore=['model'])
+        self.save_hyperparameters(ignore=["model"])
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Run schnet')
-    parser.add_argument('--dataset_name',  type=str,
-                        help='dataset name',
-                        default='dataset_train_2k')
-    parser.add_argument('--datapath',  type=str,
-                        help='path to data',
-                        default='database')
-    parser.add_argument('--logspath',  type=str,
-                        help='path to logs',
-                        default='logs/model_moses_10k_split')
-    parser.add_argument('--nepochs',  type=int, default=2000,
-                        help='epochs number')
-    parser.add_argument('--seed',  type=int, default=1799,
-                        help='random seed')
-    parser.add_argument('--batch_size',  type=int, default=2000,
-                        help='batch size')
-    parser.add_argument('--n_interactions', type=int, default=6,
-                        help='interactions number')
-    parser.add_argument('--n_atom_basis', type=int, default=128,
-                        help='atom basis number')
-    parser.add_argument('--n_rbf', type=int, default=20,
-                        help='rbf number')
-    parser.add_argument('--cutoff', type=float, default=5.0,
-                        help='cutoff threshold')
-    parser.add_argument('--devices', type=int, default=1,
-                        help='gpu/tpu/cpu devices number')
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Run schnet")
+    parser.add_argument(
+        "--dataset_name", type=str, help="dataset name", default="dataset_train_2k"
+    )
+    parser.add_argument("--datapath", type=str, help="path to data", default="database")
+    parser.add_argument(
+        "--logspath",
+        type=str,
+        help="path to logs",
+        default="logs/model_moses_10k_split",
+    )
+    parser.add_argument("--nepochs", type=int, default=2000, help="epochs number")
+    parser.add_argument("--seed", type=int, default=1799, help="random seed")
+    parser.add_argument("--batch_size", type=int, default=2000, help="batch size")
+    parser.add_argument(
+        "--n_interactions", type=int, default=6, help="interactions number"
+    )
+    parser.add_argument(
+        "--n_atom_basis", type=int, default=128, help="atom basis number"
+    )
+    parser.add_argument("--n_rbf", type=int, default=20, help="rbf number")
+    parser.add_argument("--cutoff", type=float, default=5.0, help="cutoff threshold")
+    parser.add_argument(
+        "--devices", type=int, default=1, help="gpu/tpu/cpu devices number"
+    )
 
     args, unknown = parser.parse_known_args()
     seed_everything(args.seed)
@@ -89,41 +88,45 @@ if __name__ == '__main__':
     if not os.path.exists(workpath):
         os.makedirs(workpath)
 
-    data = NablaDFT("ASE", args.dataset_name,
-                    datapath=args.datapath,
-                    data_workdir=workpath,
-                    batch_size=args.batch_size,
-                    num_workers=4,
-                    transforms=[
-                     trn.ASENeighborList(cutoff=args.cutoff),
-                     trn.RemoveOffsets("energy", remove_mean=True,
-                                       remove_atomrefs=False),
-                     trn.CastTo32()
-                    ],
-                    split_file=os.path.join(workpath, "split.npz"))
+    data = NablaDFT(
+        "ASE",
+        args.dataset_name,
+        datapath=args.datapath,
+        data_workdir=workpath,
+        batch_size=args.batch_size,
+        num_workers=4,
+        transforms=[
+            trn.ASENeighborList(cutoff=args.cutoff),
+            trn.RemoveOffsets("energy", remove_mean=True, remove_atomrefs=False),
+            trn.CastTo32(),
+        ],
+        split_file=os.path.join(workpath, "split.npz"),
+    )
 
     pairwise_distance = spk.atomistic.PairwiseDistances()
-    radial_basis = spk.nn.radial.GaussianRBF(n_rbf=args.n_rbf,
-                                             cutoff=args.cutoff)
+    radial_basis = spk.nn.radial.GaussianRBF(n_rbf=args.n_rbf, cutoff=args.cutoff)
     cutoff_fn = spk.nn.cutoff.CosineCutoff(args.cutoff)
-    representation = rep.SchNet(n_interactions=args.n_interactions,
-                                n_atom_basis=args.n_atom_basis,
-                                radial_basis=radial_basis,
-                                cutoff_fn=cutoff_fn)
-    pred_energy = spk.atomistic.Atomwise(n_in=representation.n_atom_basis,
-                                         output_key="energy")
+    representation = rep.SchNet(
+        n_interactions=args.n_interactions,
+        n_atom_basis=args.n_atom_basis,
+        radial_basis=radial_basis,
+        cutoff_fn=cutoff_fn,
+    )
+    pred_energy = spk.atomistic.Atomwise(
+        n_in=representation.n_atom_basis, output_key="energy"
+    )
     postprocessors = [trn.CastTo64(), trn.AddOffsets("energy", add_mean=True)]
-    nnpot = spk.model.NeuralNetworkPotential(representation=representation,
-                                             input_modules=[pairwise_distance],
-                                             output_modules=[pred_energy],
-                                             postprocessors=postprocessors)
+    nnpot = spk.model.NeuralNetworkPotential(
+        representation=representation,
+        input_modules=[pairwise_distance],
+        output_modules=[pred_energy],
+        postprocessors=postprocessors,
+    )
     output_energy = spk.task.ModelOutput(
         name="energy",
         loss_fn=torch.nn.MSELoss(),
         loss_weight=1,
-        metrics={
-            "MAE": torchmetrics.MeanAbsoluteError()
-        }
+        metrics={"MAE": torchmetrics.MeanAbsoluteError()},
     )
 
     scheduler_args = {"factor": 0.8, "patience": 10, "min_lr": 1e-06}
@@ -135,7 +138,7 @@ if __name__ == '__main__':
         optimizer_args={"lr": 1e-4},
         scheduler_cls=ReduceLROnPlateau,
         scheduler_args=scheduler_args,
-        scheduler_monitor="val_loss"
+        scheduler_monitor="val_loss",
     )
 
     # create trainer
@@ -144,16 +147,16 @@ if __name__ == '__main__':
         spk.train.ModelCheckpoint(
             model_path=os.path.join(workpath, "best_inference_model"),
             save_top_k=1,
-            monitor="val_loss"
+            monitor="val_loss",
         )
     ]
 
     trainer = pl.Trainer(
-        accelerator='gpu',
+        accelerator="gpu",
         devices=args.devices,
         callbacks=callbacks,
         logger=logger,
         default_root_dir=workpath,
         max_epochs=args.nepochs,
-        )
+    )
     trainer.fit(task, datamodule=data.dataset)
