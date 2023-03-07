@@ -1,5 +1,7 @@
 # nablaDFT: Large-Scale Conformational Energy and Hamiltonian Prediction benchmark and dataset
-
+<p align="left">
+<a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
+</p>
 Electronic wave function calculation is a fundamental task of computational quantum chemistry. Knowledge of the wave function parameters allows one to compute physical and chemical properties of molecules and materials.<br/>
 In this work we: introduce a new curated large-scale dataset of electron structures of drug-like molecules, establish a novel benchmark for the estimation of molecular properties in the multi-molecule setting, and evaluate a wide range of methods with this benchmark.<br/>
 
@@ -100,8 +102,30 @@ lowdin_charges = wfn.array_variables()["LOWDIN CHARGES"]  # Löwdin atomic charg
 * [Equivariant message passing for the prediction of tensorial properties and molecular spectra (PaiNN)](./nablaDFT/painn/README.md)
 * [Fast and Uncertainty-Aware Directional Message Passing for Non-Equilibrium Molecules (DimeNet++)](https://github.com/ilya-shenbin/dimenet)
 
+### Dataloaders
+To create a dataset, nablaDFT class is used. Arguments of the function depend on the type of the model (which is specified by the first argument).
+
+An example of the initialisation of ASE-type data classes (for SchNet, PaiNN models) is presented below:
+```python
+data = NablaDFT(type_of_nn="ASE",  dataset_name="dataset_train_2k")
+```
+Similarly, Hamiltonian-type data classes (for SchNOrb, PhiSNet models) are initialised in the following way:
+```python
+data = NablaDFT(type_of_nn="Hamiltonian",  dataset_name="dataset_train_2k")
+```
+Dataset itself could be acquired in the following way:
+```python
+data.dataset
+```
+
 ### Checkpoint
 Several checkpoints for each model are available here: [checkpoints links](./nablaDFT/links/models_checkpoints.json)
+
+### Examples
+
+PaiNN models training and testing example: 
+* [Jupyter notebook](examples/PAINN_example.ipynb)
+* [Collab](https://colab.research.google.com/drive/1vuQ16b2jlM4b76T2iZ9NytRN1_Sg0ljy)
 
 ### Metrics
 In the tables below ST, SF, CF denote structures test set, scaffolds test set and conformations test set correspondingly.

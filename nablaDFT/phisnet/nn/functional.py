@@ -18,19 +18,21 @@ _log2 = math.log(2)
 
 def shifted_softplus(x):
     """
-        shifted softplus activation function
+    shifted softplus activation function
     """
     return F.softplus(x) - _log2
 
 
 def cutoff_function(x, cutoff):
     """
-        cutoff function that smoothly goes from y = 1..0 in the interval x = 0..cutoff
-        (this cutoff function has infinitely many smooth derivatives)
+    cutoff function that smoothly goes from y = 1..0 in the interval x = 0..cutoff
+    (this cutoff function has infinitely many smooth derivatives)
     """
     zeros = torch.zeros_like(x)
     x_ = torch.where(x < cutoff, x, zeros)
-    return torch.where(x < cutoff, torch.exp(-x_**2/((cutoff-x_)*(cutoff+x_))), zeros)
+    return torch.where(
+        x < cutoff, torch.exp(-(x_**2) / ((cutoff - x_) * (cutoff + x_))), zeros
+    )
 
 
 """
@@ -40,23 +42,27 @@ is 1 for x <= cuton and 0 for x >= cutoff (this switch function has infinitely m
 NOTE: the implementation with the "_switch_component" function is numerically more stable than
 a simplified version, DO NOT CHANGE THIS!
 """
+
+
 def _switch_component(x, ones, zeros):
     x_ = torch.where(x <= 0, ones, x)
-    return torch.where(x <= 0, zeros, torch.exp(-ones/x_))
+    return torch.where(x <= 0, zeros, torch.exp(-ones / x_))
 
 
 def switch_function(x, cuton, cutoff):
-    x = (x-cuton)/(cutoff-cuton)
-    ones  = torch.ones_like(x)
+    x = (x - cuton) / (cutoff - cuton)
+    ones = torch.ones_like(x)
     zeros = torch.zeros_like(x)
     fp = _switch_component(x, ones, zeros)
-    fm = _switch_component(1-x, ones, zeros)
-    return torch.where(x <= 0, ones, torch.where(x >= 1, zeros, fm/(fp+fm)))
+    fm = _switch_component(1 - x, ones, zeros)
+    return torch.where(x <= 0, ones, torch.where(x >= 1, zeros, fm / (fp + fm)))
 
 
 """
 inverse softplus transformation, this is useful for initialization of parameters that are constrained to be positive
 """
+
+
 def softplus_inverse(x):
     if not isinstance(x, torch.Tensor):
         x = torch.tensor(x)
