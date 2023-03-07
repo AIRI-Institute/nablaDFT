@@ -23,41 +23,42 @@ input:
 output:
     Y: list of length L+1 containing the spherical harmonics of shape [...,2*L+1]
 """
-def spherical_harmonics(L, u):
 
+
+def spherical_harmonics(L, u):
     Y = []
 
     if L >= 0:
         Y.append(Y0(u))
     if L >= 1:
-        shape = (*u.shape[:-1],1)
+        shape = (*u.shape[:-1], 1)
         x = torch.gather(u, -1, u.new_full(shape, 0, dtype=torch.long))
         y = torch.gather(u, -1, u.new_full(shape, 1, dtype=torch.long))
         z = torch.gather(u, -1, u.new_full(shape, 2, dtype=torch.long))
         Y.append(Y1(x, y, z))
     if L >= 2:
-        x2 = x*x
-        y2 = y*y
-        z2 = z*z
-        xy = x*y
-        yz = y*z
-        xz = x*z
+        x2 = x * x
+        y2 = y * y
+        z2 = z * z
+        xy = x * y
+        yz = y * z
+        xz = x * z
         _x2my2 = x2 - y2
-        _3z2m1 = 3*z2 - 1
+        _3z2m1 = 3 * z2 - 1
         Y.append(Y2(xy, yz, xz, _3z2m1, _x2my2))
     if L >= 3:
-        xyz = xy*z
-        _3x2my2 = 3*x2 - y2
-        _x2m3y2 = x2 - 3*y2
-        Y.append(Y3(x, y, z, z2, xyz, _x2my2, _3x2my2, _x2m3y2))       
+        xyz = xy * z
+        _3x2my2 = 3 * x2 - y2
+        _x2m3y2 = x2 - 3 * y2
+        Y.append(Y3(x, y, z, z2, xyz, _x2my2, _3x2my2, _x2m3y2))
     if L >= 4:
-        x4 = x2*x2
-        y4 = y2*y2
-        x2y2 = x2*y2
+        x4 = x2 * x2
+        y4 = y2 * y2
+        x2y2 = x2 * y2
         Y.append(Y4(x2, y2, z2, xy, yz, xz, x4, y4, x2y2, _x2my2, _x2m3y2))
     if L >= 5:
         Y.append(Y5(x, y, z, z2, xyz, x4, y4, x2y2, _x2my2, _3z2m1, _3x2my2, _x2m3y2))
     if L >= 6:
-        for l in range(6,L+1):
-            Y.append(Yl(l,x,y,z))
+        for l in range(6, L + 1):
+            Y.append(Yl(l, x, y, z))
     return Y

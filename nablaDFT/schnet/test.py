@@ -72,7 +72,7 @@ if __name__ == "__main__":
             for k in x:
                 if x[k].dtype == torch.float64:
                     x[k] = x[k].float()
-                x[k] = x[k].to("cuda:0")
+                x[k] = x[k].to(device)
 
             target = x["energy"].cpu().clone()
             prediction = best_model(x)["energy"].cpu()

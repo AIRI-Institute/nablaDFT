@@ -6,7 +6,6 @@ from torch.optim import Optimizer
 
 
 class Lookahead(Optimizer):
-
     def __init__(self, optimizer, k=5, alpha=0.5):
         self.optimizer = optimizer
         self.k = k
@@ -19,7 +18,6 @@ class Lookahead(Optimizer):
             group["counter"] = 0
 
     def update(self, group):
-
         for fast in group["params"]:
             param_state = self.state[fast]
 
@@ -36,11 +34,9 @@ class Lookahead(Optimizer):
             self.update(group)
 
     def step(self, closure=None):
-
         loss = self.optimizer.step(closure)
 
         for group in self.param_groups:
-
             if group["counter"] == 0:
                 self.update(group)
             group["counter"] += 1
@@ -51,7 +47,6 @@ class Lookahead(Optimizer):
         return loss
 
     def state_dict(self):
-
         fast_state_dict = self.optimizer.state_dict()
         slow_state = {
             (id(k) if isinstance(k, torch.Tensor) else k): v
@@ -68,7 +63,6 @@ class Lookahead(Optimizer):
         }
 
     def load_state_dict(self, state_dict):
-
         slow_state_dict = {
             "state": state_dict["slow_state"],
             "param_groups": state_dict["param_groups"],

@@ -18,6 +18,10 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 from nablaDFT.dataset import NablaDFT
 
 
+ReduceLROnPlateauFactor = 0.8
+ReduceLROnPlateauMinLR = 1e-6
+
+
 def seed_everything(seed=42):
     random.seed(seed)
     os.environ["PYTHONHASHSEED"] = str(seed)
@@ -129,7 +133,11 @@ if __name__ == "__main__":
         metrics={"MAE": torchmetrics.MeanAbsoluteError()},
     )
 
-    scheduler_args = {"factor": 0.8, "patience": 10, "min_lr": 1e-06}
+    scheduler_args = {
+        "factor": ReduceLROnPlateauFactor,
+        "patience": args.patience,
+        "min_lr": ReduceLROnPlateauMinLR,
+    }
 
     task = AtomisticTaskFixed(
         model=nnpot,

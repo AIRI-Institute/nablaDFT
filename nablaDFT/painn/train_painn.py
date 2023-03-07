@@ -18,6 +18,10 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 from nablaDFT.dataset import NablaDFT
 
 
+ReduceLROnPlateauFactor = 0.8
+ReduceLROnPlateauMinLR = 1e-6
+
+
 def seed_everything(seed=42):
     random.seed(seed)
     os.environ["PYTHONHASHSEED"] = str(seed)
@@ -78,6 +82,8 @@ if __name__ == "__main__":
     )
     parser.add_argument("--n_rbf", type=int, default=20, help="rbf number")
     parser.add_argument("--cutoff", type=float, default=5.0, help="cutoff threshold")
+    parser.add_argument("--lr", type=float, default=1e-4, help="learning rate")
+    parser.add_argument("--patience", type=int, default=10, help="patience")
     parser.add_argument(
         "--devices", type=int, default=1, help="gpu/tpu/cpu devices number"
     )
@@ -129,13 +135,17 @@ if __name__ == "__main__":
         metrics={"MAE": torchmetrics.MeanAbsoluteError()},
     )
 
-    scheduler_args = {"factor": 0.8, "patience": 10, "min_lr": 1e-06}
+    scheduler_args = {
+        "factor": ReduceLROnPlateauFactor,
+        "patience": args.patience,
+        "min_lr": ReduceLROnPlateauMinLR,
+    }
 
     task = AtomisticTaskFixed(
         model=nnpot,
         outputs=[output_energy],
         optimizer_cls=torch.optim.AdamW,
-        optimizer_args={"lr": 1e-4},
+        optimizer_args={"lr": args.lr},
         scheduler_cls=ReduceLROnPlateau,
         scheduler_args=scheduler_args,
         scheduler_monitor="val_loss",

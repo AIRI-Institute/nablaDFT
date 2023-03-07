@@ -7,6 +7,8 @@ from .embedding import *
 """
 Wraps the ordinary embedding layer and returns features for all orders
 """
+
+
 class SphericalEmbedding(nn.Module):
     def __init__(self, order, num_features, Zmax=87):
         super(SphericalEmbedding, self).__init__()
@@ -17,9 +19,15 @@ class SphericalEmbedding(nn.Module):
 
     def forward(self, Z):
         xs = []
-        for L in range(self.order+1):
+        for L in range(self.order + 1):
             if L == 0:
-                xs.append(self.embedding(Z).view(*Z.shape,1,-1).repeat(*(1,)*len(Z.shape),1,1))
-            else: #features for L>0 must be zero for rotational invariance
-                xs.append(torch.zeros_like(xs[0]).repeat(*(1,)*len(Z.shape),2*L+1,1))
+                xs.append(
+                    self.embedding(Z)
+                    .view(*Z.shape, 1, -1)
+                    .repeat(*(1,) * len(Z.shape), 1, 1)
+                )
+            else:  # features for L>0 must be zero for rotational invariance
+                xs.append(
+                    torch.zeros_like(xs[0]).repeat(*(1,) * len(Z.shape), 2 * L + 1, 1)
+                )
         return xs
