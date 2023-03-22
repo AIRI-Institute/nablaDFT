@@ -9,8 +9,8 @@
     "dataset_test_structures": "https://sc.link/oPl3",
     "dataset_test_scaffolds": "https://sc.link/pPmN",
     "dataset_test_conformations_100k": "https://sc.link/nPkE",
-    "dataset_test_conformations_10k": "https://sc.link/q9nG",
-    "dataset_test_conformations_5k": "https://sc.link/r6oK",
+    "dataset_test_conformations_10k": "https://sc.link/r6oK",
+    "dataset_test_conformations_5k": "https://sc.link/q9nG",
     "dataset_test_conformations_2k": "https://sc.link/vkvX"
   }
 }
