@@ -34,9 +34,9 @@ We provide several splits of the dataset that can serve as the basis for compari
 As part of the benchmark, we provide separate databases for each subset and task and a complete archive with wave function files produced by the Psi4 package that contains quantum chemical properties of the corresponding molecule and can be used in further computations.
 ### Downloading dataset
 #### Hamiltonian databases
-The full hamiltonian database is available at [nablaDFT Hamiltonian database](https://sc.link/r4WE) (7 TB)<br/> 
+The full hamiltonian database is available at [nablaDFT Hamiltonian database](https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/moses_db/dataset_full.db) (7 TB)<br/> 
 Links to other hamiltonian databases including different train and test subsets are in file [Hamiltonian databases](./nablaDFT/links/hamiltonian_databases.json)<br/>
-An archive with numpy indexes:  [splits indexes](https://sc.link/7Z7B)<br/>
+An archive with numpy indexes:  [splits indexes](https://n-usr-31b1j.s3pd02.sbercloud.ru/b-usr-31b1j-qz9/data/moses_db/data_splits.tar.gz)<br/>
 #### Energy databases
 Links to energy databases including different train and test subsets are in file [Energy databases](./nablaDFT/links/energy_databases.json)
 

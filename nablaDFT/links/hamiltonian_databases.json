@@ -1,16 +1,16 @@
 {
   "train_databases": {
-    "dataset_train_100k": "https://sc.link/x4W9",
-    "dataset_train_10k": "https://sc.link/Gm75",
-    "dataset_train_5k": "https://sc.link/380p",
-    "dataset_train_2k": "https://sc.link/2ZAA"
+    "dataset_train_100k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/moses_db/dataset_train_100k.db",
+    "dataset_train_10k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/moses_db/dataset_train_10k.db",
+    "dataset_train_5k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/moses_db/dataset_train_5k.db",
+    "dataset_train_2k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/moses_db/dataset_train_2k.db"
   },
   "test_databases": {
-    "dataset_test_structures": "https://sc.link/617N",
-    "dataset_test_scaffolds": "https://sc.link/pPmN",
-    "dataset_test_conformations_100k": "https://sc.link/8Z7r",
-    "dataset_test_conformations_10k": "https://sc.link/5ZEX",
-    "dataset_test_conformations_5k": "https://sc.link/9Z7z",
-    "dataset_test_conformations_2k": "https://sc.link/0ZyN"
+    "dataset_test_structures": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/moses_db/dataset_test_random.db",
+    "dataset_test_scaffolds": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/moses_db/dataset_test_scaffolds.db",
+    "dataset_test_conformations_100k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/moses_db/dataset_test_100k_conformers.db",
+    "dataset_test_conformations_10k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/moses_db/dataset_test_10k_conformers.db",
+    "dataset_test_conformations_5k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/moses_db/dataset_test_5k_conformers.db",
+    "dataset_test_conformations_2k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/moses_db/dataset_test_2k_conformers.db"
   }
 }

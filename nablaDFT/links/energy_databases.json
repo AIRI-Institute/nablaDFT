@@ -1,16 +1,16 @@
 {
   "train_databases": {
-    "dataset_train_100k": "https://sc.link/Zy3E",
-    "dataset_train_10k": "https://sc.link/1q2o",
-    "dataset_train_5k": "https://sc.link/2r3P",
-    "dataset_train_2k": "https://sc.link/3v4n"
+    "dataset_train_100k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/energy_dbs/train_100k_energy.db",
+    "dataset_train_10k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/energy_dbs/train_10k_energy.db",
+    "dataset_train_5k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/energy_dbs/train_5k_energy.db",
+    "dataset_train_2k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/energy_dbs/train_2k_energy.db"
   },
   "test_databases": {
-    "dataset_test_structures": "https://sc.link/oPl3",
-    "dataset_test_scaffolds": "https://sc.link/pPmN",
-    "dataset_test_conformations_100k": "https://sc.link/nPkE",
-    "dataset_test_conformations_10k": "https://sc.link/r6oK",
-    "dataset_test_conformations_5k": "https://sc.link/q9nG",
-    "dataset_test_conformations_2k": "https://sc.link/vkvX"
+    "dataset_test_structures": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/energy_dbs/test_random.db",
+    "dataset_test_scaffolds": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/energy_dbs/test_scaffolds.db",
+    "dataset_test_conformations_100k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/energy_dbs/test_100k_conformers.db",
+    "dataset_test_conformations_10k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/energy_dbs/test_10k_conformers.db.db",
+    "dataset_test_conformations_5k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/energy_dbs/test_5k_conformers.db",
+    "dataset_test_conformations_2k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/energy_dbs/test_2k_conformers.db"
   }
 }

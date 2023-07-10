@@ -1,33 +1,33 @@
 {
   "SchNet": {
-    "train_100k": "https://n-usr-31b1j.s3pd02.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/schnet/model_100k_split.pt",
-    "train_10k": "https://n-usr-31b1j.s3pd02.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/schnet/model_10k_split.pt",
-    "train_5k": "https://n-usr-31b1j.s3pd02.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/schnet/model_5k_split.pt",
-    "train_2k": "https://n-usr-31b1j.s3pd02.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/schnet/model_2k_split.pt"
+    "train_100k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/schnet/model_100k_split.pt",
+    "train_10k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/schnet/model_10k_split.pt",
+    "train_5k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/schnet/model_5k_split.pt",
+    "train_2k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/schnet/model_2k_split.pt"
   },
   "DimeNet": {
-    "train_100k": "https://n-usr-31b1j.s3pd02.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/dimenet/train_100k.zip",
-    "train_10k": "https://n-usr-31b1j.s3pd02.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/dimenet/train_10k.zip",
-    "train_5k": "https://n-usr-31b1j.s3pd02.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/dimenet/train_5k.zip",
-    "train_2k": "https://n-usr-31b1j.s3pd02.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/dimenet/train_2k.zip"
+    "train_100k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/dimenet/train_100k.zip",
+    "train_10k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/dimenet/train_10k.zip",
+    "train_5k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/dimenet/train_5k.zip",
+    "train_2k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/dimenet/train_2k.zip"
   },
   "PhiSNet": {
-    "train_100k": "https://n-usr-31b1j.s3pd02.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/phisnet/model_100k_split.pt",
-    "train_10k": "https://n-usr-31b1j.s3pd02.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/phisnet/model_10k_split.pt",
-    "train_5k": "https://n-usr-31b1j.s3pd02.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/phisnet/model_5k_split.pt",
-    "train_2k": "https://n-usr-31b1j.s3pd02.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/phisnet/model_2k_split.pt"
+    "train_100k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/phisnet/model_100k_split.pt",
+    "train_10k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/phisnet/model_10k_split.pt",
+    "train_5k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/phisnet/model_5k_split.pt",
+    "train_2k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/phisnet/model_2k_split.pt"
   },
   "PaiNN": {
-    "train_100k": "https://n-usr-31b1j.s3pd02.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/painn/model_100k_split.pt",
-    "train_10k": "https://n-usr-31b1j.s3pd02.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/painn/model_10k_split.pt",
-    "train_5k": "https://n-usr-31b1j.s3pd02.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/painn/model_5k_split.pt",
-    "train_2k": "https://n-usr-31b1j.s3pd02.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/painn/model_2k_split.pt"
+    "train_100k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/painn/model_100k_split.pt",
+    "train_10k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/painn/model_10k_split.pt",
+    "train_5k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/painn/model_5k_split.pt",
+    "train_2k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/painn/model_2k_split.pt"
 
   },
   "SchNOrb": {
-    "train_100k": "https://n-usr-31b1j.s3pd02.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/schnorb/model_100k_split.pt",
-    "train_10k": "https://n-usr-31b1j.s3pd02.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/schnorb/model_10k_split.pt",
-    "train_5k": "https://n-usr-31b1j.s3pd02.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/schnorb/model_5k_split.pt",
-    "train_2k": "https://n-usr-31b1j.s3pd02.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/schnorb/model_2k_split.pt"
+    "train_100k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/schnorb/model_100k_split.pt",
+    "train_10k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/schnorb/model_10k_split.pt",
+    "train_5k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/schnorb/model_5k_split.pt",
+    "train_2k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/schnorb/model_2k_split.pt"
   }
 }
