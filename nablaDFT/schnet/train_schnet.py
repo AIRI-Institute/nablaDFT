@@ -20,6 +20,7 @@ from nablaDFT.dataset import NablaDFT
 
 ReduceLROnPlateauFactor = 0.8
 ReduceLROnPlateauMinLR = 1e-6
+ReduceLROnPlateauPatience = 100
 
 
 def seed_everything(seed=42):
@@ -135,7 +136,7 @@ if __name__ == "__main__":
 
     scheduler_args = {
         "factor": ReduceLROnPlateauFactor,
-        "patience": args.patience,
+        "patience": ReduceLROnPlateauPatience,
         "min_lr": ReduceLROnPlateauMinLR,
     }
 
