@@ -12,7 +12,6 @@ from torch_geometric.data.lightning import LightningDataset
 from torch_geometric.data import InMemoryDataset, Data
 
 
-
 class PyGNablaDFT(InMemoryDataset):
     """Machine learning of accurate energy-conserving molecular force fields (Chmiela et al. 2017)
     This class provides functionality for loading MD trajectories from the original dataset, not the revised versions.
@@ -83,9 +82,7 @@ class PyGNablaDFT(InMemoryDataset):
             # TODO: temp workaround for dataset w/o forces
             forces = db_row.data.get("forces", None)
             if forces is not None:
-                forces = torch.from_numpy(
-                    np.array(forces)
-                ).float()
+                forces = torch.from_numpy(np.array(forces)).float()
             samples.append(Data(z=z, pos=positions, y=y, forces=forces))
 
         if self.pre_filter is not None:
