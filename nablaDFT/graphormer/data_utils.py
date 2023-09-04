@@ -10,6 +10,7 @@ from ase.db import connect
 from torch.utils.data import Subset
 from torch_geometric.data.lightning import LightningDataset
 from torch_geometric.data import InMemoryDataset, Data
+import nablaDFT
 
 
 class PyGNablaDFT(InMemoryDataset):
@@ -67,7 +68,7 @@ class PyGNablaDFT(InMemoryDataset):
         return super(PyGNablaDFT, self).get(idx - self.offsets[data_idx])
 
     def download(self) -> None:
-        with open(PyGNablaDFT.__path__[0] + "/links/energy_databases.json", "r") as f:
+        with open(nablaDFT.__path__[0] + "/links/energy_databases.json", "r") as f:
             data = json.load(f)
             url = data[f"{self.split}_databases"][self.dataset_name]
         request.urlretrieve(url, self.raw_file_names[0])
