@@ -1,0 +1,42 @@
+_target_: nablaDFT.graphormer.Graphormer3DLightning
+
+model_name: "Graphormer3D-half"
+net:
+  _target_: nablaDFT.graphormer.Graphormer3D
+  blocks: 4
+  layers: 6
+  embed_dim: 512
+  ffn_embed_dim: 512
+  attention_heads: 32
+  input_dropout: 0.1
+  dropout: 0.1
+  attention_dropout: 0.0
+  activation_dropout: 0.1
+  num_kernel: 128
+
+optimizer:
+  _target_: torch.optim.Adam
+  _partial_: true
+  lr: 3e-4
+
+lr_scheduler:
+  _target_: nablaDFT.graphormer.schedulers.get_linear_schedule_with_warmup
+  _partial_: true
+  num_warmup_steps: ${warmup_steps}
+  num_training_steps: ${max_steps}
+
+loss:
+  _target_: torch.nn.L1Loss
+
+metric:
+  _target_: torchmetrics.MultitaskWrapper
+  _convert_: all
+  task_metrics:
+    energy:
+      _target_: torchmetrics.MeanAbsoluteError
+    forces:
+      _target_: torchmetrics.MeanAbsoluteError
+
+warmup_steps: ${warmup_steps}
+energy_loss_coef: 1.0
+forces_loss_coef: 1.0

@@ -1,0 +1,10 @@
+# Dataset config for torch geometric nablaDFT
+_target_: nablaDFT.graphormer.get_nablaDFT_datasets
+
+root: ../datasets/nablaDFT/forces/train
+dataset_name: ${dataset_name}
+train_size: 0.9
+val_size: 0.1
+batch_size: 32
+num_workers: 48
+seed: 23

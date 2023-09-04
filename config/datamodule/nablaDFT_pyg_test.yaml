@@ -1,0 +1,7 @@
+# Dataset config for torch geometric nablaDFT
+_target_: nablaDFT.graphormer.get_nablaDFT_test_dataset
+
+root: ../datasets/nablaDFT/forces/test
+dataset_name: ${dataset_name}
+batch_size: 512
+num_workers: 12
