@@ -13,6 +13,7 @@ from pytorch_lightning import (
 )
 
 from nablaDFT.utils import close_loggers, load_model
+from nablaDFT.dataset import NablaDFT
 
 
 def run(config: DictConfig):
@@ -25,7 +26,7 @@ def run(config: DictConfig):
         )
     else:
         ckpt_path = None
-    if job_type == "test":
+    if job_type == "test" and ckpt_path is not None:
         model = load_model(config, ckpt_path)
     else:
         model: LightningModule = hydra.utils.instantiate(config.model)
@@ -45,9 +46,9 @@ def run(config: DictConfig):
     datamodule: LightningDataModule = hydra.utils.instantiate(config.datamodule)
 
     if job_type == 'train':
-        trainer.fit(model=model, datamodule=datamodule, ckpt_path=ckpt_path)
+        trainer.fit(model=model, datamodule=datamodule.dataset, ckpt_path=ckpt_path)
     else:
-        trainer.test(model=model, datamodule=datamodule, ckpt_path=ckpt_path)
+        trainer.test(model=model, datamodule=datamodule.dataset, ckpt_path=ckpt_path)
 
     # Finalize
     close_loggers(

@@ -33,7 +33,7 @@ class ASENablaDFT(AtomsDataModule):
             trn.CastTo32(),
         ],
         format: Optional[AtomsDataFormat] = AtomsDataFormat.ASE,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(
             datapath=datapath,
@@ -41,7 +41,7 @@ class ASENablaDFT(AtomsDataModule):
             batch_size=batch_size,
             transforms=transforms,
             format=format,
-            **kwargs
+            **kwargs,
         )
         self.dataset_name = dataset_name
         self.train_ratio = train_ratio
@@ -115,18 +115,6 @@ class HamiltonianNablaDFT(HamiltonianDataset):
         self.subset = None
         if subset:
             self.subset = np.load(subset)
-
-
-class NablaDFT:
-    def __init__(self, type_of_nn, *args, **kwargs):
-        valid = {"ASE", "Hamiltonian"}
-        if type_of_nn not in valid:
-            raise ValueError("results: type of nn must be one of %r." % valid)
-        self.type_of_nn = type_of_nn
-        if self.type_of_nn == "ASE":
-            self.dataset = ASENablaDFT(*args, **kwargs)
-        else:
-            self.dataset = HamiltonianNablaDFT(*args, **kwargs)
 
 
 class PyGNablaDFT(InMemoryDataset):
@@ -294,44 +282,35 @@ def make_splits(
 
 def get_PyG_nablaDFT_datasets(
     root: str,
+    split: str,
     dataset_name: str,
-    train_size: float,
-    val_size: float,
-    batch_size: int,
-    num_workers: int,
-    seed: int,
+    train_size: float = None,
+    val_size: float = None,
+    batch_size: int = None,
+    num_workers: int = None,
+    seed: int = None,
 ):
-    all_dataset = PyGNablaDFT(root, dataset_name)
-    idx_train, idx_val = make_splits(
-        len(all_dataset),
-        train_size,
-        val_size,
-        seed,
-        filename=os.path.join(root, "splits.npz"),
-        splits=None,
-    )
-
-    train_dataset = Subset(all_dataset, idx_train)
-    val_dataset = Subset(all_dataset, idx_val)
+    dataset = PyGNablaDFT(root, dataset_name, split=split)
+    if split == "train":
+        idx_train, idx_val = make_splits(
+            len(dataset),
+            train_size,
+            val_size,
+            seed,
+            filename=os.path.join(root, "splits.npz"),
+            splits=None,
+        )
+        train_dataset = Subset(dataset, idx_train)
+        val_dataset = Subset(dataset, idx_val)
+        test_dataset = None
+    else:
+        train_dataset = None
+        val_dataset = None
+        test_dataset = dataset
 
     pl_datamodule = LightningDataset(
-        train_dataset,
-        val_dataset,
-        batch_size=batch_size,
-        num_workers=num_workers,
-        pin_memory=True,
-        persistent_workers=True,
-    )
-
-    return pl_datamodule
-
-
-def get_PyG_nablaDFT_test_dataset(
-    root: str, dataset_name: str, batch_size: int, num_workers: int
-):
-    test_dataset = PyGNablaDFT(root, dataset_name, split="test")
-    pl_datamodule = LightningDataset(
-        train_dataset=None,
+        train_dataset=train_dataset,
+        val_dataset=val_dataset,
         test_dataset=test_dataset,
         batch_size=batch_size,
         num_workers=num_workers,
@@ -339,3 +318,17 @@ def get_PyG_nablaDFT_test_dataset(
         persistent_workers=True,
     )
     return pl_datamodule
+
+
+class NablaDFT:
+    def __init__(self, type_of_nn, *args, **kwargs):
+        valid = {"ASE", "Hamiltonian", "PyG"}
+        if type_of_nn not in valid:
+            raise ValueError("results: type of nn must be one of %r." % valid)
+        self.type_of_nn = type_of_nn
+        if self.type_of_nn == "ASE":
+            self.dataset = ASENablaDFT(*args, **kwargs)
+        elif self.type_of_nn == "Hamiltonian":
+            self.dataset = HamiltonianNablaDFT(*args, **kwargs)
+        else:
+            self.dataset = get_PyG_nablaDFT_datasets(*args, **kwargs)
