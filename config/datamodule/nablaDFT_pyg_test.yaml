@@ -1,5 +1,5 @@
 # Dataset config for torch geometric nablaDFT
-_target_: nablaDFT.graphormer.get_nablaDFT_test_dataset
+_target_: nablaDFT.dataset.get_PyG_nablaDFT_test_dataset
 
 root: ../datasets/nablaDFT/forces/test
 dataset_name: ${dataset_name}
