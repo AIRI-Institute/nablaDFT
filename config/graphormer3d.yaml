@@ -1,5 +1,5 @@
 # Global variables
-name: Graphormer3D
+name: Graphormer3D-half
 dataset_name: dataset_train_2k
 max_steps: 1000000
 warmup_steps: 60000

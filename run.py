@@ -1,3 +1,5 @@
+"""Usage: python run.py --config-name path-to-config"""
+
 import hydra
 from omegaconf import DictConfig
 
@@ -6,9 +8,9 @@ from nablaDFT.pipelines import run
 
 
 @hydra.main(
-    config_path="../../config",
-    config_name="graphormer3d.yaml",
-    version_base="1.2",
+    config_path="./config",
+    config_name=None,
+    version_base="1.2"
 )
 def main(config: DictConfig):
     load_envs()
