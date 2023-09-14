@@ -14,7 +14,7 @@ from schnetpack.data import AtomsDataFormat, AtomsDataModule, load_dataset
 import schnetpack.transform as trn
 import nablaDFT
 
-# sys.path.append('../')
+
 from nablaDFT.phisnet.training.hamiltonian_dataset import HamiltonianDataset
 from nablaDFT.phisnet.training.sqlite_database import HamiltonianDatabase
 
@@ -118,11 +118,8 @@ class HamiltonianNablaDFT(HamiltonianDataset):
 
 
 class PyGNablaDFT(InMemoryDataset):
-    """Machine learning of accurate energy-conserving molecular force fields (Chmiela et al. 2017)
-    This class provides functionality for loading MD trajectories from the original dataset, not the revised versions.
-    See http://www.quantum-machine.org/gdml/#datasets for details.
-
-    Dataset adapter for ASE2PyG conversion.
+    """Dataset adapter for ASE2PyG conversion.
+    Based on https://github.com/atomicarchitects/equiformer/blob/master/datasets/pyg/md17.py
     """
 
     db_suffix = ".db"
@@ -172,7 +169,7 @@ class PyGNablaDFT(InMemoryDataset):
         return super(PyGNablaDFT, self).get(idx - self.offsets[data_idx])
 
     def download(self) -> None:
-        with open(nablaDFT.__path__[0] + "/links/energy_databases.json", "r") as f:
+        with open(nablaDFT.__path__[0] + "/links/energy_databases_v2.json", "r") as f:
             data = json.load(f)
             url = data[f"{self.split}_databases"][self.dataset_name]
         request.urlretrieve(url, self.raw_file_names[0])
