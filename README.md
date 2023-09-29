@@ -36,7 +36,7 @@ As part of the benchmark, we provide separate databases for each subset and task
 #### Hamiltonian databases
 The full hamiltonian database is available at [nablaDFT Hamiltonian database](https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/moses_db/dataset_full.db) (7 TB)<br/> 
 Links to other hamiltonian databases including different train and test subsets are in file [Hamiltonian databases](./nablaDFT/links/hamiltonian_databases.json)<br/>
-An archive with numpy indexes:  [splits indexes](https://n-usr-31b1j.s3pd02.sbercloud.ru/b-usr-31b1j-qz9/data/moses_db/data_splits.tar.gz)<br/>
+An archive with numpy indexes:  [splits indexes](https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/moses_db/data_splits.tar.gz)<br/>
 #### Energy databases
 Links to energy databases including different train and test subsets are in file [Energy databases](./nablaDFT/links/energy_databases.json)
 
@@ -44,10 +44,10 @@ Links to energy databases including different train and test subsets are in file
 Links to tarballs: [wave functions](./nablaDFT/links/nablaDFT_psi4wfn_links.txt)
 
 #### Summary file
-The csv file with conformations index, SMILES, atomic DFT properties and wfn archive names: [summary.csv](https://n-usr-31b1j.s3pd02.sbercloud.ru/b-usr-31b1j-qz9/data/nablaDFT/summary.csv) 
+The csv file with conformations index, SMILES, atomic DFT properties and wfn archive names: [summary.csv](https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/nablaDFT/summary.csv) 
 
 #### Conformations files
-Tar archive with xyz files [archive](https://n-usr-31b1j.s3pd02.sbercloud.ru/b-usr-31b1j-qz9/data/nablaDFT/conformations_archive.tar)
+Tar archive with xyz files [archive](https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/nablaDFT/conformations_archive.tar)
 
 ### Accessing elements of the dataset
 #### Hamiltonian database
