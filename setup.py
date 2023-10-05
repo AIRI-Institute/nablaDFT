@@ -29,6 +29,7 @@ setup(
         "pyyaml",
         "hydra-core>=1.1.0",
         "pytorch_lightning>=1.9.0",
+        "torch-geometric>=2.3.1",
         "torchmetrics",
         "hydra-colorlog>=1.1.0",
         "rich",

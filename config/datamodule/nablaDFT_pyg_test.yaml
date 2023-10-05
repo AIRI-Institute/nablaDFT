@@ -1,0 +1,9 @@
+# Dataset config for torch geometric nablaDFT
+_target_: nablaDFT.dataset.NablaDFT
+
+type_of_nn: PyG
+split: ${job_type}
+root: ../datasets/nablaDFT/forces/test
+dataset_name: ${dataset_name}
+batch_size: 512
+num_workers: 12
