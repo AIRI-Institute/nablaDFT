@@ -1,0 +1,99 @@
+_target_: nablaDFT.gemnet_oc.GemNetOCLightning
+
+model_name: "GemNet-OC"
+net:
+  _target_: nablaDFT.gemnet_oc.GemNetOC
+  num_targets: 1
+  num_spherical: 7
+  num_radial: 128
+  num_blocks: 4
+  emb_size_atom: 256
+  emb_size_edge: 512
+  emb_size_trip_in: 64
+  emb_size_trip_out: 64
+  emb_size_quad_in: 32
+  emb_size_quad_out: 32
+  emb_size_aint_in: 64
+  emb_size_aint_out: 64
+  emb_size_rbf: 16
+  emb_size_cbf: 16
+  emb_size_sbf: 32
+  num_before_skip: 2
+  num_after_skip: 2
+  num_concat: 1
+  num_atom: 3
+  num_output_afteratom: 3
+  num_atom_emb_layers: 0
+  num_global_out_layers: 2
+  regress_forces: true
+  direct_forces: true
+  use_pbc: false
+  scale_backprop_forces: false
+  cutoff: 12.0
+  cutoff_qint: 12.0
+  cutoff_aeaint: 12.0
+  cutoff_aint: 12.0
+  max_neighbors: 30
+  max_neighbors_qint: 8
+  max_neighbors_aeaint: 20
+  max_neighbors_aint: 1000
+  enforce_max_neighbors_strictly: true
+  rbf:
+    name: gaussian
+  rbf_spherical: null
+  envelope:
+    name: polynomial
+    exponent: 5
+  cbf:
+    name: spherical_harmonics
+  sbf:
+    name: legendre_outer
+  extensive: true
+  forces_coupled: true
+  output_init: HeOrthogonal
+  activation: silu
+  scale_file: null
+  quad_interaction: true
+  atom_edge_interaction: true
+  edge_atom_interaction: true
+  atom_interaction: true
+  scale_basis: true
+
+
+
+optimizer:
+  _target_: torch.optim.AdamW
+  _partial_: true
+  amsgrad: true
+  betas: [0.9, 0.95]
+  lr: 1e-3
+  weight_decay: 0
+
+lr_scheduler:
+  _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+  _partial_: true
+  factor: 0.8
+  patience: 10
+
+losses:
+  energy:
+    _target_: torch.nn.L1Loss
+  forces:
+    _target_: nablaDFT.gemnet_oc.loss.L2Loss
+loss_coefs:
+  energy: 1.0
+  forces: 100.0
+
+ema:
+  _target_: torch_ema.ExponentialMovingAverage
+  _partial_: true
+  decay: 0.9999
+
+metric:
+  _target_: torchmetrics.MultitaskWrapper
+  _convert_: all
+  task_metrics:
+    energy:
+      _target_: torchmetrics.MeanAbsoluteError
+    forces:
+      _target_: torchmetrics.MeanAbsoluteError
