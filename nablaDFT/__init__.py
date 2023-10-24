@@ -4,3 +4,4 @@ from . import painn
 from . import phisnet
 from . import graphormer
 from . import gemnet_oc
+from . import dimenetplusplus

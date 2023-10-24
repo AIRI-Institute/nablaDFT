@@ -8,5 +8,5 @@ dataset_name: ${dataset_name}
 train_size: 0.9
 val_size: 0.1
 batch_size: 32
-num_workers: 48
+num_workers: 8
 seed: 23

@@ -3,10 +3,10 @@ import io
 
 from setuptools import setup, find_packages
 
-
 def read(fname):
     with io.open(os.path.join(os.path.dirname(__file__), fname), encoding="utf-8") as f:
         return f.read()
+
 
 
 setup(
@@ -22,7 +22,6 @@ setup(
         "sympy",
         "ase>=3.21",
         "h5py",
-        "torch",
         "apsw",
         "schnetpack>=2.0.0",
         "tensorboardX",
@@ -37,6 +36,8 @@ setup(
         "dirsync",
         "torch-ema",
         "matscipy",
+        "python-dotenv",
+        "wandb"
     ],
     license="MIT",
     description="nablaDFT: Large-Scale Conformational Energy and Hamiltonian Prediction benchmark and dataset",
