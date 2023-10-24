@@ -1,16 +1,16 @@
 # Global variables
-name: GemNet-OC  # name of run
+name: GemNet-OC-10k  # name of run
 dataset_name: dataset_test_structures  # dataset name from links/energy_databases.json
 max_steps: 1000000
-warmup_steps: 60000
+warmup_steps: 0
 job_type: test  # run type for wandb
-ckpt_path: null  # path to ckpt with trained model
+ckpt_path: ./checkpoints/GemNet-OC/GemNet-OC_dataset_train_10k_epoch=336_val_loss=0.060103.ckpt  # path to ckpt with trained model
 
 # configs
 defaults:
   - _self_
   - datamodule: nablaDFT_pyg_test.yaml  # dataset config
-  - model: graphormer3d-half.yaml  # model config
+  - model: gemnet-oc.yaml  # model config
   - callbacks: default.yaml  # pl callbacks config
   - loggers: wandb.yaml  # pl loggers config
   - trainer: test.yaml  # trainer config
