@@ -100,7 +100,7 @@ lowdin_charges = wfn.array_variables()["LOWDIN CHARGES"]  # Löwdin atomic charg
 * [SE(3)-equivariant prediction of molecular wavefunctions and electronic densities (PhiSNet)](./nablaDFT/phisnet/README.md)
 * [A continuous-filter convolutional neural network for modeling quantum interactions (SchNet)](./nablaDFT/schnet/README.md)
 * [Equivariant message passing for the prediction of tensorial properties and molecular spectra (PaiNN)](./nablaDFT/painn/README.md)
-* [Fast and Uncertainty-Aware Directional Message Passing for Non-Equilibrium Molecules (DimeNet++)](https://github.com/ilya-shenbin/dimenet)
+* [Fast and Uncertainty-Aware Directional Message Passing for Non-Equilibrium Molecules (DimeNet++)](./nablaDFT/dimenetplusplus/README.md)
 
 ### Dataloaders
 To create a dataset, nablaDFT class is used. Arguments of the function depend on the type of the model (which is specified by the first argument).
