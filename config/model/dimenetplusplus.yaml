@@ -18,6 +18,10 @@ net:
     dimenet_num_output_layers: 3
     cutoff: 5.0
 
+    scaler:
+        scale_: 0.92169578585990574
+        mean_: -7.077253701315571
+    do_postprocessing: true
 
 monitor_loss: "val/loss"
 lr_scheduler: 
@@ -47,3 +51,4 @@ metric:
             _target_: torchmetrics.MeanAbsoluteError
 energy_loss_coef: 1.
 forces_loss_coef: 1.
+

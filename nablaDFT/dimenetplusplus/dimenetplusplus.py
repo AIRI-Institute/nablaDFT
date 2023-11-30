@@ -46,6 +46,7 @@ class DimeNetPlusPlusPotential(nn.Module):
         ):
         
         super().__init__()
+        self.scaler=scaler
 
         self.node_latent_dim = node_latent_dim
         self.dimenet_hidden_channels = dimenet_hidden_channels
@@ -61,11 +62,9 @@ class DimeNetPlusPlusPotential(nn.Module):
         self.dimenet_num_after_skip = dimenet_num_after_skip
         self.dimenet_num_output_layers = dimenet_num_output_layers
         self.cutoff = cutoff
-        
+        self.do_postprocessing = do_postprocessing
         self.linear_output_size = 1
 
-        self.scaler = scaler
-        
         self.net = DimeNetPlusPlus(
             hidden_channels=self.dimenet_hidden_channels,
             out_channels=self.node_latent_dim,
@@ -98,13 +97,8 @@ class DimeNetPlusPlusPotential(nn.Module):
     @torch.enable_grad()
     def forward(self, pos, atom_z, batch_mapping):
         pos = pos.requires_grad_(True)
-        P_dense = self.net(pos=pos, z=atom_z, batch=batch_mapping)
+        graph_embeddings = self.net(pos=pos, z=atom_z, batch=batch_mapping)
         
-        graph_embeddings_to_return = None
-
-        graph_embeddings = P_dense
-        graph_embeddings_to_return = graph_embeddings
-
         predictions = torch.flatten(self.regr_or_cls_nn(graph_embeddings).contiguous())
         forces = -1 * (
                     torch.autograd.grad(
@@ -116,8 +110,8 @@ class DimeNetPlusPlusPotential(nn.Module):
                 )
 
         if self.scaler and self.do_postprocessing:
-            predictions = self.scaler["scale_"] + self.scaler["mean_"]
-        return P_dense, graph_embeddings_to_return, predictions, forces
+            predictions = self.scaler["scale_"] * predictions + self.scaler["mean_"]
+        return predictions, forces
     
     
 
@@ -169,7 +163,7 @@ class DimeNetPlusPlusLightning(pl.LightningModule):
         self, batch, calculate_metrics: bool = False
     ) -> Union[Tuple[Any, Dict], Any]:
         pos, y, atom_z, batch_mapping = batch.pos, batch.y, batch.z, batch.batch
-        _, _, predictions_energy, predictions_forces = self.forward(pos, atom_z, batch_mapping)
+        predictions_energy, predictions_forces = self.forward(pos, atom_z, batch_mapping)
         loss_energy = self.loss(predictions_energy, y)
         # TODO: temp workaround
         if hasattr(batch, "forces"):
