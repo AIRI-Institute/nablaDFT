@@ -30,7 +30,7 @@ def atoms_list_to_PYG(ase_atoms_list, device):
         z = torch.from_numpy(ase_atoms.numbers).long()
         positions = torch.from_numpy(ase_atoms.positions).float()
         data.append(Data(z=z, pos=positions))
-        batch = Batch.from_data_list(data).to(device)
+    batch = Batch.from_data_list(data).to(device)
     return batch.pos, batch.z, batch.batch
 
 

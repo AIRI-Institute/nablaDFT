@@ -41,7 +41,7 @@ for batch_idx in tqdm.tqdm(range(0, db_len // batch_size)):
     optimizer.run(atoms_list, fmax=1e-4, steps=100)
     atoms_list = optimizer.atoms
     # print (atoms_list)
-    for relative_id, i in enumerate(range(1 + batch_idx * batch_size, min(db_len, batch_size * (batch_idx + 1)))):
+    for relative_id, i in enumerate(range(batch_idx * batch_size, min(db_len, batch_size * (batch_idx + 1)))):
         row = db.get(i + 1)
         data = row.data
         data['model_energy'] = float(calculator.results['energy'][relative_id])
