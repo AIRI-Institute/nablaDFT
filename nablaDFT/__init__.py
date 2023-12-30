@@ -5,3 +5,5 @@ from . import phisnet
 from . import graphormer
 from . import gemnet_oc
 from . import dimenetplusplus
+from . import equiformer_v2
+from . import escn

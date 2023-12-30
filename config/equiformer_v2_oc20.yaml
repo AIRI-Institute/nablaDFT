@@ -1,0 +1,25 @@
+# Global variables
+name: Equiformer_v2_OC20
+dataset_name: dataset_train_2k
+max_steps: 1000000
+warmup_steps: 0
+job_type: train
+ckpt_path: null # if training resume from checkpoint
+
+# configs
+defaults:
+  - _self_
+  - datamodule: nablaDFT_pyg.yaml  # dataset config
+  - model: equiformer_v2_oc20.yaml  # model config
+  - callbacks: default.yaml  # pl callbacks config
+  - loggers: wandb.yaml  # pl loggers config
+  - trainer: train.yaml  # trainer config
+
+# need this to set working dir as current dir
+hydra:
+  output_subdir: null
+  run:
+    dir: .
+original_work_dir: ${hydra:runtime.cwd}
+
+seed: 23
