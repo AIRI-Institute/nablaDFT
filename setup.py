@@ -37,7 +37,8 @@ setup(
         "torch-ema",
         "matscipy",
         "python-dotenv",
-        "wandb"
+        "wandb",
+        "e3nn"
     ],
     license="MIT",
     description="nablaDFT: Large-Scale Conformational Energy and Hamiltonian Prediction benchmark and dataset",

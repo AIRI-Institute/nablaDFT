@@ -1,8 +1,8 @@
 _target_: pytorch_lightning.Trainer
 
 deterministic: True
-accelerator: "gpu"
-devices: 6
+accelerator: "cpu"
+devices: 1
 strategy:
   _target_: pytorch_lightning.strategies.ddp.DDPStrategy
 
