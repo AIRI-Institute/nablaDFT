@@ -7,3 +7,4 @@ from . import gemnet_oc
 from . import dimenetplusplus
 from . import equiformer_v2
 from . import escn
+from . import painn_pyg
