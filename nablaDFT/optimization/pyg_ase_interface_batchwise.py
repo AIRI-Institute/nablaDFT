@@ -469,6 +469,7 @@ class LineSearch:
         self.isave[at_idx][1] = data[0]
         self.dsave[at_idx] = data[1:]
 
+
 def atoms_list_to_PYG(ase_atoms_list, device):
     data = []
     for ase_atoms in ase_atoms_list:
@@ -476,7 +477,7 @@ def atoms_list_to_PYG(ase_atoms_list, device):
         positions = torch.from_numpy(ase_atoms.positions).float()
         data.append(Data(z=z, pos=positions))
     batch = Batch.from_data_list(data).to(device)
-    return batch.pos, batch.z, batch.batch
+    return batch
 
 
 class AtomsConverterError(Exception):
@@ -586,7 +587,7 @@ class BatchwiseCalculator:
     def calculate(self, atoms: List[ase.Atoms]) -> None:
         results = {}
         model_inputs = atoms_list_to_PYG(atoms, device=self.device)
-        model_results = self.model(*model_inputs)
+        model_results = self.model(model_inputs)
 
         results = dict()
         results["energy"] = ( model_results[0].cpu().data.numpy() * self.property_units["energy"] )
