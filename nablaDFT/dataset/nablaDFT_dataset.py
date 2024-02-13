@@ -27,6 +27,8 @@ class ASENablaDFT(AtomsDataModule):
         data_workdir: Optional[str] = "logs",
         batch_size: int = 2000,
         train_ratio: float = 0.9,
+        val_ratio: float = 0.1,
+        test_ratio: float = 0.0,
         transforms: Optional[List[torch.nn.Module]] = [
             trn.ASENeighborList(cutoff=5.0),
             trn.RemoveOffsets("energy", remove_mean=True, remove_atomrefs=False),
@@ -45,6 +47,7 @@ class ASENablaDFT(AtomsDataModule):
         )
         self.dataset_name = dataset_name
         self.train_ratio = train_ratio
+        self.test_ratio = test_ratio
 
     def prepare_data(self):
         datapath_with_no_suffix = os.path.splitext(self.datapath)[0]
@@ -71,13 +74,8 @@ class ASENablaDFT(AtomsDataModule):
                 }
             dataset_length = len(ase_db)
             self.num_train = int(dataset_length * self.train_ratio)
-            self.num_val = int(dataset_length * (1 - self.train_ratio))
-            if self.num_val == 0:
-                self.num_val = -1
-                self.num_test = 0
-            if self.num_train == 0:
-                self.num_train = -1
-                self.num_test = 0
+            self.num_val = int(dataset_length * self.train_ratio)
+            self.num_test = int(dataset_length * self.test_ratio)
         self.dataset = load_dataset(self.datapath, self.format)
 
 

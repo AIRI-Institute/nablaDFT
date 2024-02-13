@@ -18,7 +18,7 @@ model:
     - _target_: schnetpack.atomistic.PairwiseDistances
   output_modules:
     - _target_: schnetpack.atomistic.Atomwise
-      n_in: args.n_atom_basis
+      n_in: 128
       output_key: "energy"
   postprocessors:
     - _target_: schnetpack.transform.CastTo64
@@ -30,11 +30,11 @@ outputs:
   - _target_: schnetpack.task.ModelOutput
     name: "energy"
     loss_fn:
-      _target_: torch.nn.MSELoss()
-      loss_weight: 1
-      metrics:
-        MAE:
-          _target_: torchmetrics.MeanAbsoluteError
+      _target_: torch.nn.MSELoss
+    loss_weight: 1
+    metrics:
+      MAE:
+        _target_: torchmetrics.MeanAbsoluteError
 
 optimizer_cls: torch.optim.AdamW
 optimizer_args:
