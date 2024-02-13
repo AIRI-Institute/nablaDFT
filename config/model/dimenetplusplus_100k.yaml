@@ -1,0 +1,54 @@
+_target_: nablaDFT.dimenetplusplus.DimeNetPlusPlusLightning
+
+model_name: "DimeNetPlusPlus"
+net:
+    _target_: nablaDFT.dimenetplusplus.DimeNetPlusPlusPotential
+    node_latent_dim: 50
+    dimenet_hidden_channels: 256
+    dimenet_num_blocks: 6
+    dimenet_int_emb_size: 64
+    dimenet_basis_emb_size: 8
+    dimenet_out_emb_channels: 256
+    dimenet_num_spherical: 7
+    dimenet_num_radial: 6
+    dimenet_max_num_neighbors: 32
+    dimenet_envelope_exponent: 5
+    dimenet_num_before_skip: 1
+    dimenet_num_after_skip: 2
+    dimenet_num_output_layers: 3
+    cutoff: 5.0
+
+    scaler:
+        scale_: 0.870582896669776
+        mean_: -7.349405628928332
+    do_postprocessing: True
+
+
+monitor_loss: "val/loss"
+lr_scheduler: 
+    _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+    _partial_: true
+
+scheduler_args:
+    factor: 0.8
+    patience: 10
+    min_lr: 1e-06
+    
+optimizer:
+    _target_: torch.optim.Adam
+    _partial_: true
+    lr: 1e-4
+
+loss:
+    _target_: torch.nn.L1Loss
+
+metric:
+    _target_: torchmetrics.MultitaskWrapper
+    _convert_: all
+    task_metrics:
+        energy:
+            _target_: torchmetrics.MeanAbsoluteError
+        forces:
+            _target_: torchmetrics.MeanAbsoluteError
+energy_loss_coef: 1.
+forces_loss_coef: 1.

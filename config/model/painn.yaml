@@ -1,0 +1,50 @@
+_target_: nablaDFT.painn.painn.AtomisticTaskFixed
+
+model_name: "SchNet"
+model:
+  _target_: schnetpack.model.NeuralNetworkPotential
+  representation:
+    _target_: schnetpack.representation.PaiNN
+    n_interactions: 6
+    n_atom_basis: 128
+    radial_basis:
+      _target_: schnetpack.nn.radial.GaussianRBF
+      n_rbf: 100
+      cutoff: 5
+    cutoff_fn:
+      _target_: schnetpack.nn.cutoff.CosineCutoff
+      cutoff: 5
+  input_modules:
+    - _target_: schnetpack.atomistic.PairwiseDistances
+  output_modules:
+    - _target_: schnetpack.atomistic.Atomwise
+      n_in: args.n_atom_basis
+      output_key: "energy"
+  postprocessors:
+    - _target_: schnetpack.transform.CastTo64
+    - _target_: schnetpack.transform.AddOffsets
+      property: "energy"
+      add_mean: True
+
+outputs:
+  - _target_: schnetpack.task.ModelOutput
+    name: "energy"
+    loss_fn:
+      _target_: torch.nn.MSELoss()
+      loss_weight: 1
+      metrics:
+        MAE:
+          _target_: torchmetrics.MeanAbsoluteError
+
+optimizer_cls: torch.optim.AdamW
+optimizer_args:
+  lr: 1e-4
+
+scheduler_cls: torch.optim.lr_scheduler.ReduceLROnPlateau
+scheduler_args:
+  factor: 0.8
+  patience: 10
+  min_lr: 1e-6
+scheduler_monitor: val_loss
+
+warmup_steps: 0
