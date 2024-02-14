@@ -9,6 +9,7 @@ from torch.optim import Optimizer
 from torch.optim.lr_scheduler import LRScheduler
 from torch_scatter import segment_coo, scatter
 from torch_geometric.nn import radius_graph
+from torch_geometric.data import Data
 import pytorch_lightning as pl
 
 from .initializers import get_initializer
@@ -1195,7 +1196,7 @@ class GemNetOC(nn.Module):
             basis_a2a_rad,
         )
 
-    def forward(self, data):
+    def forward(self, data: Data):
         pos = data.pos
         batch = data.batch
         atomic_numbers = data.z.long()
@@ -1445,7 +1446,7 @@ class GemNetOCLightning(pl.LightningModule):
         self.net = net
         self.save_hyperparameters(logger=True, ignore=["net", "ema"])
 
-    def forward(self, data):
+    def forward(self, data: Data):
         energy, forces = self.net(data)
         return energy, forces
 

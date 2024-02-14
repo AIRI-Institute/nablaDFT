@@ -282,7 +282,10 @@ class Graphormer3D(nn.Module):
         self.edge_proj = nn.Linear(self.K, embed_dim)
         self.node_proj = NodeTaskHead(embed_dim, attention_heads)
 
-    def forward(self, atoms, pos, real_mask):
+    def forward(self, data):
+        bsz = data.batch.max().detach().item() + 1  # get batch size
+        atoms, mask = to_dense_batch(data.z, data.batch, batch_size=bsz)
+        pos, _ = to_dense_batch(data.pos, data.batch, batch_size=bsz)
         # NablaDFT dataset doesn't have tags, just fill tags with ones
         tags = torch.ones(atoms.shape, dtype=torch.int).to(atoms.device)
         padding_mask = atoms.eq(0)
@@ -333,7 +336,7 @@ class Graphormer3D(nn.Module):
         ).flatten(-2)
         output_mask = (
             tags > 0
-        ) & real_mask  # no need to consider padding, since padding has tag 0, real_mask False
+        ) & mask  # no need to consider padding, since padding has tag 0, real_mask False
 
         eng_output *= output_mask
         eng_output = eng_output.sum(dim=-1)
@@ -366,24 +369,18 @@ class Graphormer3DLightning(pl.LightningModule):
         self.loss_forces_coef = forces_loss_coef
 
     def forward(self, data):
-        bsz = data.batch.max().detach().item() + 1  # get batch size
-        atoms, mask = to_dense_batch(data.z, data.batch, batch_size=bsz)
-        pos, mask_pos = to_dense_batch(data.pos, data.batch, batch_size=bsz)
-        energy_out, forces_out, mask_out = self.net(atoms, pos, mask)
+        energy_out, forces_out, mask_out = self.net(data)
         forces_out *= mask_out
-        return energy_out, forces_out
+        return energy_out, forces_out, mask_out
 
     def step(
         self, batch, calculate_metrics: bool = False
     ) -> Union[Tuple[Any, Dict], Any]:
-        bsz = batch.batch.max().detach().item() + 1  # get batch size
+        bsz = self._get_batch_size(batch)  # get batch size
         y = batch.y
-        # make dense batch from PyG batch
-        atoms, mask = to_dense_batch(batch.z, batch.batch, batch_size=bsz)
-        pos, mask_pos = to_dense_batch(batch.pos, batch.batch, batch_size=bsz)
-        energy_out, forces_out, mask_out = self.net(atoms, pos, mask)
+        energy_out, forces_out, mask_out = self(batch)
         loss_energy = self.loss(energy_out, y)
-        # TODO: temp workaround
+        # TODO: temp workaround for datasets w/o forces
         if hasattr(batch, "forces"):
             forces, mask_forces = to_dense_batch(
                 batch.forces, batch.batch, batch_size=bsz

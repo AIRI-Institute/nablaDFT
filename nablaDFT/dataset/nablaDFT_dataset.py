@@ -62,7 +62,8 @@ class ASENablaDFT(AtomsDataModule):
             else:
                 url = data["test_databases"][self.dataset_name]
         self.datapath = datapath_with_no_suffix + "/" + self.dataset_name + suffix
-        request.urlretrieve(url, self.datapath)
+        if not os.path.exists(self.datapath):  # skip if already downloaded
+            request.urlretrieve(url, self.datapath)
         with connect(self.datapath) as ase_db:
             if not ase_db.metadata:
                 atomrefs = np.load(
@@ -77,6 +78,11 @@ class ASENablaDFT(AtomsDataModule):
             self.num_train = int(dataset_length * self.train_ratio)
             self.num_val = int(dataset_length * self.val_ratio)
             self.num_test = int(dataset_length * self.test_ratio)
+            # TODO: can't assign all samples to test part
+            # see AtomsDataModule._load_partitions() for details
+            if not self.num_train and not self.num_val:
+                self.num_val = -1
+                self.num_train = 1
         self.dataset = load_dataset(self.datapath, self.format)
 
 

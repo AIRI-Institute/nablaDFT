@@ -11,3 +11,11 @@ batch_size: 32
 num_workers: 8
 split_file: ${.data_workdir}/split.npz
 
+transforms:
+  - _target_: schnetpack.transform.ASENeighborList
+    cutoff: 5
+  - _target_: schnetpack.transform.RemoveOffsets
+    property: "energy"
+    remove_mean: True
+    remove_atomrefs: False
+  - _target_: schnetpack.transform.CastTo32

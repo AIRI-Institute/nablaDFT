@@ -6,6 +6,7 @@ import torch
 import torch.nn as nn
 from torch.optim.lr_scheduler import LRScheduler
 from torch.optim import Optimizer
+from torch_geometric.data import Data
 
 from torch_geometric.nn import radius_graph
 
@@ -488,7 +489,7 @@ class EquiformerV2_OC20(nn.Module):
         )
 
     @torch.enable_grad()
-    def forward(self, data):
+    def forward(self, data: Data):
         self.dtype = data.pos.dtype
         self.device = data.pos.device
 
@@ -718,7 +719,7 @@ class EquiformerV2_OC20_Lightning(pl.LightningModule):
         self.net = net
         self.save_hyperparameters(logger=True, ignore=["net", "ema"])
 
-    def forward(self, data):
+    def forward(self, data: Data):
         energy, forces = self.net(data)
         return energy, forces
 

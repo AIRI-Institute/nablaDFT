@@ -1,4 +1,4 @@
-_target_: nablaDFT.painn.painn.AtomisticTaskFixed
+_target_: nablaDFT.ase_model.task.AtomisticTaskFixed
 
 model_name: "SchNet"
 model:
@@ -36,15 +36,19 @@ outputs:
       MAE:
         _target_: torchmetrics.MeanAbsoluteError
 
-optimizer_cls: torch.optim.AdamW
+optimizer_cls:
+  _partial_: True
+  _target_: torch.optim.AdamW
 optimizer_args:
   lr: 1e-4
 
-scheduler_cls: torch.optim.lr_scheduler.ReduceLROnPlateau
+scheduler_cls:
+  _partial_: True
+  _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
 scheduler_args:
   factor: 0.8
   patience: 10
   min_lr: 1e-6
 scheduler_monitor: val_loss
 
-warmup_steps: 0
+warmup_steps: ${warmup_steps}

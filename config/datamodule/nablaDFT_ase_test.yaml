@@ -2,16 +2,16 @@
 _target_: nablaDFT.dataset.NablaDFT
 
 type_of_nn: ASE
-datapath: ./datasets/nablaDFT/forces/train
+datapath: ./datasets/nablaDFT/forces/test
 dataset_name: ${dataset_name}
 data_workdir: ./logs
 train_ratio: 0.0
-val_ration: 0.0
+val_ratio: 0.0
 test_ratio: 1.0
 batch_size: 32
 num_workers: 8
 distance_unit: Bohr
-split_file: ${data_workdir}/split.npz
+split_file: ${.data_workdir}/split.npz
 
 transforms:
   - _target_: schnetpack.transform.ASENeighborList

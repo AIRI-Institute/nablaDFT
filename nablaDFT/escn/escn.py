@@ -14,6 +14,7 @@ import torch.nn as nn
 from torch.optim import Optimizer
 from torch.optim.lr_scheduler import LRScheduler
 from torch_geometric.nn import radius_graph
+from torch_geometric.data import Data
 
 import pytorch_lightning as pl
 
@@ -317,8 +318,9 @@ class eSCN(nn.Module):
             cell_offset_distances,
             neighbors,
         )
+
     @torch.enable_grad()
-    def forward(self, data):
+    def forward(self, data: Data):
         device = data.pos.device
         self.dtype = data.pos.dtype
 
@@ -1107,7 +1109,7 @@ class eSCNLightning(pl.LightningModule):
         self.net = net
         self.save_hyperparameters(logger=True, ignore=["net", "ema"])
 
-    def forward(self, data):
+    def forward(self, data: Data):
         energy, forces = self.net(data)
         return energy, forces
 

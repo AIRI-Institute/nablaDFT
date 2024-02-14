@@ -1,0 +1,15 @@
+model_checkpoint:
+  _target_: pytorch_lightning.callbacks.ModelCheckpoint
+  monitor: val_loss
+  mode: min
+  save_top_k: 3
+  save_last: True
+  verbose: True
+  dirpath: checkpoints/${name}
+  filename: "${name}_${dataset_name}_{epoch:03d}_{val_loss:4f}"
+early_stopping:
+  _target_: pytorch_lightning.callbacks.EarlyStopping
+  monitor: val_loss
+  min_delta: 1e-4
+  patience: 400
+  mode: min

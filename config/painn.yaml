@@ -11,7 +11,7 @@ defaults:
   - _self_
   - datamodule: nablaDFT_ase.yaml  # dataset config
   - model: painn.yaml  # model config
-  - callbacks: default.yaml  # pl callbacks config
+  - callbacks: callbacks_spk.yaml  # pl callbacks config
   - loggers: wandb.yaml  # pl loggers config
   - trainer: train.yaml  # trainer config
 
