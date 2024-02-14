@@ -47,6 +47,7 @@ class ASENablaDFT(AtomsDataModule):
         )
         self.dataset_name = dataset_name
         self.train_ratio = train_ratio
+        self.val_ratio = val_ratio
         self.test_ratio = test_ratio
 
     def prepare_data(self):
@@ -74,7 +75,7 @@ class ASENablaDFT(AtomsDataModule):
                 }
             dataset_length = len(ase_db)
             self.num_train = int(dataset_length * self.train_ratio)
-            self.num_val = int(dataset_length * self.train_ratio)
+            self.num_val = int(dataset_length * self.val_ratio)
             self.num_test = int(dataset_length * self.test_ratio)
         self.dataset = load_dataset(self.datapath, self.format)
 
