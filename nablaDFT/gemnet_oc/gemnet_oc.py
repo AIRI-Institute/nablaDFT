@@ -1453,9 +1453,6 @@ class GemNetOCLightning(pl.LightningModule):
     def step(
         self, batch, calculate_metrics: bool = False
     ):
-        bsz = batch.batch.max().detach().item() + 1  # get batch size
-        y = batch.y
-        # make dense batch from PyG batch
         energy_out, forces_out = self.net(batch)
         # TODO: temp workaround
         if hasattr(batch, "forces"):
@@ -1463,7 +1460,7 @@ class GemNetOCLightning(pl.LightningModule):
         else:
             forces = forces_out.clone()
         preds = {"energy": energy_out, "forces": forces_out}
-        target = {"energy": y, "forces": forces}
+        target = {"energy": batch.y, "forces": forces}
         loss = self._calculate_loss(preds, target)
         if calculate_metrics:
             metrics = self._calculate_metrics(preds, target)

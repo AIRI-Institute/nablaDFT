@@ -21,7 +21,7 @@ class Swish(torch.nn.Module):
 
 class DimeNetPlusPlusPotential(nn.Module):
     def __init__(
-            self, 
+            self,
             node_latent_dim: int,
             scaler=None,
             dimenet_hidden_channels=128,
@@ -38,8 +38,7 @@ class DimeNetPlusPlusPotential(nn.Module):
             dimenet_num_output_layers=3,
             cutoff=5.0,
             do_postprocessing=False
-        ):
-        
+    ):
         super().__init__()
 
         self.node_latent_dim = node_latent_dim
@@ -56,12 +55,12 @@ class DimeNetPlusPlusPotential(nn.Module):
         self.dimenet_num_after_skip = dimenet_num_after_skip
         self.dimenet_num_output_layers = dimenet_num_output_layers
         self.cutoff = cutoff
-        
+
         self.linear_output_size = 1
 
         self.scaler = scaler
         self.do_postprocessing = do_postprocessing
-        
+
         self.net = DimeNetPlusPlus(
             hidden_channels=self.dimenet_hidden_channels,
             out_channels=self.node_latent_dim,
@@ -78,7 +77,6 @@ class DimeNetPlusPlusPotential(nn.Module):
             num_after_skip=self.dimenet_num_after_skip,
             num_output_layers=self.dimenet_num_output_layers,
         )
-       
 
         regr_or_cls_input_dim = self.node_latent_dim
         self.regr_or_cls_nn = nn.Sequential(
@@ -90,7 +88,7 @@ class DimeNetPlusPlusPotential(nn.Module):
             Swish(),
             nn.Linear(regr_or_cls_input_dim // 2, self.linear_output_size),
         )
-            
+
     @torch.enable_grad()
     def forward(self, data: Data):
         pos, atom_z, batch_mapping = data.pos, data.z, data.batch
@@ -119,13 +117,13 @@ class DimeNetPlusPlusLightning(pl.LightningModule):
             metric,
             energy_loss_coef: float,
             forces_loss_coef: float,
-            monitor_loss: str="val/loss",
-            model_name: str=None,
+            monitor_loss: str = "val/loss",
+            model_name: str = None,
             lr_scheduler: Optional[Type] = None,
             scheduler_args: Optional[Dict[str, Any]] = None,
             optimizer: Optional[Type] = None,
-        ):
-        
+    ):
+
         super().__init__()
         self.save_hyperparameters(logger=True, ignore=["net", "loss"])
 
