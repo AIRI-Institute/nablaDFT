@@ -18,6 +18,7 @@ import nablaDFT
 from nablaDFT.phisnet.training.hamiltonian_dataset import HamiltonianDataset
 from nablaDFT.phisnet.training.sqlite_database import HamiltonianDatabase
 
+
 class ASENablaDFT(AtomsDataModule):
     def __init__(
         self,
@@ -129,7 +130,7 @@ class PyGNablaDFT(InMemoryDataset):
 
     @property
     def raw_file_names(self) -> List[str]:
-        return [os.path.join(self.datapath, self.dataset_name + self.db_suffix)]
+        return [(self.dataset_name + self.db_suffix)]
 
     @property
     def processed_file_names(self) -> str:
@@ -175,10 +176,10 @@ class PyGNablaDFT(InMemoryDataset):
         with open(nablaDFT.__path__[0] + "/links/energy_databases_v2.json", "r") as f:
             data = json.load(f)
             url = data[f"{self.split}_databases"][self.dataset_name]
-        request.urlretrieve(url, self.raw_file_names[0])
+        request.urlretrieve(url, self.raw_paths[0])
 
     def process(self) -> None:
-        db = connect(self.raw_file_names[0])
+        db = connect(self.raw_paths[0])
         samples = []
         for db_row in db.select():
             z = torch.from_numpy(db_row.numbers).long()

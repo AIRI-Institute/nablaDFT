@@ -96,7 +96,6 @@ class DimeNetPlusPlusPotential(nn.Module):
         pos, atom_z, batch_mapping = data.pos, data.z, data.batch
         pos = pos.requires_grad_(True)
         graph_embeddings = self.net(pos=pos, z=atom_z, batch=batch_mapping)
-        
         predictions = torch.flatten(self.regr_or_cls_nn(graph_embeddings).contiguous())
         forces = -1 * (
                     torch.autograd.grad(
@@ -203,7 +202,8 @@ class DimeNetPlusPlusLightning(pl.LightningModule):
 
     def test_step(self, batch, batch_idx: int):
         bsz = self._get_batch_size(batch)
-        loss, metrics = self.step(batch, calculate_metrics=True)
+        with torch.enable_grad():
+            loss, metrics = self.step(batch, calculate_metrics=True)
         self.log(
             "test/loss",
             loss,
@@ -215,6 +215,11 @@ class DimeNetPlusPlusLightning(pl.LightningModule):
             batch_size=bsz,
         )
         return loss
+
+    def predict_step(self, batch):
+        with torch.enable_grad():
+            predictions = self(batch)
+        return predictions
 
     def configure_optimizers(self):
         opt = self.hparams.optimizer(self.parameters())

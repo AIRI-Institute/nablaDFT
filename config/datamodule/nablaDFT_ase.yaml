@@ -2,7 +2,7 @@
 _target_: nablaDFT.dataset.NablaDFT
 
 type_of_nn: ASE
-datapath: ./datasets/nablaDFT/forces/train
+datapath: ./datasets/nablaDFT/train
 dataset_name: ${dataset_name}
 data_workdir: ./logs
 train_ratio: 0.9

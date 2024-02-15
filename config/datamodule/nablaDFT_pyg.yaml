@@ -3,7 +3,7 @@ _target_: nablaDFT.dataset.NablaDFT
 
 type_of_nn: PyG
 split: ${job_type}
-root: ../datasets/nablaDFT/forces/train
+root: ./datasets/nablaDFT/train
 dataset_name: ${dataset_name}
 train_size: 0.9
 val_size: 0.1
