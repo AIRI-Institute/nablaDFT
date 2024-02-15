@@ -11,13 +11,12 @@ test_ratio: 1.0
 batch_size: 32
 num_workers: 8
 distance_unit: Bohr
-split_file: ${.data_workdir}/split.npz
+split_file: ${.data_workdir}/${.dataset_name}_split.npz
+# define split strategy
+splitting:
+  _target_: nablaDFT.dataset.split.TestSplit
 
-transforms:
+test_transforms:
   - _target_: schnetpack.transform.ASENeighborList
     cutoff: 5
-  - _target_: schnetpack.transform.RemoveOffsets
-    property: "energy"
-    remove_mean: True
-    remove_atomrefs: False
   - _target_: schnetpack.transform.CastTo32

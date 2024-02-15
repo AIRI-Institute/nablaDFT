@@ -8,6 +8,9 @@ import pytorch_lightning as pl
 
 
 class PyGModel(pl.LightningModule):
+    """
+    Base class for neural networks for torch geometric datasets.
+    """
     def __init__(self):
         super(PyGModel, self).__init__()
 

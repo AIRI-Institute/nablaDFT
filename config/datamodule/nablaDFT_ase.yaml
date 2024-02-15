@@ -9,9 +9,9 @@ train_ratio: 0.9
 val_ratio: 0.1
 batch_size: 32
 num_workers: 8
-split_file: ${.data_workdir}/split.npz
+split_file: ${.data_workdir}/${.dataset_name}_split.npz
 
-transforms:
+train_transforms:
   - _target_: schnetpack.transform.ASENeighborList
     cutoff: 5
   - _target_: schnetpack.transform.RemoveOffsets
@@ -19,3 +19,4 @@ transforms:
     remove_mean: True
     remove_atomrefs: False
   - _target_: schnetpack.transform.CastTo32
+val_transforms: ${.train_transforms}

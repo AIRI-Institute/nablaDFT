@@ -18,7 +18,6 @@ import nablaDFT
 from nablaDFT.phisnet.training.hamiltonian_dataset import HamiltonianDataset
 from nablaDFT.phisnet.training.sqlite_database import HamiltonianDatabase
 
-
 class ASENablaDFT(AtomsDataModule):
     def __init__(
         self,
@@ -29,11 +28,9 @@ class ASENablaDFT(AtomsDataModule):
         train_ratio: float = 0.9,
         val_ratio: float = 0.1,
         test_ratio: float = 0.0,
-        transforms: Optional[List[torch.nn.Module]] = [
-            trn.ASENeighborList(cutoff=5.0),
-            trn.RemoveOffsets("energy", remove_mean=True, remove_atomrefs=False),
-            trn.CastTo32(),
-        ],
+        train_transforms=None,
+        val_transforms=None,
+        test_transforms=None,
         format: Optional[AtomsDataFormat] = AtomsDataFormat.ASE,
         **kwargs,
     ):
@@ -41,7 +38,9 @@ class ASENablaDFT(AtomsDataModule):
             datapath=datapath,
             data_workdir=data_workdir,
             batch_size=batch_size,
-            transforms=transforms,
+            train_transforms=train_transforms,
+            val_transforms=val_transforms,
+            test_transforms=test_transforms,
             format=format,
             **kwargs,
         )
@@ -78,11 +77,10 @@ class ASENablaDFT(AtomsDataModule):
             self.num_train = int(dataset_length * self.train_ratio)
             self.num_val = int(dataset_length * self.val_ratio)
             self.num_test = int(dataset_length * self.test_ratio)
-            # TODO: can't assign all samples to test part
             # see AtomsDataModule._load_partitions() for details
             if not self.num_train and not self.num_val:
                 self.num_val = -1
-                self.num_train = 1
+                self.num_train = -1
         self.dataset = load_dataset(self.datapath, self.format)
 
 
