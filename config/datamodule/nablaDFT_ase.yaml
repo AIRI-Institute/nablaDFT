@@ -2,9 +2,9 @@
 _target_: nablaDFT.dataset.NablaDFT
 
 type_of_nn: ASE
-datapath: ./datasets/nablaDFT/train
+datapath: ./datasets/nablaDFT/train/raw
 dataset_name: ${dataset_name}
-data_workdir: ./logs
+data_workdir: ${.datapath}
 train_ratio: 0.9
 val_ratio: 0.1
 batch_size: 32
