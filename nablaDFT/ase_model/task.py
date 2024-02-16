@@ -34,3 +34,8 @@ class AtomisticTaskFixed(spk.task.AtomisticTask):
         self.lr = optimizer_args["lr"]
         self.warmup_steps = warmup_steps
         self.save_hyperparameters(ignore=["model"])
+
+    def on_save_checkpoint(self, checkpoint: Dict[str, Any]) -> None:
+        # reshape model.postprocessors (AddOffsets)
+        #  otherwise during test error will occur
+        checkpoint['state_dict']['model.postprocessors.1.mean'] = checkpoint['state_dict']['model.postprocessors.1.mean'].reshape(1)
