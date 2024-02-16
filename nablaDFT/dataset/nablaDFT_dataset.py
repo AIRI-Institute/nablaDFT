@@ -1,6 +1,5 @@
 import json
 import os
-import sys
 from typing import Optional, List
 from urllib import request as request
 
@@ -11,7 +10,6 @@ from torch.utils.data import Subset
 from torch_geometric.data.lightning import LightningDataset
 from torch_geometric.data import InMemoryDataset, Data
 from schnetpack.data import AtomsDataFormat, AtomsDataModule, load_dataset
-import schnetpack.transform as trn
 import nablaDFT
 
 
