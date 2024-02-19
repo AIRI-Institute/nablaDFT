@@ -1,6 +1,6 @@
 _target_: nablaDFT.ase_model.task.AtomisticTaskFixed
 
-model_name: "SchNet"
+model_name: "PaiNN"
 model:
   _target_: schnetpack.model.NeuralNetworkPotential
   representation:
@@ -22,7 +22,6 @@ model:
       output_key: "energy"
     - _target_: schnetpack.atomistic.Forces
   postprocessors:
-    - _target_: schnetpack.transform.CastTo64
     - _target_: schnetpack.transform.AddOffsets
       property: "energy"
       add_mean: True
