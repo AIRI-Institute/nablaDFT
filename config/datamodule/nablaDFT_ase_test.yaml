@@ -4,13 +4,12 @@ _target_: nablaDFT.dataset.NablaDFT
 type_of_nn: ASE
 datapath: ./datasets/nablaDFT/test/raw
 dataset_name: ${dataset_name}
-data_workdir: ./logs
+data_workdir: ./spk_logs
 train_ratio: 0.0
 val_ratio: 0.0
 test_ratio: 1.0
 batch_size: 32
 num_workers: 8
-distance_unit: Bohr
 split_file: ${.datapath}/${dataset_name}_split.npz
 # define split strategy
 splitting:

@@ -17,6 +17,10 @@ from nablaDFT.phisnet.training.hamiltonian_dataset import HamiltonianDataset
 from nablaDFT.phisnet.training.sqlite_database import HamiltonianDatabase
 
 
+# TODO: override setup method for prediction pipeline
+# TODO: add predict_dataloader method
+# TODO: add predict_dataset property
+# TODO: or just override test_dataset during trainer.predict called
 class ASENablaDFT(AtomsDataModule):
     def __init__(
         self,
@@ -53,7 +57,7 @@ class ASENablaDFT(AtomsDataModule):
         suffix = os.path.splitext(self.datapath)[1]
         if not os.path.exists(datapath_with_no_suffix):
             os.makedirs(datapath_with_no_suffix)
-        with open(nablaDFT.__path__[0] + "/links/energy_databases.json") as f:
+        with open(nablaDFT.__path__[0] + "/links/energy_databases_v2.json") as f:
             data = json.load(f)
             if self.train_ratio != 0:
                 url = data["train_databases"][self.dataset_name]
@@ -68,8 +72,8 @@ class ASENablaDFT(AtomsDataModule):
                     nablaDFT.__path__[0] + "/data/atomization_energies.npy"
                 )
                 ase_db.metadata = {
-                    "_distance_unit": "Bohr",
-                    "_property_unit_dict": {"energy": "Hartree"},
+                    "_distance_unit": "Ang",
+                    "_property_unit_dict": {"energy": "Hartree", "forces": "Hartree/Ang"},
                     "atomrefs": {"energy": list(atomrefs)},
                 }
             dataset_length = len(ase_db)

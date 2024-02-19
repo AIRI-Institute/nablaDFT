@@ -20,11 +20,13 @@ model:
     - _target_: schnetpack.atomistic.Atomwise
       n_in: 128
       output_key: "energy"
+    - _target_: schnetpack.atomistic.Forces
   postprocessors:
     - _target_: schnetpack.transform.CastTo64
     - _target_: schnetpack.transform.AddOffsets
       property: "energy"
       add_mean: True
+  do_postprocessing: True
 
 outputs:
   - _target_: schnetpack.task.ModelOutput

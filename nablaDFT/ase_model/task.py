@@ -6,6 +6,8 @@ import torch
 from schnetpack.model.base import AtomisticModel
 from torch import nn
 
+from schnetpack.task import AtomisticTask
+from schnetpack.model import NeuralNetworkPotential
 
 class AtomisticTaskFixed(spk.task.AtomisticTask):
     def __init__(
@@ -39,3 +41,8 @@ class AtomisticTaskFixed(spk.task.AtomisticTask):
         # reshape model.postprocessors (AddOffsets)
         #  otherwise during test error will occur
         checkpoint['state_dict']['model.postprocessors.1.mean'] = checkpoint['state_dict']['model.postprocessors.1.mean'].reshape(1)
+
+    # override base class method
+    def predict_without_postprocessing(self, batch):
+        pred = self(batch)
+        return pred
