@@ -17,10 +17,6 @@ from nablaDFT.phisnet.training.hamiltonian_dataset import HamiltonianDataset
 from nablaDFT.phisnet.training.sqlite_database import HamiltonianDatabase
 
 
-# TODO: override setup method for prediction pipeline
-# TODO: add predict_dataloader method
-# TODO: add predict_dataset property
-# TODO: or just override test_dataset during trainer.predict called
 class ASENablaDFT(AtomsDataModule):
     def __init__(
         self,
@@ -73,7 +69,10 @@ class ASENablaDFT(AtomsDataModule):
                 )
                 ase_db.metadata = {
                     "_distance_unit": "Ang",
-                    "_property_unit_dict": {"energy": "Hartree", "forces": "Hartree/Ang"},
+                    "_property_unit_dict": {
+                        "energy": "Hartree",
+                        "forces": "Hartree/Ang",
+                    },
                     "atomrefs": {"energy": list(atomrefs)},
                 }
             dataset_length = len(ase_db)

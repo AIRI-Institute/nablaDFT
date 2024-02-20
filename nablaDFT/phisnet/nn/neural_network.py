@@ -418,9 +418,9 @@ class NeuralNetwork(nn.Module):
         for L in range(
             self.output_over_ii.order_out + 1
         ):  # diagonal blocks of overlap are constant
-            self.output_over_ii.linear[
-                L
-            ].weight.requires_grad = False  # => only bias terms are used
+            self.output_over_ii.linear[L].weight.requires_grad = (
+                False  # => only bias terms are used
+            )
 
         # off-diagonal blocks
         number_L = [

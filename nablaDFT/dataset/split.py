@@ -1,4 +1,5 @@
 """Overrides split strategies from schnetpack.data.splitting"""
+
 import math
 from typing import List
 
@@ -30,7 +31,7 @@ class RandomSplit(SplittingStrategy):
         offsets = torch.cumsum(torch.tensor(split_sizes), dim=0)
         indices = torch.randperm(sum(split_sizes)).tolist()
         partition_sizes_idx = [
-            indices[offset - length: offset]
+            indices[offset - length : offset]
             for offset, length in zip(offsets, split_sizes)
         ]
         return partition_sizes_idx
@@ -40,6 +41,7 @@ class TestSplit(SplittingStrategy):
     """Splitting strategy that allows to put all dataset
     elements in test split without index permutations.
     """
+
     def split(self, dataset, *split_sizes):
         dsize = len(dataset)
         partition_sizes_idx = [[], [], list(range(dsize))]  # train, val, test

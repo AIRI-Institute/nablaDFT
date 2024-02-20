@@ -37,10 +37,8 @@ try:
 except ImportError:
     pass
 
-from nablaDFT.gemnet_oc.utils import (
-    radius_graph_pbc,
-    compute_neighbors
-)
+from nablaDFT.gemnet_oc.utils import radius_graph_pbc, compute_neighbors
+
 
 class eSCN(nn.Module):
     """Equivariant Spherical Channel Network
@@ -95,9 +93,7 @@ class eSCN(nn.Module):
         import sys
 
         if "e3nn" not in sys.modules:
-            logging.error(
-                "You need to install the e3nn library to use the SCN model"
-            )
+            logging.error("You need to install the e3nn library to use the SCN model")
             raise ImportError
 
         self.regress_forces = regress_forces
@@ -118,9 +114,7 @@ class eSCN(nn.Module):
         self.lmax_list = lmax_list
         self.mmax_list = mmax_list
         self.num_resolutions: int = len(self.lmax_list)
-        self.sphere_channels_all: int = (
-            self.num_resolutions * self.sphere_channels
-        )
+        self.sphere_channels_all: int = self.num_resolutions * self.sphere_channels
         self.basis_width_scalar = basis_width_scalar
         self.distance_function = distance_function
 
@@ -245,9 +239,7 @@ class eSCN(nn.Module):
             pass
         elif hasattr(self, "enforce_max_neighbors_strictly"):
             # Not all models will have this attribute
-            enforce_max_neighbors_strictly = (
-                self.enforce_max_neighbors_strictly
-            )
+            enforce_max_neighbors_strictly = self.enforce_max_neighbors_strictly
         else:
             # Default to old behavior
             enforce_max_neighbors_strictly = True
@@ -302,9 +294,7 @@ class eSCN(nn.Module):
             distance_vec = data.pos[j] - data.pos[i]
 
             edge_dist = distance_vec.norm(dim=-1)
-            cell_offsets = torch.zeros(
-                edge_index.shape[1], 3, device=data.pos.device
-            )
+            cell_offsets = torch.zeros(edge_index.shape[1], 3, device=data.pos.device)
             cell_offset_distances = torch.zeros_like(
                 cell_offsets, device=data.pos.device
             )
@@ -342,16 +332,12 @@ class eSCN(nn.Module):
         ###############################################################
 
         # Compute 3x3 rotation matrix per edge
-        edge_rot_mat = self._init_edge_rot_mat(
-            data, edge_index, edge_distance_vec
-        )
+        edge_rot_mat = self._init_edge_rot_mat(data, edge_index, edge_distance_vec)
 
         # Initialize the WignerD matrices and other values for spherical harmonic calculations
         self.SO3_edge_rot = nn.ModuleList()
         for i in range(self.num_resolutions):
-            self.SO3_edge_rot.append(
-                SO3_Rotation(edge_rot_mat, self.lmax_list[i])
-            )
+            self.SO3_edge_rot.append(SO3_Rotation(edge_rot_mat, self.lmax_list[i]))
 
         ###############################################################
         # Initialize node embeddings
@@ -371,16 +357,14 @@ class eSCN(nn.Module):
         offset = 0
         # Initialize the l=0,m=0 coefficients for each resolution
         for i in range(self.num_resolutions):
-            x.embedding[:, offset_res, :] = self.sphere_embedding(
-                atomic_numbers
-            )[:, offset : offset + self.sphere_channels]
+            x.embedding[:, offset_res, :] = self.sphere_embedding(atomic_numbers)[
+                :, offset : offset + self.sphere_channels
+            ]
             offset = offset + self.sphere_channels
             offset_res = offset_res + int((self.lmax_list[i] + 1) ** 2)
 
         # This can be expensive to compute (not implemented efficiently), so only do it once and pass it along to each layer
-        mappingReduced = CoefficientMapping(
-            self.lmax_list, self.mmax_list, device
-        )
+        mappingReduced = CoefficientMapping(self.lmax_list, self.mmax_list, device)
 
         ###############################################################
         # Update spherical node embeddings
@@ -474,9 +458,7 @@ class eSCN(nn.Module):
         # Make sure the atoms are far enough apart
         if torch.min(edge_vec_0_distance) < 0.0001:
             logging.error(
-                "Error edge_vec_0_distance: {}".format(
-                    torch.min(edge_vec_0_distance)
-                )
+                "Error edge_vec_0_distance: {}".format(torch.min(edge_vec_0_distance))
             )
             (minval, minidx) = torch.min(edge_vec_0_distance, 0)
             logging.error(
@@ -503,37 +485,23 @@ class eSCN(nn.Module):
         edge_vec_2c = edge_vec_2.clone()
         edge_vec_2c[:, 1] = -edge_vec_2[:, 2]
         edge_vec_2c[:, 2] = edge_vec_2[:, 1]
-        vec_dot_b = torch.abs(torch.sum(edge_vec_2b * norm_x, dim=1)).view(
-            -1, 1
-        )
-        vec_dot_c = torch.abs(torch.sum(edge_vec_2c * norm_x, dim=1)).view(
-            -1, 1
-        )
+        vec_dot_b = torch.abs(torch.sum(edge_vec_2b * norm_x, dim=1)).view(-1, 1)
+        vec_dot_c = torch.abs(torch.sum(edge_vec_2c * norm_x, dim=1)).view(-1, 1)
 
         vec_dot = torch.abs(torch.sum(edge_vec_2 * norm_x, dim=1)).view(-1, 1)
-        edge_vec_2 = torch.where(
-            torch.gt(vec_dot, vec_dot_b), edge_vec_2b, edge_vec_2
-        )
+        edge_vec_2 = torch.where(torch.gt(vec_dot, vec_dot_b), edge_vec_2b, edge_vec_2)
         vec_dot = torch.abs(torch.sum(edge_vec_2 * norm_x, dim=1)).view(-1, 1)
-        edge_vec_2 = torch.where(
-            torch.gt(vec_dot, vec_dot_c), edge_vec_2c, edge_vec_2
-        )
+        edge_vec_2 = torch.where(torch.gt(vec_dot, vec_dot_c), edge_vec_2c, edge_vec_2)
 
         vec_dot = torch.abs(torch.sum(edge_vec_2 * norm_x, dim=1))
         # Check the vectors aren't aligned
         assert torch.max(vec_dot) < 0.99
 
         norm_z = torch.cross(norm_x, edge_vec_2, dim=1)
-        norm_z = norm_z / (
-            torch.sqrt(torch.sum(norm_z**2, dim=1, keepdim=True))
-        )
-        norm_z = norm_z / (
-            torch.sqrt(torch.sum(norm_z**2, dim=1)).view(-1, 1)
-        )
+        norm_z = norm_z / (torch.sqrt(torch.sum(norm_z**2, dim=1, keepdim=True)))
+        norm_z = norm_z / (torch.sqrt(torch.sum(norm_z**2, dim=1)).view(-1, 1))
         norm_y = torch.cross(norm_x, norm_z, dim=1)
-        norm_y = norm_y / (
-            torch.sqrt(torch.sum(norm_y**2, dim=1, keepdim=True))
-        )
+        norm_y = norm_y / (torch.sqrt(torch.sum(norm_y**2, dim=1, keepdim=True)))
 
         # Construct the 3D rotation matrix
         norm_x = norm_x.view(-1, 3, 1)
@@ -806,18 +774,12 @@ class SO2Block(torch.nn.Module):
         num_channels_m0 = 0
         for i in range(self.num_resolutions):
             num_coefficents = self.lmax_list[i] + 1
-            num_channels_m0 = (
-                num_channels_m0 + num_coefficents * self.sphere_channels
-            )
+            num_channels_m0 = num_channels_m0 + num_coefficents * self.sphere_channels
 
         # SO(2) convolution for m=0
         self.fc1_dist0 = nn.Linear(edge_channels, self.hidden_channels)
-        self.fc1_m0 = nn.Linear(
-            num_channels_m0, self.hidden_channels, bias=False
-        )
-        self.fc2_m0 = nn.Linear(
-            self.hidden_channels, num_channels_m0, bias=False
-        )
+        self.fc1_m0 = nn.Linear(num_channels_m0, self.hidden_channels, bias=False)
+        self.fc2_m0 = nn.Linear(self.hidden_channels, num_channels_m0, bias=False)
 
         # SO(2) convolution for non-zero m
         self.so2_conv = nn.ModuleList()
@@ -871,9 +833,7 @@ class SO2Block(torch.nn.Module):
             # Perform SO(2) convolution
             x_m = self.so2_conv[m - 1](x_m, x_edge)
             x_m = x_m.view(num_edges, -1, x.num_channels)
-            x.embedding[
-                :, offset : offset + 2 * mappingReduced.m_size[m]
-            ] = x_m
+            x.embedding[:, offset : offset + 2 * mappingReduced.m_size[m]] = x_m
 
             offset = offset + 2 * mappingReduced.m_size[m]
 
@@ -922,9 +882,7 @@ class SO2Conv(torch.nn.Module):
             if self.mmax_list[i] >= m:
                 num_coefficents = self.lmax_list[i] - m + 1
 
-            num_channels = (
-                num_channels + num_coefficents * self.sphere_channels
-            )
+            num_channels = num_channels + num_coefficents * self.sphere_channels
 
         assert num_channels > 0
 
@@ -988,12 +946,8 @@ class EdgeBlock(torch.nn.Module):
         self.fc1_dist = nn.Linear(self.in_channels, self.edge_channels)
 
         # Embedding function of the atomic numbers
-        self.source_embedding = nn.Embedding(
-            self.max_num_elements, self.edge_channels
-        )
-        self.target_embedding = nn.Embedding(
-            self.max_num_elements, self.edge_channels
-        )
+        self.source_embedding = nn.Embedding(self.max_num_elements, self.edge_channels)
+        self.target_embedding = nn.Embedding(self.max_num_elements, self.edge_channels)
         nn.init.uniform_(self.source_embedding.weight.data, -0.001, 0.001)
         nn.init.uniform_(self.target_embedding.weight.data, -0.001, 0.001)
 
@@ -1102,7 +1056,7 @@ class eSCNLightning(pl.LightningModule):
         losses: Dict,
         ema,
         metric,
-        loss_coefs
+        loss_coefs,
     ) -> None:
         super(eSCNLightning, self).__init__()
         self.ema = ema
@@ -1113,9 +1067,7 @@ class eSCNLightning(pl.LightningModule):
         energy, forces = self.net(data)
         return energy, forces
 
-    def step(
-        self, batch, calculate_metrics: bool = False
-    ):
+    def step(self, batch, calculate_metrics: bool = False):
         bsz = batch.batch.max().detach().item() + 1  # get batch size
         y = batch.y
         # make dense batch from PyG batch
@@ -1229,7 +1181,9 @@ class eSCNLightning(pl.LightningModule):
     def _calculate_loss(self, y_pred, y_true) -> float:
         total_loss = 0.0
         for name, loss in self.hparams.losses.items():
-            total_loss += self.hparams.loss_coefs[name] * loss(y_pred[name], y_true[name])
+            total_loss += self.hparams.loss_coefs[name] * loss(
+                y_pred[name], y_true[name]
+            )
         return total_loss
 
     def _calculate_metrics(self, y_pred, y_true) -> Dict:

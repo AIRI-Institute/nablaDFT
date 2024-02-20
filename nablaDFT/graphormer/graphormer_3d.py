@@ -358,7 +358,7 @@ class Graphormer3DLightning(pl.LightningModule):
         metric,
         warmup_steps: int,
         energy_loss_coef: float,
-        forces_loss_coef: float
+        forces_loss_coef: float,
     ) -> None:
         super(Graphormer3DLightning, self).__init__()
         self.save_hyperparameters(logger=True, ignore=["net", "loss"])

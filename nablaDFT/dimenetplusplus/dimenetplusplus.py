@@ -21,23 +21,23 @@ class Swish(torch.nn.Module):
 
 class DimeNetPlusPlusPotential(nn.Module):
     def __init__(
-            self,
-            node_latent_dim: int,
-            scaler=None,
-            dimenet_hidden_channels=128,
-            dimenet_num_blocks=4,
-            dimenet_int_emb_size=64,
-            dimenet_basis_emb_size=8,
-            dimenet_out_emb_channels=256,
-            dimenet_num_spherical=7,
-            dimenet_num_radial=6,
-            dimenet_max_num_neighbors=32,
-            dimenet_envelope_exponent=5,
-            dimenet_num_before_skip=1,
-            dimenet_num_after_skip=2,
-            dimenet_num_output_layers=3,
-            cutoff=5.0,
-            do_postprocessing=False
+        self,
+        node_latent_dim: int,
+        scaler=None,
+        dimenet_hidden_channels=128,
+        dimenet_num_blocks=4,
+        dimenet_int_emb_size=64,
+        dimenet_basis_emb_size=8,
+        dimenet_out_emb_channels=256,
+        dimenet_num_spherical=7,
+        dimenet_num_radial=6,
+        dimenet_max_num_neighbors=32,
+        dimenet_envelope_exponent=5,
+        dimenet_num_before_skip=1,
+        dimenet_num_after_skip=2,
+        dimenet_num_output_layers=3,
+        cutoff=5.0,
+        do_postprocessing=False,
     ):
         super().__init__()
 
@@ -96,13 +96,13 @@ class DimeNetPlusPlusPotential(nn.Module):
         graph_embeddings = self.net(pos=pos, z=atom_z, batch=batch_mapping)
         predictions = torch.flatten(self.regr_or_cls_nn(graph_embeddings).contiguous())
         forces = -1 * (
-                    torch.autograd.grad(
-                        predictions,
-                        pos,
-                        grad_outputs=torch.ones_like(predictions),
-                        create_graph=self.training,
-                    )[0]
-                )
+            torch.autograd.grad(
+                predictions,
+                pos,
+                grad_outputs=torch.ones_like(predictions),
+                create_graph=self.training,
+            )[0]
+        )
 
         if self.scaler and self.do_postprocessing:
             predictions = self.scaler["scale_"] * predictions + self.scaler["mean_"]
@@ -111,17 +111,17 @@ class DimeNetPlusPlusPotential(nn.Module):
 
 class DimeNetPlusPlusLightning(pl.LightningModule):
     def __init__(
-            self,
-            net: nn.Module,
-            loss,
-            metric,
-            energy_loss_coef: float,
-            forces_loss_coef: float,
-            monitor_loss: str = "val/loss",
-            model_name: str = None,
-            lr_scheduler: Optional[Type] = None,
-            scheduler_args: Optional[Dict[str, Any]] = None,
-            optimizer: Optional[Type] = None,
+        self,
+        net: nn.Module,
+        loss,
+        metric,
+        energy_loss_coef: float,
+        forces_loss_coef: float,
+        monitor_loss: str = "val/loss",
+        model_name: str = None,
+        lr_scheduler: Optional[Type] = None,
+        scheduler_args: Optional[Dict[str, Any]] = None,
+        optimizer: Optional[Type] = None,
     ):
 
         super().__init__()
@@ -226,9 +226,9 @@ class DimeNetPlusPlusLightning(pl.LightningModule):
         else:
             scheduler = None
         return {
-            'optimizer': opt,
-            'monitor': self.monitor_loss,
-            'lr_scheduler': scheduler
+            "optimizer": opt,
+            "monitor": self.monitor_loss,
+            "lr_scheduler": scheduler,
         }
 
     def on_fit_start(self) -> None:
