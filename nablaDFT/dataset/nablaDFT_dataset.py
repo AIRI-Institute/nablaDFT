@@ -9,8 +9,11 @@ from ase.db import connect
 from torch.utils.data import Subset
 from torch_geometric.data.lightning import LightningDataset
 from torch_geometric.data import InMemoryDataset, Data
-from schnetpack.data import AtomsDataFormat, AtomsDataModule, load_dataset
+from schnetpack.data import AtomsDataFormat, load_dataset
+
 import nablaDFT
+from nablaDFT.dataset.atoms_datamodule import AtomsDataModule
+
 
 
 from nablaDFT.phisnet.training.hamiltonian_dataset import HamiltonianDataset
@@ -310,15 +313,22 @@ def get_PyG_nablaDFT_datasets(
         train_dataset = Subset(dataset, idx_train)
         val_dataset = Subset(dataset, idx_val)
         test_dataset = None
+        pred_dataset = None
     else:
         train_dataset = None
         val_dataset = None
-        test_dataset = dataset
+        if split == "predict":
+            pred_dataset = dataset
+            test_dataset = None
+        else:
+            test_dataset = dataset
+            pred_dataset = None
 
     pl_datamodule = LightningDataset(
         train_dataset=train_dataset,
         val_dataset=val_dataset,
         test_dataset=test_dataset,
+        pred_dataset=pred_dataset,
         batch_size=batch_size,
         num_workers=num_workers,
         pin_memory=True,

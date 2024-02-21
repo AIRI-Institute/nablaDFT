@@ -28,10 +28,10 @@ def predict(trainer: Trainer,
     """Function for prediction loop execution.
        Saves model prediction to "predictions" directory.
     """
-    trainer.logger = False # need this to disable save_hyperparameters during predict, otherwise Omega DictConf can't be dumped to YAML
+    trainer.logger = False # need this to disable save_hyperparameters during predict, otherwise OmegaConf DictConf can't be dumped to YAML
     pred_path = os.path.join(os.getcwd(), "predictions")
     os.makedirs(pred_path, exist_ok=True)
-    predictions = trainer.predict(model=model, dataloaders=datamodule.dataset, ckpt_path=ckpt_path)
+    predictions = trainer.predict(model=model, datamodule=datamodule.dataset, ckpt_path=ckpt_path)
     torch.save(predictions, f"{pred_path}/{config.name}_{config.dataset_name}.pt")
 
 def optimize(config: DictConfig):

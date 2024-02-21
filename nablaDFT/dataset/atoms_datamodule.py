@@ -297,7 +297,7 @@ class AtomsDataModule(pl.LightningDataModule):
                     )
 
                 self.train_idx, self.val_idx, self.test_idx = self.splitting.split(
-                    self.dataset, self.num_train, self.num_val, self.num_test, self.num_pred
+                    self.dataset, self.num_train, self.num_val, self.num_test
                 )
 
                 if self.split_file is not None:
@@ -331,12 +331,12 @@ class AtomsDataModule(pl.LightningDataModule):
             t.datamodule(self)
         for t in self.test_transforms:
             t.datamodule(self)
-        for t in self.predict_transforms:
-            t.datamodule(self)
         self._train_dataset.transforms = self.train_transforms
         self._val_dataset.transforms = self.val_transforms
-        self._test_dataset.transforms = self.test_transforms
-        self._predict_dataset.transforms = self.test_transforms
+        if self.split == 'predict':
+            self._test_dataset.transforms = self.test_transforms
+        else:
+            self._test_dataset.transforms = self.test_transforms
 
     def get_stats(
         self, property: str, divide_by_atoms: bool, remove_atomref: bool

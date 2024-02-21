@@ -4,6 +4,7 @@ import pytorch_lightning as pl
 import schnetpack as spk
 import torch
 from schnetpack.model.base import AtomisticModel
+from schnetpack.task import UnsupervisedModelOutput
 from torch import nn
 
 
@@ -34,6 +35,22 @@ class AtomisticTaskFixed(spk.task.AtomisticTask):
         self.lr = optimizer_args["lr"]
         self.warmup_steps = warmup_steps
         self.save_hyperparameters(ignore=["model"])
+
+    def predict_step(self, batch, batch_idx):
+        torch.set_grad_enabled(self.grad_enabled)
+
+        targets = {
+            output.target_property: batch[output.target_property]
+            for output in self.outputs
+            if not isinstance(output, UnsupervisedModelOutput)
+        }
+        try:
+            targets["considered_atoms"] = batch["considered_atoms"]
+        except:
+            pass
+        pred = self.predict_without_postprocessing(batch)
+        pred, targets = self.apply_constraints(pred, targets)
+        return pred
 
     def on_save_checkpoint(self, checkpoint: Dict[str, Any]) -> None:
         # reshape model.postprocessors (AddOffsets)
