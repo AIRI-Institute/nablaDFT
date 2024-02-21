@@ -456,7 +456,7 @@ class Graphormer3DLightning(pl.LightningModule):
         return loss
 
     def predict_step(self, data, **kwargs):
-        energy_out, forces_out = self(data)
+        energy_out, forces_out, _ = self(data)
         return energy_out, forces_out
 
     def configure_optimizers(self):
