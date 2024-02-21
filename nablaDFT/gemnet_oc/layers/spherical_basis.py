@@ -51,9 +51,7 @@ class CircularBasisLayer(torch.nn.Module):
                 start=-1, stop=1, num_gaussians=num_spherical, **cbf_hparams
             )
         elif cbf_name == "spherical_harmonics":
-            self.cosφ_basis = get_sph_harm_basis(
-                num_spherical, zero_m_only=True
-            )
+            self.cosφ_basis = get_sph_harm_basis(num_spherical, zero_m_only=True)
         else:
             raise ValueError(f"Unknown cosine basis function '{cbf_name}'.")
 
@@ -105,14 +103,10 @@ class SphericalBasisLayer(torch.nn.Module):
         del sbf_hparams["name"]
 
         if sbf_name == "spherical_harmonics":
-            self.spherical_basis = get_sph_harm_basis(
-                num_spherical, zero_m_only=False
-            )
+            self.spherical_basis = get_sph_harm_basis(num_spherical, zero_m_only=False)
 
         elif sbf_name == "legendre_outer":
-            circular_basis = get_sph_harm_basis(
-                num_spherical, zero_m_only=True
-            )
+            circular_basis = get_sph_harm_basis(num_spherical, zero_m_only=True)
             self.spherical_basis = lambda cosφ, ϑ: (
                 circular_basis(cosφ)[:, :, None]
                 * circular_basis(torch.cos(ϑ))[:, None, :]

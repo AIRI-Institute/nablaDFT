@@ -1,0 +1,21 @@
+# Dataset config for ASE nablaDFT
+_target_: nablaDFT.dataset.NablaDFT
+
+type_of_nn: ASE
+datapath: ./datasets/nablaDFT/test/raw
+dataset_name: ${dataset_name}
+data_workdir: ./spk_logs
+train_ratio: 0.0
+val_ratio: 0.0
+test_ratio: 1.0
+batch_size: 32
+num_workers: 8
+split_file: ${.datapath}/${dataset_name}_split.npz
+# define split strategy
+splitting:
+  _target_: nablaDFT.dataset.split.TestSplit
+
+test_transforms:
+  - _target_: schnetpack.transform.ASENeighborList
+    cutoff: 5
+  - _target_: schnetpack.transform.CastTo32

@@ -6,6 +6,7 @@ import torch
 import torch.nn as nn
 from torch.optim.lr_scheduler import LRScheduler
 from torch.optim import Optimizer
+from torch_geometric.data import Data
 
 from torch_geometric.nn import radius_graph
 
@@ -39,14 +40,10 @@ from .transformer_block import (
 
 # Statistics of nablaDFT train 100K
 _AVG_NUM_NODES = 39.65745326960467
-_AVG_DEGREE = (
-    19.16009564536883 
-)
+_AVG_DEGREE = 19.16009564536883
 
-from nablaDFT.gemnet_oc.utils import (
-    radius_graph_pbc,
-    compute_neighbors
-)
+from nablaDFT.gemnet_oc.utils import radius_graph_pbc, compute_neighbors
+
 
 class EquiformerV2_OC20(nn.Module):
     """
@@ -154,9 +151,7 @@ class EquiformerV2_OC20(nn.Module):
         import sys
 
         if "e3nn" not in sys.modules:
-            logging.error(
-                "You need to install e3nn==0.4.4 to use EquiformerV2."
-            )
+            logging.error("You need to install e3nn==0.4.4 to use EquiformerV2.")
             raise ImportError
 
         self.use_pbc = use_pbc
@@ -224,9 +219,7 @@ class EquiformerV2_OC20(nn.Module):
 
         self.grad_forces = False
         self.num_resolutions: int = len(self.lmax_list)
-        self.sphere_channels_all: int = (
-            self.num_resolutions * self.sphere_channels
-        )
+        self.sphere_channels_all: int = self.num_resolutions * self.sphere_channels
 
         # Weights for message initialization
         self.sphere_embedding = nn.Embedding(
@@ -273,9 +266,7 @@ class EquiformerV2_OC20(nn.Module):
             self.SO3_rotation.append(SO3_Rotation(self.lmax_list[i]))
 
         # Initialize conversion between degree l and order m layouts
-        self.mappingReduced = CoefficientMappingModule(
-            self.lmax_list, self.mmax_list
-        )
+        self.mappingReduced = CoefficientMappingModule(self.lmax_list, self.mmax_list)
 
         # Initialize the transformations between spherical and grid representations
         self.SO3_grid = ModuleListInfo(
@@ -393,8 +384,6 @@ class EquiformerV2_OC20(nn.Module):
         self.apply(self._init_weights)
         self.apply(self._uniform_init_rad_func_linear_weights)
 
-
-
     def _generate_graph(
         self,
         data,
@@ -413,9 +402,7 @@ class EquiformerV2_OC20(nn.Module):
             pass
         elif hasattr(self, "enforce_max_neighbors_strictly"):
             # Not all models will have this attribute
-            enforce_max_neighbors_strictly = (
-                self.enforce_max_neighbors_strictly
-            )
+            enforce_max_neighbors_strictly = self.enforce_max_neighbors_strictly
         else:
             # Default to old behavior
             enforce_max_neighbors_strictly = True
@@ -470,9 +457,7 @@ class EquiformerV2_OC20(nn.Module):
             distance_vec = data.pos[j] - data.pos[i]
 
             edge_dist = distance_vec.norm(dim=-1)
-            cell_offsets = torch.zeros(
-                edge_index.shape[1], 3, device=data.pos.device
-            )
+            cell_offsets = torch.zeros(edge_index.shape[1], 3, device=data.pos.device)
             cell_offset_distances = torch.zeros_like(
                 cell_offsets, device=data.pos.device
             )
@@ -488,7 +473,7 @@ class EquiformerV2_OC20(nn.Module):
         )
 
     @torch.enable_grad()
-    def forward(self, data):
+    def forward(self, data: Data):
         self.dtype = data.pos.dtype
         self.device = data.pos.device
 
@@ -512,9 +497,7 @@ class EquiformerV2_OC20(nn.Module):
         ###############################################################
 
         # Compute 3x3 rotation matrix per edge
-        edge_rot_mat = self._init_edge_rot_mat(
-            data, edge_index, edge_distance_vec
-        )
+        edge_rot_mat = self._init_edge_rot_mat(data, edge_index, edge_distance_vec)
 
         # Initialize the WignerD matrices and other values for spherical harmonic calculations
         for i in range(self.num_resolutions):
@@ -539,25 +522,19 @@ class EquiformerV2_OC20(nn.Module):
         # Initialize the l = 0, m = 0 coefficients for each resolution
         for i in range(self.num_resolutions):
             if self.num_resolutions == 1:
-                x.embedding[:, offset_res, :] = self.sphere_embedding(
-                    atomic_numbers
-                )
+                x.embedding[:, offset_res, :] = self.sphere_embedding(atomic_numbers)
             else:
-                x.embedding[:, offset_res, :] = self.sphere_embedding(
-                    atomic_numbers
-                )[:, offset : offset + self.sphere_channels]
+                x.embedding[:, offset_res, :] = self.sphere_embedding(atomic_numbers)[
+                    :, offset : offset + self.sphere_channels
+                ]
             offset = offset + self.sphere_channels
             offset_res = offset_res + int((self.lmax_list[i] + 1) ** 2)
 
         # Edge encoding (distance and atom edge)
         edge_distance = self.distance_expansion(edge_distance)
         if self.share_atom_edge_embedding and self.use_atom_edge_embedding:
-            source_element = atomic_numbers[
-                edge_index[0]
-            ]  # Source atom atomic number
-            target_element = atomic_numbers[
-                edge_index[1]
-            ]  # Target atom atomic number
+            source_element = atomic_numbers[edge_index[0]]  # Source atom atomic number
+            target_element = atomic_numbers[edge_index[1]]  # Target atom atomic number
             source_embedding = self.source_embedding(source_element)
             target_embedding = self.target_embedding(target_element)
             edge_distance = torch.cat(
@@ -626,9 +603,7 @@ class EquiformerV2_OC20(nn.Module):
         # Force estimation
         ###############################################################
         if self.regress_forces:
-            forces = self.force_block(
-                x, atomic_numbers, edge_distance, edge_index
-            )
+            forces = self.force_block(x, atomic_numbers, edge_distance, edge_index)
             forces = forces.embedding.narrow(1, 1, 3)
             forces = forces.view(-1, 3)
 
@@ -678,15 +653,9 @@ class EquiformerV2_OC20(nn.Module):
                 or isinstance(module, SO3_LinearV2)
                 or isinstance(module, torch.nn.LayerNorm)
                 or isinstance(module, EquivariantLayerNormArray)
-                or isinstance(
-                    module, EquivariantLayerNormArraySphericalHarmonics
-                )
-                or isinstance(
-                    module, EquivariantRMSNormArraySphericalHarmonics
-                )
-                or isinstance(
-                    module, EquivariantRMSNormArraySphericalHarmonicsV2
-                )
+                or isinstance(module, EquivariantLayerNormArraySphericalHarmonics)
+                or isinstance(module, EquivariantRMSNormArraySphericalHarmonics)
+                or isinstance(module, EquivariantRMSNormArraySphericalHarmonicsV2)
                 or isinstance(module, GaussianRadialBasisLayer)
             ):
                 for parameter_name, _ in module.named_parameters():
@@ -711,20 +680,18 @@ class EquiformerV2_OC20_Lightning(pl.LightningModule):
         losses: Dict,
         ema,
         metric,
-        loss_coefs
+        loss_coefs,
     ) -> None:
         super(EquiformerV2_OC20_Lightning, self).__init__()
         self.ema = ema
         self.net = net
         self.save_hyperparameters(logger=True, ignore=["net", "ema"])
 
-    def forward(self, data):
+    def forward(self, data: Data):
         energy, forces = self.net(data)
         return energy, forces
 
-    def step(
-        self, batch, calculate_metrics: bool = False
-    ):
+    def step(self, batch, calculate_metrics: bool = False):
         bsz = batch.batch.max().detach().item() + 1  # get batch size
         y = batch.y
         # make dense batch from PyG batch
@@ -838,7 +805,9 @@ class EquiformerV2_OC20_Lightning(pl.LightningModule):
     def _calculate_loss(self, y_pred, y_true) -> float:
         total_loss = 0.0
         for name, loss in self.hparams.losses.items():
-            total_loss += self.hparams.loss_coefs[name] * loss(y_pred[name], y_true[name])
+            total_loss += self.hparams.loss_coefs[name] * loss(
+                y_pred[name], y_true[name]
+            )
         return total_loss
 
     def _calculate_metrics(self, y_pred, y_true) -> Dict:

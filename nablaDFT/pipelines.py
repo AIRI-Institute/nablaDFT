@@ -45,7 +45,7 @@ def run(config: DictConfig):
     # Datamodule
     datamodule: LightningDataModule = hydra.utils.instantiate(config.datamodule)
 
-    if job_type == 'train':
+    if job_type == "train":
         trainer.fit(model=model, datamodule=datamodule.dataset, ckpt_path=ckpt_path)
     else:
         trainer.test(model=model, datamodule=datamodule.dataset, ckpt_path=ckpt_path)

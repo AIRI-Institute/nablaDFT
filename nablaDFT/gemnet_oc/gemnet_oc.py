@@ -9,6 +9,7 @@ from torch.optim import Optimizer
 from torch.optim.lr_scheduler import LRScheduler
 from torch_scatter import segment_coo, scatter
 from torch_geometric.nn import radius_graph
+from torch_geometric.data import Data
 import pytorch_lightning as pl
 
 from .initializers import get_initializer
@@ -36,7 +37,7 @@ from .utils import (
     load_scales_compat,
     radius_graph_pbc,
     get_pbc_distances,
-    compute_neighbors
+    compute_neighbors,
 )
 
 
@@ -339,9 +340,7 @@ class GemNetOC(nn.Module):
             for _ in range(num_global_out_layers)
         ]
         self.out_mlp_E = torch.nn.Sequential(*out_mlp_E)
-        self.out_energy = Dense(
-            emb_size_atom, num_targets, bias=False, activation=None
-        )
+        self.out_energy = Dense(emb_size_atom, num_targets, bias=False, activation=None)
         if direct_forces:
             out_mlp_F = [
                 Dense(
@@ -541,9 +540,7 @@ class GemNetOC(nn.Module):
                 activation=None,
                 bias=False,
             )
-            self.mlp_cbf_qint = BasisEmbedding(
-                num_radial, emb_size_cbf, num_spherical
-            )
+            self.mlp_cbf_qint = BasisEmbedding(num_radial, emb_size_cbf, num_spherical)
             self.mlp_sbf_qint = BasisEmbedding(
                 num_radial, emb_size_sbf, num_spherical**2
             )
@@ -555,9 +552,7 @@ class GemNetOC(nn.Module):
                 activation=None,
                 bias=False,
             )
-            self.mlp_cbf_aeint = BasisEmbedding(
-                num_radial, emb_size_cbf, num_spherical
-            )
+            self.mlp_cbf_aeint = BasisEmbedding(num_radial, emb_size_cbf, num_spherical)
         if self.edge_atom_interaction:
             self.mlp_rbf_eaint = Dense(
                 num_radial,
@@ -565,9 +560,7 @@ class GemNetOC(nn.Module):
                 activation=None,
                 bias=False,
             )
-            self.mlp_cbf_eaint = BasisEmbedding(
-                num_radial, emb_size_cbf, num_spherical
-            )
+            self.mlp_cbf_eaint = BasisEmbedding(num_radial, emb_size_cbf, num_spherical)
         if self.atom_interaction:
             self.mlp_rbf_aint = BasisEmbedding(num_radial, emb_size_rbf)
 
@@ -577,9 +570,7 @@ class GemNetOC(nn.Module):
             activation=None,
             bias=False,
         )
-        self.mlp_cbf_tint = BasisEmbedding(
-            num_radial, emb_size_cbf, num_spherical
-        )
+        self.mlp_cbf_tint = BasisEmbedding(num_radial, emb_size_cbf, num_spherical)
 
         # Share the dense Layer of the atom embedding block accross the interaction blocks
         self.mlp_rbf_h = Dense(
@@ -741,10 +732,7 @@ class GemNetOC(nn.Module):
         # Distinguish edges between the same (periodic) atom by ordering the cells
         cell_earlier = (
             (graph["cell_offset"][:, 0] < 0)
-            | (
-                (graph["cell_offset"][:, 0] == 0)
-                & (graph["cell_offset"][:, 1] < 0)
-            )
+            | ((graph["cell_offset"][:, 0] == 0) & (graph["cell_offset"][:, 1] < 0))
             | (
                 (graph["cell_offset"][:, 0] == 0)
                 & (graph["cell_offset"][:, 1] == 0)
@@ -756,9 +744,9 @@ class GemNetOC(nn.Module):
         mask = mask_sep_atoms | mask_same_atoms
 
         # Mask out counter-edges
-        edge_index_directed = graph["edge_index"][
-            mask[None, :].expand(2, -1)
-        ].view(2, -1)
+        edge_index_directed = graph["edge_index"][mask[None, :].expand(2, -1)].view(
+            2, -1
+        )
 
         # Concatenate counter-edges after normal edges
         edge_index_cat = torch.cat(
@@ -946,7 +934,7 @@ class GemNetOC(nn.Module):
         )
 
     def get_graphs_and_indices(self, data):
-        """ Generate embedding and interaction graphs and indices."""
+        """Generate embedding and interaction graphs and indices."""
         num_atoms = data.z.size(0)
 
         # Atom interaction graph is always the largest
@@ -975,9 +963,7 @@ class GemNetOC(nn.Module):
                 self.max_neighbors_aint,
             )
         else:
-            main_graph = self.generate_graph_dict(
-                data, self.cutoff, self.max_neighbors
-            )
+            main_graph = self.generate_graph_dict(data, self.cutoff, self.max_neighbors)
             a2a_graph = {}
             a2ee2a_graph = {}
         if self.quad_interaction:
@@ -1104,9 +1090,7 @@ class GemNetOC(nn.Module):
                 angle_cabd,
             )
         if self.atom_edge_interaction:
-            basis_rad_a2ee2a_raw = self.radial_basis_aeaint(
-                a2ee2a_graph["distance"]
-            )
+            basis_rad_a2ee2a_raw = self.radial_basis_aeaint(a2ee2a_graph["distance"])
             cosφ_cab_a2e = inner_product_clamped(
                 main_graph["vector"][trip_idx_a2e["out"]],
                 a2ee2a_graph["vector"][trip_idx_a2e["in"]],
@@ -1195,7 +1179,7 @@ class GemNetOC(nn.Module):
             basis_a2a_rad,
         )
 
-    def forward(self, data):
+    def forward(self, data: Data):
         pos = data.pos
         batch = data.batch
         atomic_numbers = data.z.long()
@@ -1353,9 +1337,7 @@ class GemNetOC(nn.Module):
             pass
         elif hasattr(self, "enforce_max_neighbors_strictly"):
             # Not all models will have this attribute
-            enforce_max_neighbors_strictly = (
-                self.enforce_max_neighbors_strictly
-            )
+            enforce_max_neighbors_strictly = self.enforce_max_neighbors_strictly
         else:
             # Default to old behavior
             enforce_max_neighbors_strictly = True
@@ -1410,9 +1392,7 @@ class GemNetOC(nn.Module):
             distance_vec = data.pos[j] - data.pos[i]
 
             edge_dist = distance_vec.norm(dim=-1)
-            cell_offsets = torch.zeros(
-                edge_index.shape[1], 3, device=data.pos.device
-            )
+            cell_offsets = torch.zeros(edge_index.shape[1], 3, device=data.pos.device)
             cell_offset_distances = torch.zeros_like(
                 cell_offsets, device=data.pos.device
             )
@@ -1438,23 +1418,18 @@ class GemNetOCLightning(pl.LightningModule):
         losses: Dict,
         ema,
         metric,
-        loss_coefs
+        loss_coefs,
     ) -> None:
         super(GemNetOCLightning, self).__init__()
         self.ema = ema
         self.net = net
         self.save_hyperparameters(logger=True, ignore=["net", "ema"])
 
-    def forward(self, data):
+    def forward(self, data: Data):
         energy, forces = self.net(data)
         return energy, forces
 
-    def step(
-        self, batch, calculate_metrics: bool = False
-    ):
-        bsz = batch.batch.max().detach().item() + 1  # get batch size
-        y = batch.y
-        # make dense batch from PyG batch
+    def step(self, batch, calculate_metrics: bool = False):
         energy_out, forces_out = self.net(batch)
         # TODO: temp workaround
         if hasattr(batch, "forces"):
@@ -1462,7 +1437,7 @@ class GemNetOCLightning(pl.LightningModule):
         else:
             forces = forces_out.clone()
         preds = {"energy": energy_out, "forces": forces_out}
-        target = {"energy": y, "forces": forces}
+        target = {"energy": batch.y, "forces": forces}
         loss = self._calculate_loss(preds, target)
         if calculate_metrics:
             metrics = self._calculate_metrics(preds, target)
@@ -1565,7 +1540,9 @@ class GemNetOCLightning(pl.LightningModule):
     def _calculate_loss(self, y_pred, y_true) -> float:
         total_loss = 0.0
         for name, loss in self.hparams.losses.items():
-            total_loss += self.hparams.loss_coefs[name] * loss(y_pred[name], y_true[name])
+            total_loss += self.hparams.loss_coefs[name] * loss(
+                y_pred[name], y_true[name]
+            )
         return total_loss
 
     def _calculate_metrics(self, y_pred, y_true) -> Dict:

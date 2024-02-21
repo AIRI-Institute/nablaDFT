@@ -1,6 +1,5 @@
 import json
 import os
-import sys
 from typing import Optional, List
 from urllib import request as request
 
@@ -11,7 +10,6 @@ from torch.utils.data import Subset
 from torch_geometric.data.lightning import LightningDataset
 from torch_geometric.data import InMemoryDataset, Data
 from schnetpack.data import AtomsDataFormat, AtomsDataModule, load_dataset
-import schnetpack.transform as trn
 import nablaDFT
 
 
@@ -27,11 +25,11 @@ class ASENablaDFT(AtomsDataModule):
         data_workdir: Optional[str] = "logs",
         batch_size: int = 2000,
         train_ratio: float = 0.9,
-        transforms: Optional[List[torch.nn.Module]] = [
-            trn.ASENeighborList(cutoff=5.0),
-            trn.RemoveOffsets("energy", remove_mean=True, remove_atomrefs=False),
-            trn.CastTo32(),
-        ],
+        val_ratio: float = 0.1,
+        test_ratio: float = 0.0,
+        train_transforms=None,
+        val_transforms=None,
+        test_transforms=None,
         format: Optional[AtomsDataFormat] = AtomsDataFormat.ASE,
         **kwargs,
     ):
@@ -39,45 +37,52 @@ class ASENablaDFT(AtomsDataModule):
             datapath=datapath,
             data_workdir=data_workdir,
             batch_size=batch_size,
-            transforms=transforms,
+            train_transforms=train_transforms,
+            val_transforms=val_transforms,
+            test_transforms=test_transforms,
             format=format,
             **kwargs,
         )
         self.dataset_name = dataset_name
         self.train_ratio = train_ratio
+        self.val_ratio = val_ratio
+        self.test_ratio = test_ratio
 
     def prepare_data(self):
         datapath_with_no_suffix = os.path.splitext(self.datapath)[0]
         suffix = os.path.splitext(self.datapath)[1]
         if not os.path.exists(datapath_with_no_suffix):
             os.makedirs(datapath_with_no_suffix)
-        with open(nablaDFT.__path__[0] + "/links/energy_databases.json") as f:
+        with open(nablaDFT.__path__[0] + "/links/energy_databases_v2.json") as f:
             data = json.load(f)
             if self.train_ratio != 0:
                 url = data["train_databases"][self.dataset_name]
             else:
                 url = data["test_databases"][self.dataset_name]
         self.datapath = datapath_with_no_suffix + "/" + self.dataset_name + suffix
-        request.urlretrieve(url, self.datapath)
+        if not os.path.exists(self.datapath):  # skip if already downloaded
+            request.urlretrieve(url, self.datapath)
         with connect(self.datapath) as ase_db:
             if not ase_db.metadata:
                 atomrefs = np.load(
                     nablaDFT.__path__[0] + "/data/atomization_energies.npy"
                 )
                 ase_db.metadata = {
-                    "_distance_unit": "Bohr",
-                    "_property_unit_dict": {"energy": "Hartree"},
+                    "_distance_unit": "Ang",
+                    "_property_unit_dict": {
+                        "energy": "Hartree",
+                        "forces": "Hartree/Ang",
+                    },
                     "atomrefs": {"energy": list(atomrefs)},
                 }
             dataset_length = len(ase_db)
             self.num_train = int(dataset_length * self.train_ratio)
-            self.num_val = int(dataset_length * (1 - self.train_ratio))
-            if self.num_val == 0:
+            self.num_val = int(dataset_length * self.val_ratio)
+            self.num_test = int(dataset_length * self.test_ratio)
+            # see AtomsDataModule._load_partitions() for details
+            if not self.num_train and not self.num_val:
                 self.num_val = -1
-                self.num_test = 0
-            if self.num_train == 0:
                 self.num_train = -1
-                self.num_test = 0
         self.dataset = load_dataset(self.datapath, self.format)
 
 
@@ -126,7 +131,7 @@ class PyGNablaDFT(InMemoryDataset):
 
     @property
     def raw_file_names(self) -> List[str]:
-        return [os.path.join(self.datapath, self.dataset_name + self.db_suffix)]
+        return [(self.dataset_name + self.db_suffix)]
 
     @property
     def processed_file_names(self) -> str:
@@ -172,10 +177,10 @@ class PyGNablaDFT(InMemoryDataset):
         with open(nablaDFT.__path__[0] + "/links/energy_databases_v2.json", "r") as f:
             data = json.load(f)
             url = data[f"{self.split}_databases"][self.dataset_name]
-        request.urlretrieve(url, self.raw_file_names[0])
+        request.urlretrieve(url, self.raw_paths[0])
 
     def process(self) -> None:
-        db = connect(self.raw_file_names[0])
+        db = connect(self.raw_paths[0])
         samples = []
         for db_row in db.select():
             z = torch.from_numpy(db_row.numbers).long()

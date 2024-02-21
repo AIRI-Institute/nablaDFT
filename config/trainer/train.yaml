@@ -1,14 +1,15 @@
 _target_: pytorch_lightning.Trainer
 
 deterministic: True
-accelerator: "cpu"
-devices: 1
+accelerator: "gpu"
+devices: [0]
 strategy:
   _target_: pytorch_lightning.strategies.ddp.DDPStrategy
 
 max_steps: ${max_steps}
 
-gradient_clip_algorithm: norm
-gradient_clip_val: 5.0
+# example of additional arguments for trainer
+# gradient_clip_algorithm: norm
+# gradient_clip_val: 5.0
 
 log_every_n_steps: 10

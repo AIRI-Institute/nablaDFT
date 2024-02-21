@@ -1,15 +1,10 @@
+from typing import Dict, Union, Tuple, Any, Optional, Type
+
 import torch
-import numpy as np
-import pytorch_lightning as pl
-
-from collections import defaultdict
-from typing import Callable, Dict, Union, Tuple, Any, Optional, List, Type
-
 from torch import nn
-from torch.nn import functional as F
-from torch_geometric.utils import to_dense_batch
+import pytorch_lightning as pl
 from torch_geometric.nn.models import DimeNetPlusPlus
-import torchmetrics
+from torch_geometric.data import Data
 
 
 def swish(x):
@@ -26,25 +21,24 @@ class Swish(torch.nn.Module):
 
 class DimeNetPlusPlusPotential(nn.Module):
     def __init__(
-            self, 
-            node_latent_dim: int,
-            scaler=None,
-            dimenet_hidden_channels=128,
-            dimenet_num_blocks=4,
-            dimenet_int_emb_size=64,
-            dimenet_basis_emb_size=8,
-            dimenet_out_emb_channels=256,
-            dimenet_num_spherical=7,
-            dimenet_num_radial=6,
-            dimenet_max_num_neighbors=32,
-            dimenet_envelope_exponent=5,
-            dimenet_num_before_skip=1,
-            dimenet_num_after_skip=2,
-            dimenet_num_output_layers=3,
-            cutoff=5.0,
-            do_postprocessing=False
-        ):
-        
+        self,
+        node_latent_dim: int,
+        scaler=None,
+        dimenet_hidden_channels=128,
+        dimenet_num_blocks=4,
+        dimenet_int_emb_size=64,
+        dimenet_basis_emb_size=8,
+        dimenet_out_emb_channels=256,
+        dimenet_num_spherical=7,
+        dimenet_num_radial=6,
+        dimenet_max_num_neighbors=32,
+        dimenet_envelope_exponent=5,
+        dimenet_num_before_skip=1,
+        dimenet_num_after_skip=2,
+        dimenet_num_output_layers=3,
+        cutoff=5.0,
+        do_postprocessing=False,
+    ):
         super().__init__()
 
         self.node_latent_dim = node_latent_dim
@@ -61,11 +55,12 @@ class DimeNetPlusPlusPotential(nn.Module):
         self.dimenet_num_after_skip = dimenet_num_after_skip
         self.dimenet_num_output_layers = dimenet_num_output_layers
         self.cutoff = cutoff
-        
+
         self.linear_output_size = 1
 
         self.scaler = scaler
-        
+        self.do_postprocessing = do_postprocessing
+
         self.net = DimeNetPlusPlus(
             hidden_channels=self.dimenet_hidden_channels,
             out_channels=self.node_latent_dim,
@@ -82,7 +77,6 @@ class DimeNetPlusPlusPotential(nn.Module):
             num_after_skip=self.dimenet_num_after_skip,
             num_output_layers=self.dimenet_num_output_layers,
         )
-       
 
         regr_or_cls_input_dim = self.node_latent_dim
         self.regr_or_cls_nn = nn.Sequential(
@@ -94,45 +88,42 @@ class DimeNetPlusPlusPotential(nn.Module):
             Swish(),
             nn.Linear(regr_or_cls_input_dim // 2, self.linear_output_size),
         )
-            
+
     @torch.enable_grad()
-    def forward(self, pos, atom_z, batch_mapping):
+    def forward(self, data: Data):
+        pos, atom_z, batch_mapping = data.pos, data.z, data.batch
         pos = pos.requires_grad_(True)
         graph_embeddings = self.net(pos=pos, z=atom_z, batch=batch_mapping)
-        
         predictions = torch.flatten(self.regr_or_cls_nn(graph_embeddings).contiguous())
         forces = -1 * (
-                    torch.autograd.grad(
-                        predictions,
-                        pos,
-                        grad_outputs=torch.ones_like(predictions),
-                        create_graph=self.training,
-                    )[0]
-                )
+            torch.autograd.grad(
+                predictions,
+                pos,
+                grad_outputs=torch.ones_like(predictions),
+                create_graph=self.training,
+            )[0]
+        )
 
         if self.scaler and self.do_postprocessing:
             predictions = self.scaler["scale_"] * predictions + self.scaler["mean_"]
         return predictions, forces
-    
-    
 
 
 class DimeNetPlusPlusLightning(pl.LightningModule):
     def __init__(
-            self,
-            net: nn.Module,
-            loss,
-            metric,
-            energy_loss_coef: float,
-            forces_loss_coef: float,
-            monitor_loss: str="val/loss",
-            model_name: str=None,
-            lr_scheduler: Optional[Type] = None,
-            scheduler_args: Optional[Dict[str, Any]] = None,
-            optimizer: Optional[Type] = None,
+        self,
+        net: nn.Module,
+        loss,
+        metric,
+        energy_loss_coef: float,
+        forces_loss_coef: float,
+        monitor_loss: str = "val/loss",
+        model_name: str = None,
+        lr_scheduler: Optional[Type] = None,
+        scheduler_args: Optional[Dict[str, Any]] = None,
+        optimizer: Optional[Type] = None,
+    ):
 
-        ):
-        
         super().__init__()
         self.save_hyperparameters(logger=True, ignore=["net", "loss"])
 
@@ -144,47 +135,30 @@ class DimeNetPlusPlusLightning(pl.LightningModule):
         self.loss_energy_coef = energy_loss_coef
         self.loss_forces_coef = forces_loss_coef
 
-    def forward(self, pos, atom_z, batch_mapping):
-        return self.net(pos, atom_z, batch_mapping)
-
-
-    def configure_optimizers(self):
-        opt = self.hparams.optimizer(self.parameters())
-        if self.hparams.lr_scheduler is not None:
-            scheduler = self.hparams.lr_scheduler(optimizer=opt, **self.scheduler_args)
-        else:
-            scheduler = None
-        return {
-            'optimizer': opt,
-            'monitor': self.monitor_loss,
-            'lr_scheduler': scheduler
-        }
+    def forward(self, data: Data):
+        return self.net(data)
 
     def step(
         self, batch, calculate_metrics: bool = False
     ) -> Union[Tuple[Any, Dict], Any]:
-        pos, y, atom_z, batch_mapping = batch.pos, batch.y, batch.z, batch.batch
-        predictions_energy, predictions_forces = self.forward(pos, atom_z, batch_mapping)
-        loss_energy = self.loss(predictions_energy, y)
+        predictions_energy, predictions_forces = self.forward(batch)
+        loss_energy = self.loss(predictions_energy, batch.y)
         # TODO: temp workaround
         if hasattr(batch, "forces"):
-            forces = batch.forces
-            loss_forces = self.loss(predictions_forces, forces)
+            loss_forces = self.loss(predictions_forces, batch.forces)
         else:
             loss_forces = torch.zeros(1).to(self.device)
             predictions_forces = torch.zeros(1).to(self.device)
             forces = torch.zeros(1).to(self.device)
-        
         loss = self.loss_forces_coef * loss_forces + self.loss_energy_coef * loss_energy
         if calculate_metrics:
             preds = {"energy": predictions_energy, "forces": predictions_forces}
-            target = {"energy": y, "forces": forces}
+            target = {"energy": batch.y, "forces": batch.forces}
             metrics = self._calculate_metrics(preds, target)
             return loss, metrics
         return loss
 
-
-    def training_step(self, batch: torch.Tensor, batch_idx: int):
+    def training_step(self, batch, batch_idx: int):
         bsz = self._get_batch_size(batch)
         loss = self.step(batch, calculate_metrics=False)
         self.log(
@@ -198,8 +172,7 @@ class DimeNetPlusPlusLightning(pl.LightningModule):
         )
         return loss
 
-
-    def validation_step(self, batch: torch.Tensor, batch_idx: int):
+    def validation_step(self, batch, batch_idx: int):
         bsz = self._get_batch_size(batch)
         loss, metrics = self.step(batch, calculate_metrics=True)
         self._log_current_lr()
@@ -225,10 +198,10 @@ class DimeNetPlusPlusLightning(pl.LightningModule):
         )
         return loss
 
-
-    def test_step(self, batch: torch.Tensor, batch_idx: int):
+    def test_step(self, batch, batch_idx: int):
         bsz = self._get_batch_size(batch)
-        loss, metrics = self.step(batch, calculate_metrics=True)
+        with torch.enable_grad():
+            loss, metrics = self.step(batch, calculate_metrics=True)
         self.log(
             "test/loss",
             loss,
@@ -241,10 +214,22 @@ class DimeNetPlusPlusLightning(pl.LightningModule):
         )
         return loss
 
-    def _calculate_metrics(self, y_pred, y_true) -> Dict:
-        """Function for metrics calculation during step."""
-        metric = self.hparams.metric(y_pred, y_true)
-        return metric
+    def predict_step(self, batch):
+        with torch.enable_grad():
+            predictions = self(batch)
+        return predictions
+
+    def configure_optimizers(self):
+        opt = self.hparams.optimizer(self.parameters())
+        if self.hparams.lr_scheduler is not None:
+            scheduler = self.hparams.lr_scheduler(optimizer=opt, **self.scheduler_args)
+        else:
+            scheduler = None
+        return {
+            "optimizer": opt,
+            "monitor": self.monitor_loss,
+            "lr_scheduler": scheduler,
+        }
 
     def on_fit_start(self) -> None:
         self._check_metrics_devices()
