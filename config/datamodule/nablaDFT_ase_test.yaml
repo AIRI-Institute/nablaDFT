@@ -2,6 +2,7 @@
 _target_: nablaDFT.dataset.NablaDFT
 
 type_of_nn: ASE
+split: ${job_type}
 datapath: ./datasets/nablaDFT/test/raw
 dataset_name: ${dataset_name}
 data_workdir: ./spk_logs
