@@ -12,9 +12,9 @@ from torch_geometric.data import InMemoryDataset, Data
 from schnetpack.data import AtomsDataFormat, load_dataset
 
 import nablaDFT
-from nablaDFT.dataset.atoms_datamodule import AtomsDataModule
+from .atoms_datamodule import AtomsDataModule
 
-from nablaDFT.dataset import HamiltonianDatabase, HamiltonianDataset
+from .hamiltonian_dataset import HamiltonianDatabase, HamiltonianDataset
 
 
 class ASENablaDFT(AtomsDataModule):
@@ -108,10 +108,6 @@ class HamiltonianNablaDFT(HamiltonianDataset):
         with open(nablaDFT.__path__[0] + "/links/hamiltonian_databases.json") as f:
                 data = json.load(f)
                 url = data["train_databases"][dataset_name]
-        # f = open(nablaDFT.__path__[0] + "/links/hamiltonian_databases.json")
-        # data = json.load(f)
-        # url = data["train_databases"][dataset_name]
-        # f.close()
         filepath = datapath + "/" + dataset_name + ".db"
         if not os.path.exists(filepath):
             request.urlretrieve(url, filepath)
