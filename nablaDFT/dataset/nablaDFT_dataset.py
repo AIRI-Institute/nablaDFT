@@ -9,8 +9,11 @@ from ase.db import connect
 from torch.utils.data import Subset
 from torch_geometric.data.lightning import LightningDataset
 from torch_geometric.data import InMemoryDataset, Data
-from schnetpack.data import AtomsDataFormat, AtomsDataModule, load_dataset
+from schnetpack.data import AtomsDataFormat, load_dataset
+
 import nablaDFT
+from nablaDFT.dataset.atoms_datamodule import AtomsDataModule
+
 
 
 from nablaDFT.phisnet.training.hamiltonian_dataset import HamiltonianDataset
@@ -20,6 +23,7 @@ from nablaDFT.phisnet.training.sqlite_database import HamiltonianDatabase
 class ASENablaDFT(AtomsDataModule):
     def __init__(
         self,
+        split: str,
         dataset_name: str = "dataset_train_2k",
         datapath: str = "database",
         data_workdir: Optional[str] = "logs",
@@ -34,6 +38,7 @@ class ASENablaDFT(AtomsDataModule):
         **kwargs,
     ):
         super().__init__(
+            split=split,
             datapath=datapath,
             data_workdir=data_workdir,
             batch_size=batch_size,
@@ -53,15 +58,18 @@ class ASENablaDFT(AtomsDataModule):
         suffix = os.path.splitext(self.datapath)[1]
         if not os.path.exists(datapath_with_no_suffix):
             os.makedirs(datapath_with_no_suffix)
-        with open(nablaDFT.__path__[0] + "/links/energy_databases_v2.json") as f:
-            data = json.load(f)
-            if self.train_ratio != 0:
-                url = data["train_databases"][self.dataset_name]
-            else:
-                url = data["test_databases"][self.dataset_name]
         self.datapath = datapath_with_no_suffix + "/" + self.dataset_name + suffix
-        if not os.path.exists(self.datapath):  # skip if already downloaded
-            request.urlretrieve(url, self.datapath)
+        exists = os.path.exists(self.datapath)
+        if self.split == "predict" and not exists:
+            raise FileNotFoundError("Specified dataset not found")
+        elif self.split != "predict" and not exists:
+            with open(nablaDFT.__path__[0] + "/links/energy_databases_v2.json") as f:
+                data = json.load(f)
+                if self.train_ratio != 0:
+                    url = data["train_databases"][self.dataset_name]
+                else:
+                    url = data["test_databases"][self.dataset_name]
+                request.urlretrieve(url, self.datapath)
         with connect(self.datapath) as ase_db:
             if not ase_db.metadata:
                 atomrefs = np.load(
@@ -305,15 +313,22 @@ def get_PyG_nablaDFT_datasets(
         train_dataset = Subset(dataset, idx_train)
         val_dataset = Subset(dataset, idx_val)
         test_dataset = None
+        pred_dataset = None
     else:
         train_dataset = None
         val_dataset = None
-        test_dataset = dataset
+        if split == "predict":
+            pred_dataset = dataset
+            test_dataset = None
+        else:
+            test_dataset = dataset
+            pred_dataset = None
 
     pl_datamodule = LightningDataset(
         train_dataset=train_dataset,
         val_dataset=val_dataset,
         test_dataset=test_dataset,
+        pred_dataset=pred_dataset,
         batch_size=batch_size,
         num_workers=num_workers,
         pin_memory=True,
