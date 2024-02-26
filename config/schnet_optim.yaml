@@ -1,0 +1,19 @@
+name: SchNet
+dataset_name: dataset_train_2k
+job_type: optimize
+ckpt_path: null
+
+defaults:
+  - _self_
+  - model: schnet.yaml
+  - opt_task: batchwise.yaml
+
+
+# need this to set working dir as current dir
+hydra:
+  output_subdir: null
+  run:
+    dir: .
+original_work_dir: ${hydra:runtime.cwd}
+
+seed: 23
