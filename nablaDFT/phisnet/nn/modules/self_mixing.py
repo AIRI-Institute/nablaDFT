@@ -59,10 +59,12 @@ class SelfMixing(nn.Module):
     def forward(self, xs):
         # initialize output
         ys = [
-            self.keepcoeff(L) * xs[L]
-            if L <= self.order_in
-            else torch.zeros_like(xs[0]).repeat(
-                *(1,) * len(xs[0].shape[:-2]), 2 * L + 1, 1
+            (
+                self.keepcoeff(L) * xs[L]
+                if L <= self.order_in
+                else torch.zeros_like(xs[0]).repeat(
+                    *(1,) * len(xs[0].shape[:-2]), 2 * L + 1, 1
+                )
             )
             for L in range(self.order_out + 1)
         ]

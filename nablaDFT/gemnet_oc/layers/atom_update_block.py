@@ -43,14 +43,10 @@ class AtomUpdateBlock(torch.nn.Module):
     ) -> None:
         super().__init__()
 
-        self.dense_rbf = Dense(
-            emb_size_rbf, emb_size_edge, activation=None, bias=False
-        )
+        self.dense_rbf = Dense(emb_size_rbf, emb_size_edge, activation=None, bias=False)
         self.scale_sum = ScaleFactor()
 
-        self.layers = self.get_mlp(
-            emb_size_edge, emb_size_atom, nHidden, activation
-        )
+        self.layers = self.get_mlp(emb_size_edge, emb_size_atom, nHidden, activation)
 
     def get_mlp(self, units_in: int, units: int, nHidden: int, activation):
         if units_in != units:

@@ -19,9 +19,10 @@ net:
     cutoff: 5.0
 
     scaler:
-        scale_: 0.92169578585990574
-        mean_: -7.077253701315571
-    do_postprocessing: true
+        scale_: 0.870582896669776
+        mean_: -7.349405628928332
+    do_postprocessing: True
+
 
 monitor_loss: "val/loss"
 lr_scheduler: 

@@ -3,7 +3,6 @@
     for displaying more info.
 """
 
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -26,9 +25,7 @@ def drop_path(
     shape = (x.shape[0],) + (1,) * (
         x.ndim - 1
     )  # work with diff dim tensors, not just 2D ConvNets
-    random_tensor = keep_prob + torch.rand(
-        shape, dtype=x.dtype, device=x.device
-    )
+    random_tensor = keep_prob + torch.rand(shape, dtype=x.dtype, device=x.device)
     random_tensor.floor_()  # binarize
     output = x.div(keep_prob) * random_tensor
     return output
@@ -107,9 +104,7 @@ class EquivariantScalarsDropout(nn.Module):
             temp = x.narrow(-1, start_idx, mul * ir.dim)
             start_idx += mul * ir.dim
             if ir.is_scalar():
-                temp = F.dropout(
-                    temp, p=self.drop_prob, training=self.training
-                )
+                temp = F.dropout(temp, p=self.drop_prob, training=self.training)
             out.append(temp)
         out = torch.cat(out, dim=-1)
         return out
@@ -146,6 +141,4 @@ class EquivariantDropoutArraySphericalHarmonics(nn.Module):
         return out
 
     def extra_repr(self) -> str:
-        return "drop_prob={}, drop_graph={}".format(
-            self.drop_prob, self.drop_graph
-        )
+        return "drop_prob={}, drop_graph={}".format(self.drop_prob, self.drop_graph)

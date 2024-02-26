@@ -9,7 +9,7 @@ from tqdm import tqdm
 from nn import NeuralNetwork
 from train import empty_error_dict, compute_error_dict
 from training import parse_command_line_arguments
-from training.hamiltonian_dataset import HamiltonianDataset
+from nablaDFT.dataset import NablaDFT
 
 if __name__ == "__main__":
     logging.basicConfig()
@@ -49,10 +49,8 @@ if __name__ == "__main__":
     # ---------------- DATA ----------------
     # loaded = np.load(os.path.join(os.path.dirname(args.load_from), 'datasplits.npz'))
 
-    logging.info("Loading " + str(args.test_dataset) + "...")
-    test_dataset = HamiltonianDataset(
-        args.test_dataset, dtype=args.dtype, max_squares=20000
-    )
+    logging.info("Loading " + str(args.dataset_name) + " from " +str(args.datapath) +  "...")
+    dataset = NablaDFT("Hamiltonian", args.datapath, args.dataset_name)
     batch_size = args.valid_batch_size
 
     test_data_loader = torch.utils.data.DataLoader(

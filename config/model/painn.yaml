@@ -1,0 +1,63 @@
+_target_: nablaDFT.ase_model.task.AtomisticTaskFixed
+
+model_name: "PaiNN"
+model:
+  _target_: schnetpack.model.NeuralNetworkPotential
+  representation:
+    _target_: schnetpack.representation.PaiNN
+    n_interactions: 6
+    n_atom_basis: 128
+    radial_basis:
+      _target_: schnetpack.nn.radial.GaussianRBF
+      n_rbf: 100
+      cutoff: 5
+    cutoff_fn:
+      _target_: schnetpack.nn.cutoff.CosineCutoff
+      cutoff: 5
+  input_modules:
+    - _target_: schnetpack.atomistic.PairwiseDistances
+  output_modules:
+    - _target_: schnetpack.atomistic.Atomwise
+      n_in: 128
+      output_key: "energy"
+    - _target_: schnetpack.atomistic.Forces
+  postprocessors:
+    - _target_: schnetpack.transform.AddOffsets
+      property: "energy"
+      add_mean: True
+  do_postprocessing: True
+
+outputs:
+  - _target_: schnetpack.task.ModelOutput
+    name: "energy"
+    loss_fn:
+      _target_: torch.nn.MSELoss
+    loss_weight: 1
+    metrics:
+      MAE:
+        _target_: torchmetrics.MeanAbsoluteError
+  - _target_: schnetpack.task.ModelOutput
+    name: "forces"
+    loss_fn:
+      _target_: torch.nn.MSELoss
+    loss_weight: 1
+    metrics:
+      MAE:
+        _target_: torchmetrics.MeanAbsoluteError
+
+optimizer_cls:
+  _partial_: True
+  _target_: torch.optim.AdamW
+optimizer_args:
+  lr: 1e-4
+
+scheduler_cls:
+  _partial_: True
+  _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+scheduler_args:
+  factor: 0.8
+  patience: 10
+  min_lr: 1e-6
+scheduler_monitor: val_loss
+
+warmup_steps: ${warmup_steps}
