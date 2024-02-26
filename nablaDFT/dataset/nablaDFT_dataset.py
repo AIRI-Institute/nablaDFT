@@ -12,12 +12,9 @@ from torch_geometric.data import InMemoryDataset, Data
 from schnetpack.data import AtomsDataFormat, load_dataset
 
 import nablaDFT
-from nablaDFT.dataset.atoms_datamodule import AtomsDataModule
+from .atoms_datamodule import AtomsDataModule
 
-
-
-from nablaDFT.phisnet.training.hamiltonian_dataset import HamiltonianDataset
-from nablaDFT.phisnet.training.sqlite_database import HamiltonianDatabase
+from .hamiltonian_dataset import HamiltonianDatabase, HamiltonianDataset
 
 
 class ASENablaDFT(AtomsDataModule):
@@ -108,12 +105,12 @@ class HamiltonianNablaDFT(HamiltonianDataset):
         self.dtype = dtype
         if not os.path.exists(datapath):
             os.makedirs(datapath)
-        f = open(nablaDFT.__path__[0] + "/links/hamiltonian_databases.json")
-        data = json.load(f)
-        url = data["train_databases"][dataset_name]
-        f.close()
+        with open(nablaDFT.__path__[0] + "/links/hamiltonian_databases.json") as f:
+                data = json.load(f)
+                url = data["train_databases"][dataset_name]
         filepath = datapath + "/" + dataset_name + ".db"
-        request.urlretrieve(url, filepath)
+        if not os.path.exists(filepath):
+            request.urlretrieve(url, filepath)
         self.database = HamiltonianDatabase(filepath)
         max_orbitals = []
         for z in self.database.Z:

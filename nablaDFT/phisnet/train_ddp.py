@@ -12,7 +12,7 @@ from tensorboardX import SummaryWriter
 from torch.nn.functional import softplus
 
 from nn import NeuralNetwork
-from training import HamiltonianDataset, ExponentialMovingAverage, Lookahead
+from training import ExponentialMovingAverage, Lookahead
 from training import (
     seeded_random_split,
     parse_command_line_arguments,
@@ -20,6 +20,8 @@ from training import (
     empty_error_dict,
     compute_error_dict,
 )
+
+from nablaDFT.dataset import NablaDFT
 
 import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel as DDP
@@ -88,7 +90,7 @@ if __name__ == "__main__":
     # load dataset(s)
     if args.local_rank == 0:
         logging.info("Loading " + args.dataset + "...")
-    dataset = HamiltonianDataset(args.dataset, dtype=args.dtype, subset=args.subset)
+    dataset = NablaDFT("Hamiltonian", args.datapath, args.dataset_name)
     # split into train/valid/test
 
     train_dataset, valid_dataset, test_dataset = seeded_random_split(
