@@ -1,10 +1,11 @@
 import os
+import logging
 
 import ase
 from ase import units
 from ase.constraints import FixAtoms
 from ase.calculators.calculator import Calculator, all_changes
-from ase.io import read, write
+from ase.io import write, read
 from ase.io.trajectory import Trajectory
 from ase.md import VelocityVerlet, Langevin, MDLogger
 from ase.md.velocitydistribution import (
@@ -16,34 +17,25 @@ from ase.optimize import QuasiNewton
 from ase.vibrations import Vibrations
 
 import torch
-import schnetpack
-import logging
-from copy import deepcopy
-
-from torch_geometric.data import InMemoryDataset, Data
-from torch_geometric.data.batch import Batch
+from torch_geometric.data import Data, Batch
 
 from schnetpack.units import convert_units
 
-from typing import Optional, List, Union, Dict
-from ase import Atoms
+from typing import Optional, List, Union
 from omegaconf import DictConfig
 
-import utils
+from nablaDFT.utils import load_model
 
 log = logging.getLogger(__name__)
 
 
-class PYGCalculatorError(Exception):
-    pass
+def atom_to_pyg_batch(ase_molecule):
+    z = torch.from_numpy(ase_molecule.numbers).long()
+    positions = torch.from_numpy(ase_molecule.positions).float()
+    batch = Batch.from_data_list([Data(z=z, pos=positions)])
+    return batch
 
-def atoms_to_PYG(ase_atoms, device):
-    z = torch.from_numpy(ase_atoms.numbers).long()
-    positions = torch.from_numpy(ase_atoms.positions).float()
-    batch = Batch.from_data_list([Data(z=z, pos=positions)]).to(device)
-    return batch.pos, batch.z, batch.batch
 
-            
 class PYGCalculator(Calculator):
     """
     ASE calculator for pytorch geometric machine learning models.
@@ -66,7 +58,6 @@ class PYGCalculator(Calculator):
         dtype: torch.dtype = torch.float32,
         **kwargs,
     ):
-
         """
         Args:
             model_file (str): path to trained model
@@ -91,7 +82,7 @@ class PYGCalculator(Calculator):
             self.forces: force_key,
         }
 
-        self.model = utils.load_model(config, ckpt_path)
+        self.model = self._load_model(config, ckpt_path)
         self.model.to(device=device, dtype=dtype)
 
         # set up basic conversion factors
@@ -107,7 +98,7 @@ class PYGCalculator(Calculator):
         # Container for basic ml model ouputs
         self.model_results = None
 
-    def _load_model(self, model_file: str):
+    def _load_model(self, config, ckpt_path):
         """
 
         Args:
@@ -117,9 +108,9 @@ class PYGCalculator(Calculator):
            AtomisticTask: loaded schnetpack model
         """
 
-        log.info("Loading model from {:s}".format(model_file))
+        log.info("Loading model from {:s}".format(ckpt_path))
         # load model and keep it on CPU, device can be changed afterwards
-        model = utils.load_model(config, ckpt_path)
+        model = load_model(config, ckpt_path)
         model = model.eval()
 
         return model
@@ -142,12 +133,17 @@ class PYGCalculator(Calculator):
         if self.calculation_required(atoms, properties):
             Calculator.calculate(self, atoms)
 
-            model_inputs = atoms_to_PYG(atoms, device=self.device)
-            model_results = self.model(*model_inputs)
-            
+            model_inputs = atom_to_pyg_batch(atoms).to(self.device)
+            model_results = self.model(model_inputs)
+
             results = dict()
-            results["energy"] = ( model_results[0].cpu().data.numpy().item() * self.property_units["energy"] )
-            results["forces"] = ( model_results[1].cpu().data.numpy() * self.property_units["forces"] )
+            results["energy"] = (
+                model_results[0].cpu().data.numpy().item()
+                * self.property_units["energy"]
+            )
+            results["forces"] = (
+                model_results[1].cpu().data.numpy() * self.property_units["forces"]
+            )
             self.results = results
             self.model_results = model_results
 
@@ -159,6 +155,7 @@ class PYGAseInterface:
 
     def __init__(
         self,
+        molecule_path: str,
         working_dir: str,
         config: DictConfig,
         ckpt_path: str,
@@ -170,8 +167,8 @@ class PYGAseInterface:
         dtype: torch.dtype = torch.float32,
         optimizer_class: type = QuasiNewton,
         fixed_atoms: Optional[List[int]] = None,
-        ase_atoms: Optional = None,
-        ):
+        
+    ):
         """
         Args:
             molecule_path: Path to initial geometry
@@ -193,7 +190,7 @@ class PYGAseInterface:
             os.makedirs(self.working_dir)
 
         # Load the molecule
-        self.molecule = ase_atoms
+        self.molecule = read(molecule_path)
 
         # Apply position constraints
         if fixed_atoms:
@@ -362,6 +359,7 @@ class PYGAseInterface:
 
         # Save final geometry in xyz format
         self.save_molecule(name, file_format="extxyz")
+        log.info(f"Save molecule in {name}")
 
     def compute_normal_modes(self, write_jmol: bool = True):
         """
@@ -382,4 +380,3 @@ class PYGAseInterface:
         # Write jmol file if requested
         if write_jmol:
             frequencies.write_jmol()
-
