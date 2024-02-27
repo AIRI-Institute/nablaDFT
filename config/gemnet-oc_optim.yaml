@@ -1,7 +1,7 @@
-name: SchNet
+name: GemNet-OC
 dataset_name: test_opt # used for output database name
 job_type: optimize
-ckpt_path: ./checkpoints/SchNet/schnet_100k.ckpt
+ckpt_path: ./checkpoints/GemNet-OC/GemNet-OC_dataset_train_100k_epoch=085_val_loss=0.028551.ckpt
 
 input_db: ./test_opt.db # relative path to input database
 output_dir: ./traj_optimize # relative path to output database
@@ -10,8 +10,8 @@ device: cuda:0  # GPU-distributed not supported, specify device
 
 defaults:
   - _self_
-  - model: schnet.yaml
-  - calculator: spk_calculator.yaml
+  - model: gemnet-oc.yaml
+  - calculator: pyg_calculator.yaml
   - optimizer: batchwise_lbfgs.yaml
 
 # need this to set working dir as current dir
