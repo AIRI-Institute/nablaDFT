@@ -1,0 +1,3 @@
+_target_: nablaDFT.optimization.ASEBatchwiseLBFGS
+master: True
+use_line_search: True
