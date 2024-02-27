@@ -159,8 +159,8 @@ class SpkBatchwiseCalculator(BatchwiseCalculator):
     """Batchwise calculator for SchNetPack models for batchwise optimization"""
     def __init__(
         self,
-        atoms_converter: AtomsConverter,
         model: nn.Module,
+        atoms_converter: AtomsConverter,
         device: str = "cpu",
         energy_key: str = "energy",
         force_key: str = "forces",
