@@ -476,7 +476,9 @@ class EquiformerV2_OC20(nn.Module):
     def forward(self, data: Data):
         self.dtype = data.pos.dtype
         self.device = data.pos.device
-
+        
+        bsz = data.batch.max().detach().item() + 1
+        
         atomic_numbers = data.z.long()
         num_atoms = len(atomic_numbers)
 
@@ -569,7 +571,7 @@ class EquiformerV2_OC20(nn.Module):
         node_energy = self.energy_block(x)
         node_energy = node_energy.embedding.narrow(1, 0, 1)
         energy = torch.zeros(
-            data.y.shape[0],
+            bsz,
             device=node_energy.device,
             dtype=node_energy.dtype,
         )

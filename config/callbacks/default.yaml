@@ -13,3 +13,4 @@ early_stopping:
   min_delta: 1e-4
   patience: 400
   mode: min
+  check_on_train_epoch_end: False

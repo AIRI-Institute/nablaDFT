@@ -314,6 +314,8 @@ class eSCN(nn.Module):
         device = data.pos.device
         self.dtype = data.pos.dtype
 
+        bsz = data.batch.max().detach().item() + 1
+
         start_time = time.time()
         atomic_numbers = data.z.long()
         num_atoms = len(atomic_numbers)
@@ -421,7 +423,7 @@ class eSCN(nn.Module):
         # Energy estimation
         ###############################################################
         node_energy = self.energy_block(x_pt)
-        energy = torch.zeros(data.y.shape[0], device=device)
+        energy = torch.zeros(bsz, device=device)
         energy.index_add_(0, data.batch, node_energy.view(-1))
         # Scale energy to help balance numerical precision w.r.t. forces
         energy = energy * 0.001
