@@ -31,7 +31,7 @@ class BatchwiseOptimizeTask:
 
     def optimize_batch(self, atoms_list: List):
         self.optimizer.initialize()
-        self.optimizer.run(atoms_list, fmax=1e-4, steps=5)
+        self.optimizer.run(atoms_list, fmax=1e-4, steps=100)
         atoms_list = self.optimizer.atoms
         return atoms_list
 

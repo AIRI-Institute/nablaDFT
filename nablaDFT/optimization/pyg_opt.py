@@ -43,4 +43,4 @@ if __name__ == "__main__":
         device=args.device,
         dtype=torch.float32,
     )
-    nablaDFT_ase.optimize(fmax=1e-4, steps=5)
+    nablaDFT_ase.optimize(fmax=1e-4, steps=100)
