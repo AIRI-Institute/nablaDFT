@@ -1,6 +1,7 @@
 name: GemNet-OC
 dataset_name: test_opt # used for output database name
 job_type: optimize
+pretrained: True
 ckpt_path: ./checkpoints/GemNet-OC/GemNet-OC_dataset_train_100k_epoch=085_val_loss=0.028551.ckpt
 
 input_db: ./test_opt.db # relative path to input database
