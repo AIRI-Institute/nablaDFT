@@ -78,8 +78,7 @@ def load_model(config: DictConfig, ckpt_path: str) -> LightningModule:
     model: LightningModule = hydra.utils.instantiate(config.model)
     if ckpt_path is None:
         warnings.warn(
-            """Checkpoint path was specified, but it not exists.
-                           Continue with randomly initialized weights."""
+            """Checkpoint path was specified, but it not exists. Continue with randomly initialized weights."""
         )
     else:
         ckpt = torch.load(ckpt_path)
