@@ -64,7 +64,8 @@ def download_model(config: DictConfig):
     """Downloads best model checkpoint from vault."""
     model_name = config.get("name")
     ckpt_path = os.path.join(
-       hydra.utils.get_original_cwd(), f"./checkpoints/{model_name}/{model_name}_100k.ckpt"
+        hydra.utils.get_original_cwd(),
+        f"./checkpoints/{model_name}/{model_name}_100k.ckpt",
     )
     with open(nablaDFT.__path__[0] + "/links/models_checkpoints.json", "r") as f:
         data = json.load(f)
@@ -77,9 +78,9 @@ def load_model(config: DictConfig, ckpt_path: str) -> LightningModule:
     model: LightningModule = hydra.utils.instantiate(config.model)
     if ckpt_path is None:
         warnings.warn(
-                        """Checkpoint path was specified, but it not exists.
+            """Checkpoint path was specified, but it not exists.
                            Continue with randomly initialized weights."""
-                    )
+        )
     else:
         ckpt = torch.load(ckpt_path)
         model.load_state_dict(ckpt["state_dict"])
