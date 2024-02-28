@@ -167,7 +167,6 @@ class PYGAseInterface:
         dtype: torch.dtype = torch.float32,
         optimizer_class: type = QuasiNewton,
         fixed_atoms: Optional[List[int]] = None,
-        
     ):
         """
         Args:

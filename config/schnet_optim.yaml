@@ -1,4 +1,4 @@
-name: SchNet
+name: SchNet  # model name, used for output database name
 dataset_name: test_opt # used for output database name
 job_type: optimize
 ckpt_path: ./checkpoints/SchNet/schnet_100k.ckpt

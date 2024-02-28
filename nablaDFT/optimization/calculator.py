@@ -119,6 +119,7 @@ class BatchwiseCalculator:
 
 class PyGBatchwiseCalculator(BatchwiseCalculator):
     """Batchwise calculator for PyTorch Geometric models for batchwise optimization"""
+
     def __init__(
         self,
         model: nn.Module,
@@ -136,7 +137,7 @@ class PyGBatchwiseCalculator(BatchwiseCalculator):
             force_key=force_key,
             energy_unit=energy_unit,
             position_unit=position_unit,
-            dtype=dtype
+            dtype=dtype,
         )
 
     def calculate(self, atoms: List[ase.Atoms]) -> None:
@@ -157,6 +158,7 @@ class PyGBatchwiseCalculator(BatchwiseCalculator):
 
 class SpkBatchwiseCalculator(BatchwiseCalculator):
     """Batchwise calculator for SchNetPack models for batchwise optimization"""
+
     def __init__(
         self,
         model: nn.Module,
@@ -166,7 +168,7 @@ class SpkBatchwiseCalculator(BatchwiseCalculator):
         force_key: str = "forces",
         energy_unit: str = "eV",
         position_unit: str = "Ang",
-        dtype: torch.dtype = torch.float32
+        dtype: torch.dtype = torch.float32,
     ):
         super().__init__(
             model=model,
@@ -175,7 +177,7 @@ class SpkBatchwiseCalculator(BatchwiseCalculator):
             force_key=force_key,
             energy_unit=energy_unit,
             position_unit=position_unit,
-            dtype=dtype
+            dtype=dtype,
         )
         self.atoms_converter = atoms_converter
 

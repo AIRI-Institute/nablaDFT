@@ -8,20 +8,21 @@ from .optimizers import BatchwiseOptimizer
 
 class BatchwiseOptimizeTask:
     """Use for batchwise molecules conformations geometry optimization."""
+
     def __init__(
-            self,
-            input_datapath: str,
-            output_datapath: str,
-            optimizer: BatchwiseOptimizer,
-            batch_size: int,
-        ) -> None:
+        self,
+        input_datapath: str,
+        output_datapath: str,
+        optimizer: BatchwiseOptimizer,
+        batch_size: int,
+    ) -> None:
         """
         Args:
             input_datapath (str): path to ASE database with molecules.
-            output_datapath (str): path to output database. 
+            output_datapath (str): path to output database.
             optimizer (BatchwiseOptimizer): used for molecule geometry optimization.
             converter (AtomsConverter): optional, mandatory for SchNetPack models.
-            batch_size (int): number of samples per batch. 
+            batch_size (int): number of samples per batch.
         """
         self.optimizer = optimizer
         self.bs = batch_size
@@ -42,15 +43,15 @@ class BatchwiseOptimizeTask:
             batch_count += 1
         for batch_idx in tqdm.tqdm(range(batch_count)):
             atoms_list = [
-            self.data_db_conn.get(i + 1).toatoms()
-            for i in range(
-                batch_idx * self.bs, min(db_len, self.bs * (batch_idx + 1))
-            )
-        ]
+                self.data_db_conn.get(i + 1).toatoms()
+                for i in range(
+                    batch_idx * self.bs, min(db_len, self.bs * (batch_idx + 1))
+                )
+            ]
             atoms_list = self.optimize_batch(atoms_list)
             for relative_id, i in enumerate(
-            range(batch_idx * self.bs, min(db_len, self.bs * (batch_idx + 1)))
-        ):
+                range(batch_idx * self.bs, min(db_len, self.bs * (batch_idx + 1)))
+            ):
                 row = self.data_db_conn.get(i + 1)
                 data = row.data
                 data["model_energy"] = float(

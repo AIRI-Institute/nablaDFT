@@ -78,7 +78,7 @@ class BatchwiseDynamics(Dynamics):
         self.trajectory = trajectory
         self.log_every_step = log_every_step
         self.fixed_atoms_mask = fixed_atoms_mask
-        
+
     def irun(self):
         # compute initial structure and log the first step
         self.calculator.get_forces(self.atoms, fixed_atoms_mask=self.fixed_atoms_mask)
@@ -684,4 +684,3 @@ class ASEBatchwiseLBFGS(BatchwiseOptimizer):
         )
         if self.alpha_k is None:
             raise RuntimeError("LineSearch failed!")
-        

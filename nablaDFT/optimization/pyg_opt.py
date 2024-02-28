@@ -9,19 +9,15 @@ from pyg_ase_interface import PYGAseInterface
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run PyG molecule optimization")
-    parser.add_argument(
-        "--molecule_path", type=str, help="database name"
-    )
-    parser.add_argument(
-        "--model_ckpt_path", type=str, help="model ckpt path"
-    )
+    parser.add_argument("--molecule_path", type=str, help="database name")
+    parser.add_argument("--model_ckpt_path", type=str, help="model ckpt path")
 
     parser.add_argument(
-        "--model_config_name", type=str, help="model config name",
+        "--model_config_name",
+        type=str,
+        help="model config name",
     )
-    parser.add_argument(
-        "--device", type=str, help="device", default="cuda:0"
-    )
+    parser.add_argument("--device", type=str, help="device", default="cuda:0")
     args, unknown = parser.parse_known_args()
     with initialize(version_base=None, config_path="../../config", job_name="test"):
         cfg = compose(config_name=args.model_config_name)

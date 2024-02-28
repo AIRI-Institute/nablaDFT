@@ -52,6 +52,9 @@ def optimize(config: DictConfig):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir, exist_ok=True)
     output_datapath = os.path.join(output_dir, f"{config.name}_{config.dataset_name}.db")
+    # append to existing database not supported
+    if os.path.exists(output_datapath):
+        os.remove(output_datapath)    
     model = load_model(config, ckpt_path)
     calculator = hydra.utils.instantiate(
         config.calculator, model 
