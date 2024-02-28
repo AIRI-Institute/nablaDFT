@@ -52,3 +52,4 @@ metric:
             _target_: torchmetrics.MeanAbsoluteError
 energy_loss_coef: 1.
 forces_loss_coef: 1.
+

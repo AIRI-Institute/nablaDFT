@@ -59,5 +59,3 @@ scheduler_args:
   patience: 10
   min_lr: 1e-6
 scheduler_monitor: val_loss
-
-warmup_steps: ${warmup_steps}
