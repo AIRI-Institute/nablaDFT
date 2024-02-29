@@ -80,7 +80,7 @@ def run(config: DictConfig):
     # download checkpoint if pretrained=True
     if config.get("pretrained"):
         if ckpt_path is None:
-            download_model(config)
+            ckpt_path = download_model(config)
         else:
             if not os.path.exists(ckpt_path):
                 warnings.warn(

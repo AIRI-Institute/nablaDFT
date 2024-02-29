@@ -60,18 +60,23 @@ def init_wandb():
     wandb.login()
 
 
-def download_model(config: DictConfig):
+def download_model(config: DictConfig) -> str:
     """Downloads best model checkpoint from vault."""
     model_name = config.get("name")
     ckpt_path = os.path.join(
         hydra.utils.get_original_cwd(),
         f"./checkpoints/{model_name}/{model_name}_100k.ckpt",
     )
+    if os.path.exists(ckpt_path):
+        return ckpt_path
+    else:
+        os.makedirs(f"./checkpoints/{model_name}", exist_ok=True)
     with open(nablaDFT.__path__[0] + "/links/models_checkpoints.json", "r") as f:
         data = json.load(f)
         url = data[f"{model_name}"]["dataset_train_100k"]
     request.urlretrieve(url, ckpt_path)
     logging.info(f"Downloaded {model_name} 100k checkpoint to {ckpt_path}")
+    return ckpt_path
 
 
 def load_model(config: DictConfig, ckpt_path: str) -> LightningModule:
