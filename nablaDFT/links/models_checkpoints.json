@@ -1,33 +1,53 @@
 {
   "SchNet": {
-    "train_100k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/schnet/model_100k_split.pt",
-    "train_10k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/schnet/model_10k_split.pt",
-    "train_5k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/schnet/model_5k_split.pt",
-    "train_2k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/schnet/model_2k_split.pt"
-  },
-  "DimeNet": {
-    "train_100k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/dimenet/train_100k.zip",
-    "train_10k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/dimenet/train_10k.zip",
-    "train_5k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/dimenet/train_5k.zip",
-    "train_2k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/dimenet/train_2k.zip"
-  },
-  "PhiSNet": {
-    "train_100k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/phisnet/model_100k_split.pt",
-    "train_10k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/phisnet/model_10k_split.pt",
-    "train_5k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/phisnet/model_5k_split.pt",
-    "train_2k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/phisnet/model_2k_split.pt"
+    "dataset_train_100k": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/models_checkpoints/SchNet/schnet_100k.ckpt",
+    "dataset_train_10k": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/models_checkpoints/SchNet/schnet_10k.ckpt",
+    "dataset_train_5k": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/models_checkpoints/SchNet/schnet_5k.ckpt",
+    "dataset_train_2k": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/models_checkpoints/SchNet/schnet_2k.ckpt"
   },
   "PaiNN": {
-    "train_100k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/painn/model_100k_split.pt",
-    "train_10k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/painn/model_10k_split.pt",
-    "train_5k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/painn/model_5k_split.pt",
-    "train_2k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/painn/model_2k_split.pt"
+    "dataset_train_100k": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/models_checkpoints/PaiNN/painn_100k.ckpt",
+    "dataset_train_10k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/painn/painn_10k.ckpt",
+    "dataset_train_5k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/painn/painn_5k_split.pt",
+    "dataset_train_2k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/painn/painn_2k_split.pt"
 
   },
+  "DimeNet++": {
+    "dataset_train_100k": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/models_checkpoints/DimeNet++/DimeNet++_dataset_train_100k_epoch=0258.ckpt",
+    "dataset_train_10k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/nablaDFTv2/models_checkpoints/DimeNet++/DimeNet++_dataset_train_10k_epoch=0651.ckpt",
+    "dataset_train_5k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/nablaDFTv2/models_checkpoints/DimeNet++/DimeNet++_dataset_train_5k_epoch=0545.ckpt",
+    "dataset_train_2k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/nablaDFTv2/models_checkpoints/DimeNet++/DimeNet++_dataset_train_2k_epoch=0442.ckpt"
+
+  },
+  "PhiSNet": {
+    "dataset_train_100k": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/models_checkpoints/phisnet/model_100k_split.pt",
+    "dataset_train_10k": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/models_checkpoints/phisnet/model_10k_split.pt",
+    "dataset_train_5k": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/models_checkpoints/phisnet/model_5k_split.pt",
+    "dataset_train_2k": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/models_checkpoints/phisnet/model_2k_split.pt"
+  
+  },
   "SchNOrb": {
-    "train_100k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/schnorb/model_100k_split.pt",
-    "train_10k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/schnorb/model_10k_split.pt",
-    "train_5k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/schnorb/model_5k_split.pt",
-    "train_2k": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/models_checkpoints/schnorb/model_2k_split.pt"
+    "dataset_train_100k": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/models_checkpoints/schnorb/model_100k_split.pt",
+    "dataset_train_10k": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/models_checkpoints/schnorb/model_10k_split.pt",
+    "dataset_train_5k": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/models_checkpoints/schnorb/model_5k_split.pt",
+    "dataset_train_2k": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/models_checkpoints/schnorb/model_2k_split.pt"
+  },
+  "GemNet-OC": {
+    "dataset_train_100k": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/models_checkpoints/GemNet-OC/GemNet-OC_dataset_train_100k_epoch=085_val_loss=0.028551.ckpt",
+    "dataset_train_10k": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/models_checkpoints/GemNet-OC/GemNet-OC_dataset_train_10k_epoch=337_val_loss=0.060103.ckpt",
+    "dataset_train_5k": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/models_checkpoints/GemNet-OC/GemNet-OC_dataset_train_5k_epoch=427_val_loss=0.078626.ckpt",
+    "dataset_train_2k": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/models_checkpoints/GemNet-OC/GemNet-OC_dataset_train_2k_epoch=400_val_loss=0.142715.ckpt"
+  },
+  "ESCN-OC": {
+    "dataset_train_100k": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/models_checkpoints/ESCN-OC/ESCN-OC_dataset_train_100k_epoch=028_val_loss=0.029561.ckpt",
+    "dataset_train_10k": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/models_checkpoints/ESCN-OC/ESCN-OC_dataset_train_10k_epoch=189_val_loss=0.052877.ckpt",
+    "dataset_train_5k": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/models_checkpoints/ESCN-OC/ESCN-OC_dataset_train_5k_epoch=175_val_loss=0.065441.ckpt",
+    "dataset_train_2k": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/models_checkpoints/ESCN-OC/ESCN-OC_dataset_train_2k_epoch=253_val_loss=0.124682.ckpt"
+  },
+  "Equiformer_v2": {
+    "dataset_train_100k": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/models_checkpoints/Equiformer_OC20/Equiformer_OC20_dataset_train_100k_epoch=010_val_loss=0.302613.ckpt",
+    "dataset_train_10k": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/models_checkpoints/Equiformer_OC20/Equiformer_OC20_dataset_train_10k_epoch=107_val_loss=0.337899.ckpt",
+    "dataset_train_5k": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/models_checkpoints/Equiformer_OC20/Equiformer_OC20_5k.ckptt",
+    "dataset_train_2k": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/models_checkpoints/Equiformer_OC20/Equiformer_OC20_dataset_train_2k_epoch=409_val_loss=0.354093.ckpt"
   }
 }
