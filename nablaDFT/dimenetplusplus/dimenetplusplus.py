@@ -40,6 +40,7 @@ class DimeNetPlusPlusPotential(nn.Module):
         do_postprocessing=False,
     ):
         super().__init__()
+        self.scaler=scaler
 
         self.node_latent_dim = node_latent_dim
         self.dimenet_hidden_channels = dimenet_hidden_channels
