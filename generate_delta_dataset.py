@@ -55,11 +55,11 @@ def calculate_gfn2(atoms, positions):
 
 def generate_gfn2xtb_db(input_db_path, output_db_path):
     db = connect(input_db_path)
-    odb = connect(output_db_path)
-    for row in tqdm(db.select(), desc="Generate GFN2-xTB database", total=len(db)):
-        gfn2_energy, gfn2_force = calculate_gfn2(row.numbers, row.positions)
-        data = {"energy": gfn2_energy, "forces": gfn2_force}
-        odb.write(row, data=data)
+    with connect(output_db_path) as odb:
+        for row in tqdm(db.select(), desc="Generate GFN2-xTB database", total=len(db)):
+            gfn2_energy, gfn2_force = calculate_gfn2(row.numbers, row.positions)
+            data = {"energy": gfn2_energy, "forces": gfn2_force}
+            odb.write(row, data=data)
 
 
 def generate_delta_db(
