@@ -69,16 +69,16 @@ def generate_delta_db(
     ):
     dft_db = connect(dft_db_path)
     gfn_db = connect(gfn_db_path)
-    odb = connect(output_db_path)
-    for idx in tqdm(range(1, len(dft_db) + 1), desc="Generate Delta database", total=(len(dft_db)+1)):
-        row = dft_db.get(idx) # used for new db
-        dft_data = row.data
-        gfn_data = gfn_db.get(idx).data
-        data = {
-            "energy": dft_data["energy"] - gfn_data["energy"],
-            "forces": dft_data["forces"] - gfn_data["forces"]
-        }
-        odb.write(row, data=data)
+    with connect(output_db_path) as odb:
+        for idx in tqdm(range(1, len(dft_db) + 1), desc="Generate Delta database", total=(len(dft_db)+1)):
+            row = dft_db.get(idx) # used for new db
+            dft_data = row.data
+            gfn_data = gfn_db.get(idx).data
+            data = {
+                "energy": dft_data["energy"] - gfn_data["energy"],
+                "forces": dft_data["forces"] - gfn_data["forces"]
+            }
+            odb.write(row, data=data)
 
 
 if __name__ == "__main__":
