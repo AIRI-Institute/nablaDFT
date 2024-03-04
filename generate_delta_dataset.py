@@ -32,7 +32,7 @@ ATOM_ENERGIES_XTB = {
     "Br": -4.048339371234,
     "I": -3.779630263390,
 }
-ANG2BOHR = 0.52917720859
+CONV_FACTOR = 0.52917720859
 
 
 logger = logging.getLogger(__name__)
@@ -44,13 +44,13 @@ def atomic_energy(atoms):
     return sum(atomic_energy)
 
 def calculate_gfn2(atoms, positions):
-    calc = Calculator(Param.GFN2xTB, atoms, positions / ANG2BOHR)
+    calc = Calculator(Param.GFN2xTB, atoms, positions / CONV_FACTOR)
     calc.set_accuracy(0.0001)
     calc.set_max_iterations(100)
     calc.set_verbosity(VERBOSITY_MUTED)
     res = calc.singlepoint()
     energy = res.get_energy() - atomic_energy(atoms) 
-    forces = res.get_gradient() * ANG2BOHR
+    forces = res.get_gradient() * CONV_FACTOR
     return energy, forces
 
 def generate_gfn2xtb_db(input_db_path, output_db_path):
