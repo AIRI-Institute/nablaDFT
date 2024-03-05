@@ -1,0 +1,58 @@
+_target_: nablaDFT.painn_pyg.PaiNNLightning
+
+model_name: "PAINN-OC"
+net:
+  _target_: nablaDFT.painn_pyg.PaiNN
+  hidden_channels: 512
+  num_layers: 6
+  num_rbf: 128
+  cutoff: 12.0
+  max_neighbors: 50
+  rbf: 
+      name: 'gaussian'
+  envelope: 
+      name: 'polynomial'
+      exponent: 5
+  regress_forces: true
+  direct_forces: false
+  use_pbc: false
+  otf_graph: true
+  num_elements: 65
+
+
+optimizer:
+  _target_: torch.optim.AdamW
+  _partial_: true
+  amsgrad: true
+  betas: [0.9, 0.95]
+  lr: 1e-3
+  weight_decay: 0
+
+lr_scheduler:
+  _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+  _partial_: true
+  factor: 0.8
+  patience: 10
+
+losses:
+  energy:
+    _target_: torch.nn.L1Loss
+  forces:
+    _target_: nablaDFT.gemnet_oc.loss.L2Loss
+loss_coefs:
+  energy: 1.0
+  forces: 100.0
+
+ema:
+  _target_: torch_ema.ExponentialMovingAverage
+  _partial_: true
+  decay: 0.9999
+
+metric:
+  _target_: torchmetrics.MultitaskWrapper
+  _convert_: all
+  task_metrics:
+    energy:
+      _target_: torchmetrics.MeanAbsoluteError
+    forces:
+      _target_: torchmetrics.MeanAbsoluteError
