@@ -75,7 +75,7 @@ def generate_delta_db(
             dft_data = row.data
             gfn_data = gfn_db.get(idx).data
             data = {
-                "energy": dft_data["energy"] - gfn_data["energy"],
+                "energy": [dft_data["energy"][0] - gfn_data["energy"]],
                 "forces": dft_data["forces"] - gfn_data["forces"]
             }
             odb.write(row, data=data)
