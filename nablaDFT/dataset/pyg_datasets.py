@@ -13,7 +13,7 @@ from torch_geometric.data import InMemoryDataset, Data
 
 import nablaDFT
 from .hamiltonian_dataset import HamiltonianDatabase
-
+from nablaDFT.utils import tqdm_download_hook, get_file_size
 
 logger = logging.getLogger(__name__)
 
@@ -74,7 +74,9 @@ class PyGNablaDFT(InMemoryDataset):
         with open(nablaDFT.__path__[0] + "/links/energy_databases_v2.json", "r") as f:
             data = json.load(f)
             url = data[f"{self.split}_databases"][self.dataset_name]
-        request.urlretrieve(url, self.raw_paths[0])
+        file_size = get_file_size(url)
+        with tqdm(unit="B", unit_scale=True, unit_divisor=1024, miniters=1, total=file_size) as t:
+            request.urlretrieve(url, self.raw_paths[0], reporthook=tqdm_download_hook(t))
 
     def process(self) -> None:
         db = connect(self.raw_paths[0])
@@ -147,13 +149,13 @@ class PyGHamiltonianNablaDFT(InMemoryDataset):
         self.data_all, self.slices_all = [], []
         self.offsets = [0]
         self.dtype = dtype
-        self.max_orbitals = self._get_max_orbitals(datapath, dataset_name)
         self.include_hamiltonian = include_hamiltonian
         self.include_overlap = include_overlap
         self.include_core = include_core
 
         super(PyGHamiltonianNablaDFT, self).__init__(datapath, transform, pre_transform)
 
+        self.max_orbitals = self._get_max_orbitals(datapath, dataset_name)
         for path in self.processed_paths:
             data, slices = torch.load(path)
             self.data_all.append(data)
@@ -180,7 +182,9 @@ class PyGHamiltonianNablaDFT(InMemoryDataset):
         with open(nablaDFT.__path__[0] + "/links/hamiltonian_databases.json") as f:
                 data = json.load(f)
                 url = data["train_databases"][self.dataset_name]
-        request.urlretrieve(url, self.raw_paths[0])
+        file_size = get_file_size(url)
+        with tqdm(unit="B", unit_scale=True, unit_divisor=1024, miniters=1, total=file_size) as t:
+            request.urlretrieve(url, self.raw_paths[0], reporthook=tqdm_download_hook(t))
 
     def process(self) -> None:
         database = HamiltonianDatabase(self.raw_paths[0])
@@ -221,6 +225,8 @@ class PyGHamiltonianNablaDFT(InMemoryDataset):
 
     def _get_max_orbitals(self, datapath, dataset_name):
         db_path = os.path.join(datapath, "raw/" + dataset_name + self.db_suffix)
+        if not os.path.exists(db_path):
+            self.download()
         database = HamiltonianDatabase(db_path)
         max_orbitals = []
         for z in database.Z:

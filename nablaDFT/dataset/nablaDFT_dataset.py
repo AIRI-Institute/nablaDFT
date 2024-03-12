@@ -1,7 +1,7 @@
 """Module defines Pytorch Lightning DataModule interfaces for various NablaDFT datasets"""
 import json
 import os
-from typing import Optional, List
+from typing import Optional
 from urllib import request as request
 
 import numpy as np
@@ -14,7 +14,6 @@ from schnetpack.data import AtomsDataFormat, load_dataset
 
 import nablaDFT
 from .atoms_datamodule import AtomsDataModule
-from .hamiltonian_dataset import HamiltonianDatabase, HamiltonianDataset
 from .pyg_datasets import PyGNablaDFT, PyGHamiltonianNablaDFT
 
 
