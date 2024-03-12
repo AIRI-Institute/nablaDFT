@@ -70,12 +70,11 @@ class PyGNablaDFT(InMemoryDataset):
         return super(PyGNablaDFT, self).get(idx - self.offsets[data_idx])
 
     def download(self) -> None:
-        logger.info(f"Downloading split: {self.dataset_name}")
         with open(nablaDFT.__path__[0] + "/links/energy_databases_v2.json", "r") as f:
             data = json.load(f)
             url = data[f"{self.split}_databases"][self.dataset_name]
         file_size = get_file_size(url)
-        with tqdm(unit="B", unit_scale=True, unit_divisor=1024, miniters=1, total=file_size) as t:
+        with tqdm(unit="B", unit_scale=True, unit_divisor=1024, miniters=1, total=file_size, desc=f"Downloading split: {self.dataset_name}") as t:
             request.urlretrieve(url, self.raw_paths[0], reporthook=tqdm_download_hook(t))
 
     def process(self) -> None:
@@ -178,12 +177,11 @@ class PyGHamiltonianNablaDFT(InMemoryDataset):
         return super(PyGHamiltonianNablaDFT, self).get(idx - self.offsets[data_idx])
 
     def download(self) -> None:
-        logger.info(f"Downloading split: {self.dataset_name}")
         with open(nablaDFT.__path__[0] + "/links/hamiltonian_databases.json") as f:
                 data = json.load(f)
                 url = data["train_databases"][self.dataset_name]
         file_size = get_file_size(url)
-        with tqdm(unit="B", unit_scale=True, unit_divisor=1024, miniters=1, total=file_size) as t:
+        with tqdm(unit="B", unit_scale=True, unit_divisor=1024, miniters=1, total=file_size, desc=f"Downloading split: {self.dataset_name}") as t:
             request.urlretrieve(url, self.raw_paths[0], reporthook=tqdm_download_hook(t))
 
     def process(self) -> None:
