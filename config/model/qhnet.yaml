@@ -1,0 +1,39 @@
+_target_: nablaDFT.qhnet.QHNetLightning
+
+model_name: "QHNet"
+net:
+  _target_: nablaDFT.qhnet.QHNet
+  sh_lmax: 4
+  hidden_size: 128
+  bottle_hidden_size: 32
+  num_gnn_layers: 5
+  max_radius: 12
+  num_nodes: 83
+  radius_embed_dim: 32
+
+optimizer:
+  _target_: torch.optim.AdamW
+  _partial_: true
+  amsgrad: true
+  betas: [0.9, 0.95]
+  lr: 1e-3
+  weight_decay: 0
+
+lr_scheduler:
+  _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+  _partial_: true
+  factor: 0.8
+  patience: 10
+
+losses:
+  hamiltonian:
+    _target_: nablaDFT.qhnet.loss.MAE_RMSE_Loss
+loss_coefs:
+  hamiltonian: 1.0
+
+metric:
+  _target_: torchmetrics.MultitaskWrapper
+  _convert_: all
+  task_metrics:
+    hamiltonian:
+      _target_: torchmetrics.MeanAbsoluteError
