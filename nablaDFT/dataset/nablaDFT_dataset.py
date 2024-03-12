@@ -173,7 +173,7 @@ class PyGHamiltonianDataModule(PyGDataModule):
 
     def setup(self, stage: str) -> None:
         if stage == "fit":
-            dataset = PyGHamiltonianNablaDFT(self.root, self.dataset_name, "train", **self.kwargs)
+            dataset = PyGHamiltonianNablaDFT(self.root, self.dataset_name, "train", **self.kwargs)[:50] # TODO: temporal subset
             self.dataset_train, self.dataset_val = random_split(dataset, self.sizes,
                                                                 generator=torch.Generator().manual_seed(self.seed))
         elif stage == "test":

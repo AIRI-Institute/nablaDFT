@@ -1,9 +1,11 @@
 """Module describes PyTorch Geometric interfaces for various NablaDFT datasets"""
 import json
 import os
+import logging
 from typing import List, Callable
 from urllib import request as request
 
+from tqdm import tqdm
 import numpy as np
 import torch
 from ase.db import connect
@@ -11,6 +13,9 @@ from torch_geometric.data import InMemoryDataset, Data
 
 import nablaDFT
 from .hamiltonian_dataset import HamiltonianDatabase
+
+
+logger = logging.getLogger(__name__)
 
 
 class PyGNablaDFT(InMemoryDataset):
@@ -65,6 +70,7 @@ class PyGNablaDFT(InMemoryDataset):
         return super(PyGNablaDFT, self).get(idx - self.offsets[data_idx])
 
     def download(self) -> None:
+        logger.info(f"Downloading split: {self.dataset_name}")
         with open(nablaDFT.__path__[0] + "/links/energy_databases_v2.json", "r") as f:
             data = json.load(f)
             url = data[f"{self.split}_databases"][self.dataset_name]
@@ -73,7 +79,7 @@ class PyGNablaDFT(InMemoryDataset):
     def process(self) -> None:
         db = connect(self.raw_paths[0])
         samples = []
-        for db_row in db.select():
+        for db_row in tqdm(db.select(), total=len(db)):
             z = torch.from_numpy(db_row.numbers).long()
             positions = torch.from_numpy(db_row.positions).float()
             y = torch.from_numpy(np.array(db_row.data["energy"])).float()
@@ -91,6 +97,7 @@ class PyGNablaDFT(InMemoryDataset):
 
         data, slices = self.collate(samples)
         torch.save((data, slices), self.processed_paths[0])
+        logger.info(f"Saved processed dataset: {self.processed_paths[0]}")
 
 
 # TODO: move this to OnDiskDataset
@@ -169,6 +176,7 @@ class PyGHamiltonianNablaDFT(InMemoryDataset):
         return super(PyGHamiltonianNablaDFT, self).get(idx - self.offsets[data_idx])
 
     def download(self) -> None:
+        logger.info(f"Downloading split: {self.dataset_name}")
         with open(nablaDFT.__path__[0] + "/links/hamiltonian_databases.json") as f:
                 data = json.load(f)
                 url = data["train_databases"][self.dataset_name]
@@ -177,7 +185,7 @@ class PyGHamiltonianNablaDFT(InMemoryDataset):
     def process(self) -> None:
         database = HamiltonianDatabase(self.raw_paths[0])
         samples = []
-        for idx in range(len(database)):
+        for idx in tqdm(range(len(database)), total=len(database)):
             data = database[idx]
             z = torch.tensor(data[0]).long()
             positions = torch.tensor(data[1]).to(self.dtype)
@@ -209,6 +217,7 @@ class PyGHamiltonianNablaDFT(InMemoryDataset):
 
         data, slices = self.collate(samples)
         torch.save((data, slices), self.processed_paths[0])
+        logger.info(f"Saved processed dataset: {self.processed_paths[0]}")
 
     def _get_max_orbitals(self, datapath, dataset_name):
         db_path = os.path.join(datapath, "raw/" + dataset_name + self.db_suffix)
