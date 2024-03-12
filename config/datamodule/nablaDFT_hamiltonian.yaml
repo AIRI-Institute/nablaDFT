@@ -1,7 +1,7 @@
 # Dataset config for torch geometric nablaDFT
-_target_: nablaDFT.dataset.PyGHamiltonianNablaDFT
+_target_: nablaDFT.dataset.PyGHamiltonianDataModule
 
-root: ./datasets/nablaDFT/train
+root: ./datasets/nablaDFT/hamiltonian
 dataset_name: ${dataset_name}
 train_size: 0.9
 val_size: 0.1
