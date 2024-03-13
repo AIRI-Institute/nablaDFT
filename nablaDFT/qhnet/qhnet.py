@@ -1,5 +1,6 @@
 from typing import Dict
 
+import numpy as np
 import torch
 from torch import nn
 from torch.optim import Optimizer
@@ -13,20 +14,11 @@ import pytorch_lightning as pl
 from .layers import ExponentialBernsteinRadialBasisFunctions, ConvNetLayer, PairNetLayer, SelfNetLayer, Expansion, get_nonlinear
 
 
-ATOM_MASKS = {
-    1: [0, 1, 5, 6, 7],
-    6: [0, 1, 2, 5, 6, 7, 8, 9, 10, 17, 18, 19, 20, 21],
-    7: [0, 1, 2, 5, 6, 7, 8, 9, 10, 17, 18, 19, 20, 21],
-    8: [0, 1, 2, 5, 6, 7, 8, 9, 10, 17, 18, 19, 20, 21],
-    9: [0, 1, 2, 5, 6, 7, 8, 9, 10, 17, 18, 19, 20, 21],
-    16: [0, 1, 2, 3, 5, 6, 7, 8, 9, 10, 17, 18, 19, 20, 21],
-    17: [0, 1, 2, 5, 6, 7, 8, 9, 10, 17, 18, 19, 20, 21],
-    35: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
-         16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]
-}
-
-
 class QHNet(nn.Module):
+    """Modified QHNet from paper
+    Args:
+        orbitals (Dict): defines orbitals for each atom type from the dataset.
+    """
     def __init__(self,
                  in_node_features=1,
                  sh_lmax=4,
@@ -35,14 +27,10 @@ class QHNet(nn.Module):
                  num_gnn_layers=5,
                  max_radius=12,
                  num_nodes=10,
-                 radius_embed_dim=32):  # maximum nuclear charge (+1, i.e. 87 for up to Rn) for embeddings, can be kept at default
+                 radius_embed_dim=32, # maximum nuclear charge (+1, i.e. 87 for up to Rn) for embeddings, can be kept at default
+                 orbitals: Dict = None):
         super(QHNet, self).__init__()
         # store hyperparameter values
-        self.atom_orbs = [
-            [[8, 0, '1s'], [8, 0, '2s'], [8, 0, '3s'], [8, 1, '2p'], [8, 1, '3p'], [8, 2, '3d']],
-            [[1, 0, '1s'], [1, 0, '2s'], [1, 1, '2p']],
-            [[1, 0, '1s'], [1, 0, '2s'], [1, 1, '2p']]
-        ]
         self.order = sh_lmax
         self.sh_irrep = o3.Irreps.spherical_harmonics(lmax=self.order)
         self.hs = hidden_size
@@ -53,15 +41,13 @@ class QHNet(nn.Module):
         self.node_embedding = nn.Embedding(num_nodes, self.hs)
         self.hidden_irrep = o3.Irreps(f'{self.hs}x0e + {self.hs}x1o + {self.hs}x2e + {self.hs}x3o + {self.hs}x4e')
         self.hidden_bottle_irrep = o3.Irreps(f'{self.hbs}x0e + {self.hbs}x1o + {self.hbs}x2e + {self.hbs}x3o + {self.hbs}x4e')
-        self.hidden_irrep_base = o3.Irreps(f'{self.hs}x0e + {self.hs}x1e + {self.hs}x2e + {self.hs}x3e + {self.hs}x4e')
-        self.hidden_bottle_irrep_base = o3.Irreps(
-            f'{self.hbs}x0e + {self.hbs}x1e + {self.hbs}x2e + {self.hbs}x3e + {self.hbs}x4e')
-        self.final_out_irrep = o3.Irreps(f'{self.hs * 3}x0e + {self.hs * 2}x1o + {self.hs}x2e').simplify()
+        self.hidden_irrep_base = o3.Irreps(f'{self.hs}x0e + {self.hs}x1e + {self.hs}x2e + {self.hs}x3e + {self.hs}x4e') # in use
         self.input_irrep = o3.Irreps(f'{self.hs}x0e')
         self.distance_expansion = ExponentialBernsteinRadialBasisFunctions(self.radius_embed_dim, self.max_radius)
-        self.nonlinear_scalars = {1: "ssp", -1: "tanh"}
-        self.nonlinear_gates = {1: "ssp", -1: "abs"}
         self.num_fc_layer = 1
+
+        orbital_mask, max_s, max_p, max_d = self._get_mask(orbitals)  # max_* used below to define output representation
+        self.orbital_mask = orbital_mask
 
         self.e3_gnn_layer = nn.ModuleList()
         self.e3_gnn_node_pair_layer = nn.ModuleList()
@@ -112,8 +98,8 @@ class QHNet(nn.Module):
 
             self.expand_ii[name] = Expansion(
                 input_expand_ii,
-                o3.Irreps("3x0e + 2x1e + 1x2e"),
-                o3.Irreps("3x0e + 2x1e + 1x2e")
+                o3.Irreps(f"{max_s}x0e + {max_p}x1e + {max_d}x2e"), # here we define which basis we use
+                o3.Irreps(f"{max_s}x0e + {max_p}x1e + {max_d}x2e")  # here we define which basis we use
             )
             self.fc_ii[name] = torch.nn.Sequential(
                 nn.Linear(self.hs, self.hs),
@@ -125,11 +111,10 @@ class QHNet(nn.Module):
                 nn.SiLU(),
                 nn.Linear(self.hs, self.expand_ii[name].num_bias) # TODO: this shit defines output dimension for diagonal block
             )
-
             self.expand_ij[name] = Expansion(
                 o3.Irreps(f'{self.hbs}x0e + {self.hbs}x1e + {self.hbs}x2e + {self.hbs}x3e + {self.hbs}x4e'),
-                o3.Irreps("3x0e + 2x1e + 1x2e"),
-                o3.Irreps("3x0e + 2x1e + 1x2e")
+                o3.Irreps(f"{max_s}x0e + {max_p}x1e + {max_d}x2e"),  # here we define which basis we use
+                o3.Irreps(f"{max_s}x0e + {max_p}x1e + {max_d}x2e")  # here we define which basis we use
             )
 
             self.fc_ij[name] = torch.nn.Sequential(
@@ -146,11 +131,10 @@ class QHNet(nn.Module):
 
         self.output_ii = Linear(self.hidden_irrep, self.hidden_bottle_irrep)
         self.output_ij = Linear(self.hidden_irrep, self.hidden_bottle_irrep)
-        self.orbital_mask = {}
 
     def set(self):
-        for key in ATOM_MASKS.keys():
-            self.orbital_mask[key] = torch.tensor(ATOM_MASKS[key]).to(self.device)   
+        for key in self.orbital_mask.keys():
+            self.orbital_mask[key] = self.orbital_mask[key].to(self.device)
 
     def get_number_of_parameters(self):
         num = 0
@@ -193,7 +177,6 @@ class QHNet(nn.Module):
         hamiltonian_non_diagonal_matrix = self.expand_ij['hamiltonian'](
             fij, self.fc_ij['hamiltonian'](node_pair_embedding),
             self.fc_ij_bias['hamiltonian'](node_pair_embedding))
-
         if keep_blocks is False:
             hamiltonian_matrix = self.build_final_matrix(
                 data, hamiltonian_diagonal_matrix, hamiltonian_non_diagonal_matrix)
@@ -267,43 +250,29 @@ class QHNet(nn.Module):
                                 -1, self.orbital_mask[data.z[src_idx].item()]))
                 matrix_block_col.append(torch.cat(matrix_col, dim=-2))
             final_matrix.append(torch.cat(matrix_block_col, dim=-1))
-        final_matrix = torch.block_diag(final_matrix)
+        final_matrix = torch.block_diag(*final_matrix)
         return final_matrix
-
-    def split_matrix(self, data):
-        diagonal_matrix, non_diagonal_matrix = \
-            torch.zeros(data.z.shape[0], 14, 14).type(data.pos.type()).to(self.device), \
-            torch.zeros(data.edge_index.shape[1], 14, 14).type(data.pos.type()).to(self.device)
-
-        data.matrix =  data.matrix.reshape(
-            len(data.ptr) - 1, data.matrix.shape[-1], data.matrix.shape[-1])
-
-        num_atoms = 0
-        num_edges = 0
-        for graph_idx in range(data.ptr.shape[0] - 1):
-            slices = [0]
-            for atom_idx in data.z[range(data.ptr[graph_idx], data.ptr[graph_idx + 1])]:
-                slices.append(slices[-1] + len(self.orbital_mask[atom_idx.item()]))
-
-            for node_idx in range(data.ptr[graph_idx], data.ptr[graph_idx+1]):
-                node_idx = node_idx - num_atoms
-                orb_mask = self.orbital_mask[data.z[node_idx].item()]
-                diagonal_matrix[node_idx][orb_mask][:, orb_mask] = \
-                    data.matrix[graph_idx][slices[node_idx]: slices[node_idx+1], slices[node_idx]: slices[node_idx+1]]
-
-            for edge_index_idx in range(num_edges, data.edge_index.shape[1]):
-                dst, src = data.edge_index[:, edge_index_idx]
-                if dst > data.ptr[graph_idx + 1] or src > data.ptr[graph_idx + 1]:
-                    break
-                num_edges = num_edges + 1
-                orb_mask_dst = self.orbital_mask[data.z[dst].item()]
-                orb_mask_src = self.orbital_mask[data.z[src].item()]
-                graph_dst, graph_src = dst - num_atoms, src - num_atoms
-                non_diagonal_matrix[edge_index_idx][orb_mask_dst][:, orb_mask_src] = \
-                    data.matrix[graph_idx][slices[graph_dst]: slices[graph_dst+1], slices[graph_src]: slices[graph_src+1]]
-
-            num_atoms = num_atoms + data.ptr[graph_idx + 1] - data.ptr[graph_idx]
-        return diagonal_matrix, non_diagonal_matrix
+    
+    def _get_mask(self, orbitals):
+        # get orbitals by z
+        # retrieve max orbital and get ranges for mask
+        max_z = max(orbitals.keys())
+        _, counts = np.unique(orbitals[max_z], return_counts=True)
+        s_max, p_max, d_max = counts # max orbital number per type
+        s_range = [i for i in range(s_max)]
+        p_range = [i + max(s_range) + 1 for i in range(p_max * 3)]
+        d_range = [i + max(p_range) + 1 for i in range(d_max * 5)]
+        ranges = [s_range, p_range, d_range]
+        orbs_count = [1, 3, 5] # orbital count per type
+        # create mask for each atom type
+        atom_orb_masks = {}
+        for atom in orbitals.keys():
+            _, orb_count = np.unique(orbitals[atom], return_counts=True)
+            mask = []
+            for idx, val in enumerate(orb_count):
+                mask.extend(ranges[idx][:orb_count[idx] * orbs_count[idx]])
+            atom_orb_masks[atom] = torch.tensor(mask)
+        return atom_orb_masks, s_max, p_max, d_max
 
 
 class QHNetLightning(pl.LightningModule):
@@ -314,11 +283,13 @@ class QHNetLightning(pl.LightningModule):
             optimizer: Optimizer,
             lr_scheduler: LRScheduler,
             losses: Dict,
+            ema,
             metric,
             loss_coefs,
     ) -> None:
         super(QHNetLightning, self).__init__()
         self.net = net
+        self.ema = ema
         self.save_hyperparameters(logger=True)
 
     def forward(self, data: Data):
@@ -354,8 +325,8 @@ class QHNetLightning(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         bsz = self._get_batch_size(batch)
- #       with self.ema.average_parameters():
-        loss, metrics = self.step(batch, calculate_metrics=True)
+        with self.ema.average_parameters():
+            loss, metrics = self.step(batch, calculate_metrics=True)
         self.log(
             "val/loss",
             loss,
@@ -413,15 +384,15 @@ class QHNetLightning(pl.LightningModule):
             }
         return {"optimizer": optimizer}
 
-#    def on_before_zero_grad(self, optimizer: Optimizer) -> None:
-#        self.ema.update()
+    def on_before_zero_grad(self, optimizer: Optimizer) -> None:
+        self.ema.update()
 
     def on_fit_start(self) -> None:
- #       self._instantiate_ema()
+        self._instantiate_ema()
         self._check_devices()
 
     def on_test_start(self) -> None:
- #       self._instantiate_ema()
+        self._instantiate_ema()
         self._check_devices()
 
     def on_validation_epoch_end(self) -> None:
@@ -465,14 +436,23 @@ class QHNetLightning(pl.LightningModule):
     def _check_devices(self):
         self.hparams.metric = self.hparams.metric.to(self.device)
         self.net.set()
-#        if self.ema is not None:
-#            self.ema.to(self.device)
+        if self.ema is not None:
+            self.ema.to(self.device)
 
-#    def _instantiate_ema(self):
-#        if self.ema is not None:
-#            self.ema = self.ema(self.parameters())
+    def _instantiate_ema(self):
+        if self.ema is not None:
+            self.ema = self.ema(self.parameters())
 
     def _get_batch_size(self, batch):
         """Function for batch size infer."""
         bsz = batch.batch.max().detach().item() + 1  # get batch size
         return bsz
+    
+    def _get_hamiltonian_sizes(self, batch):
+        sizes = []
+        for idx in range(batch.ptr.shape[0] - 1):
+            atoms = batch.z[batch.ptr[idx]: batch.ptr[idx + 1]]
+            size = sum([self.net.orbital_mask[atom] for atom in atoms])
+            sizes.append(size)
+        return sizes
+    
