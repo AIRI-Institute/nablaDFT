@@ -290,7 +290,7 @@ class QHNetLightning(pl.LightningModule):
         super(QHNetLightning, self).__init__()
         self.net = net
         self.ema = ema
-        self.save_hyperparameters(logger=True)
+        self.save_hyperparameters(logger=True, ignore=['net'])
 
     def forward(self, data: Data):
         hamiltonian = self.net(data)
@@ -300,11 +300,12 @@ class QHNetLightning(pl.LightningModule):
         hamiltonian_out = self.net(batch)
         hamiltonian = batch.hamiltonian
         preds = {'hamiltonian': hamiltonian_out}
-        hamiltonian = torch.block_diag(*[torch.from_numpy(H) for H in hamiltonian])
+        masks = torch.block_diag(*[torch.ones_like(torch.from_numpy(H)) for H in hamiltonian])
+        hamiltonian = torch.block_diag(*[torch.from_numpy(H) for H in hamiltonian]).to(self.device)
         target = {'hamiltonian': hamiltonian}
-        loss = self._calculate_loss(preds, target)
+        loss = self._calculate_loss(preds, target, masks)
         if calculate_metrics:
-            metrics = self._calculate_metrics(preds, target)
+            metrics = self._calculate_metrics(preds, target, masks)
             return loss, metrics
         return loss
 
@@ -401,18 +402,26 @@ class QHNetLightning(pl.LightningModule):
     def on_test_epoch_end(self) -> None:
         self._reduce_metrics(step_type="test")
 
-    def _calculate_loss(self, y_pred, y_true) -> float:
+#    def on_after_backward(self):
+#        for name, param in self.named_parameters():
+#           if param.grad is None:
+#                print(name)
+
+    def _calculate_loss(self, y_pred, y_true, masks) -> float:
         # Note: since hamiltonians has different shapes, loss calculated per sample
         total_loss = 0.0
         for name, loss in self.hparams.losses.items():
             total_loss += self.hparams.loss_coefs[name] * loss(
-                y_pred[name], y_true[name]
+                y_pred[name], y_true[name], masks
             )
         return total_loss
 
-    def _calculate_metrics(self, y_pred, y_true) -> Dict:
+    def _calculate_metrics(self, y_pred, y_true, mask) -> Dict:
         """Function for metrics calculation during step."""
+        # TODO: temp workaround for metric normalization by mask sum
+        norm_coef = (y_pred['hamiltonian'].numel() / mask.sum())
         metric = self.hparams.metric(y_pred, y_true)
+        metric['hamiltonian'] = metric['hamiltonian'] * norm_coef
         return metric
 
     def _log_current_lr(self) -> None:

@@ -36,7 +36,7 @@ lr_scheduler:
 
 losses:
   hamiltonian:
-    _target_: nablaDFT.qhnet.loss.MAE_RMSE_Loss
+    _target_: nablaDFT.qhnet.loss.HamiltonianLoss
 loss_coefs:
   hamiltonian: 1.0
 

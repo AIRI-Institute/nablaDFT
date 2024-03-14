@@ -3,12 +3,15 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-class MAE_RMSE_Loss(nn.Module):
+class HamiltonianLoss(nn.Module):
     def __init__(self) -> None:
-        super(MAE_RMSE_Loss, self).__init__()
+        super(HamiltonianLoss, self).__init__()
 
-    def forward(self, pred, target):
-        mse = F.mse_loss(pred, target, reduction="none")
-        mae = F.l1_loss(pred, target, reduction="mean")
-        rmse = torch.sqrt(mse.mean())
-        return mae + rmse
+    def forward(self, pred, target, mask):
+        diff = pred - target
+        mse = torch.mean(diff**2)
+        mae = torch.mean(torch.abs(diff))
+        mse *= (pred.numel() / mask.sum())
+        mae *= (pred.numel() / mask.sum())
+        rmse = torch.sqrt(mse)
+        return rmse + mae

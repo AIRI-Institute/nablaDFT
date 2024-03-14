@@ -7,7 +7,7 @@ train_size: 0.9
 val_size: 0.1
 seed: 23
 # Dataloader args
-batch_size: 2
+batch_size: 8
 num_workers: 4
 persistent_workers: True
 pin_memory: True
