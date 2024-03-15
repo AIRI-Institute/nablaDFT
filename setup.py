@@ -32,9 +32,9 @@ setup(
         "pyyaml",
         "hydra-core==1.2.0",
         "torch==2.2.0",
-        "torch-scatter @ https://data.pyg.org/whl/torch-2.2.0+${CUDA}.html",
-        "torch-sparse @ https://data.pyg.org/whl/torch-2.2.0+${CUDA}.html",
-        "torch-cluster @ https://data.pyg.org/whl/torch-2.2.0+${CUDA}.html",
+        "torch-scatter",
+        "torch-sparse ",
+        "torch-cluster",
         "pytorch_lightning==2.1.4",
         "torch-geometric==2.4.0",
         "torchmetrics==1.0.1",
@@ -48,6 +48,11 @@ setup(
         "wandb==0.16.3",
         "e3nn==0.5.1"
     ],
+    dependency_links=[
+        f"https://data.pyg.org/whl/torch-2.2.0+{CUDA}.html",
+        f"https://data.pyg.org/whl/torch-2.2.0+{CUDA}.html",
+        f"https://data.pyg.org/whl/torch-2.2.0+{CUDA}.html"
+    ]
     license="MIT",
     description="nablaDFT: Large-Scale Conformational Energy and Hamiltonian Prediction benchmark and dataset",
     long_description="""
