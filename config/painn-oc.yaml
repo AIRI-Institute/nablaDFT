@@ -1,0 +1,25 @@
+# Global variables
+name: PaiNN-OC
+dataset_name: dataset_test_conformations_2k_delta
+max_steps: 1000000
+job_type: test
+pretrained: False
+ckpt_path: ./checkpoints/PaiNN-OC/PaiNN-OC_dataset_train_2k_delta_epoch=5116_val_loss=0.325242.ckpt # path to checkpoint for training resume or test run
+
+# configs
+defaults:
+  - _self_
+  - datamodule: nablaDFT_pyg_test.yaml  # dataset config
+  - model: painn-oc.yaml  # model config
+  - callbacks: default.yaml  # pl callbacks config
+  - loggers: wandb.yaml  # pl loggers config
+  - trainer: test.yaml  # trainer config
+
+# need this to set working dir as current dir
+hydra:
+  output_subdir: null
+  run:
+    dir: .
+original_work_dir: ${hydra:runtime.cwd}
+
+seed: 23
