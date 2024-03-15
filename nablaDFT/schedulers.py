@@ -54,6 +54,7 @@ def _get_polynomial_decay_schedule_with_warmup_lr_lambda(
     power: float,
     lr_init: int,
 ):
+    # from https://github.com/huggingface/transformers/blob/v4.31.0/src/transformers/optimization.py#L218
     if current_step < num_warmup_steps:
         return float(current_step) / float(max(1, num_warmup_steps))
     elif current_step > num_training_steps:
@@ -69,6 +70,7 @@ def _get_polynomial_decay_schedule_with_warmup_lr_lambda(
 def get_polynomial_decay_schedule_with_warmup(
     optimizer, num_warmup_steps, num_training_steps, lr_end=1e-7, power=1.0, last_epoch=-1
 ):
+    # from https://github.com/huggingface/transformers/blob/v4.31.0/src/transformers/optimization.py#L239
     """
     Create a schedule with a learning rate that decreases as a polynomial decay from the initial lr set in the
     optimizer to end lr defined by *lr_end*, after a warmup period during which it increases linearly from 0 to the
