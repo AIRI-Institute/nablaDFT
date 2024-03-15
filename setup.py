@@ -3,6 +3,10 @@ import io
 
 from setuptools import setup, find_packages
 
+
+CUDA = "cu121"
+
+
 def read(fname):
     with io.open(os.path.join(os.path.dirname(__file__), fname), encoding="utf-8") as f:
         return f.read()
@@ -28,6 +32,9 @@ setup(
         "pyyaml",
         "hydra-core==1.2.0",
         "torch==2.2.0",
+        "torch-scatter @ https://data.pyg.org/whl/torch-2.2.0+${CUDA}.html",
+        "torch-sparse @ https://data.pyg.org/whl/torch-2.2.0+${CUDA}.html",
+        "torch-cluster @ https://data.pyg.org/whl/torch-2.2.0+${CUDA}.html",
         "pytorch_lightning==2.1.4",
         "torch-geometric==2.4.0",
         "torchmetrics==1.0.1",
