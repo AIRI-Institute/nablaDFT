@@ -7,6 +7,7 @@ from urllib import request as request
 import logging
 import warnings
 
+from tqdm import tqdm
 import pytorch_lightning as pl
 from pytorch_lightning import LightningModule
 from pytorch_lightning.utilities import rank_zero_only
@@ -24,6 +25,31 @@ import nablaDFT
 
 
 logger = logging.getLogger()
+
+def get_file_size(url: str) -> int:
+    """Returns file size in bytes"""
+    req = request.Request(url, method="HEAD")
+    with request.urlopen(req) as f:
+        file_size = f.headers.get('Content-Length')
+    return int(file_size)
+
+def tqdm_download_hook(t):
+    """wraps TQDM progress bar instance"""
+    last_block = [0]
+
+    def update_to(blocks_count: int, block_size: int, total_size: int):
+        """Adds progress bar for request.urlretrieve() method
+        Args:
+            - blocks_count (int): transferred blocks count.
+            - block_size (int): size of block in bytes.
+            - total_size (int): size of requested file.
+        """
+        if total_size in (None, -1):
+            t.total = total_size
+        displayed = t.update((blocks_count - last_block[0]) * block_size)
+        last_block[0] = blocks_count
+        return displayed
+    return update_to
 
 
 def seed_everything(seed=42):
@@ -74,7 +100,8 @@ def download_model(config: DictConfig) -> str:
     with open(nablaDFT.__path__[0] + "/links/models_checkpoints.json", "r") as f:
         data = json.load(f)
         url = data[f"{model_name}"]["dataset_train_100k"]
-    request.urlretrieve(url, ckpt_path)
+    with tqdm(unit="B", unit_scale=True, unit_divisor=1024, miniters=1, desc=f"Downloading {model_name} checkpoint") as t:
+        request.urlretrieve(url, ckpt_path, reporthook=tqdm_download_hook(t))
     logging.info(f"Downloaded {model_name} 100k checkpoint to {ckpt_path}")
     return ckpt_path
 

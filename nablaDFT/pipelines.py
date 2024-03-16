@@ -35,7 +35,7 @@ def predict(
     pred_path = os.path.join(os.getcwd(), "predictions")
     os.makedirs(pred_path, exist_ok=True)
     predictions = trainer.predict(
-        model=model, datamodule=datamodule.dataset, ckpt_path=ckpt_path
+        model=model, datamodule=datamodule, ckpt_path=ckpt_path
     )
     torch.save(predictions, f"{pred_path}/{config.name}_{config.dataset_name}.pt")
 
@@ -105,9 +105,9 @@ def run(config: DictConfig):
     # Datamodule
     datamodule: LightningDataModule = hydra.utils.instantiate(config.datamodule)
     if job_type == "train":
-        trainer.fit(model=model, datamodule=datamodule.dataset, ckpt_path=ckpt_path)
+        trainer.fit(model=model, datamodule=datamodule, ckpt_path=ckpt_path)
     elif job_type == "test":
-        trainer.test(model=model, datamodule=datamodule.dataset, ckpt_path=ckpt_path)
+        trainer.test(model=model, datamodule=datamodule, ckpt_path=ckpt_path)
     elif job_type == "predict":
         predict(trainer, model, datamodule, ckpt_path, config)
     # Finalize
