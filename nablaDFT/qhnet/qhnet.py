@@ -109,7 +109,7 @@ class QHNet(nn.Module):
             self.fc_ii_bias[name] = torch.nn.Sequential(
                 nn.Linear(self.hs, self.hs),
                 nn.SiLU(),
-                nn.Linear(self.hs, self.expand_ii[name].num_bias) # TODO: this shit defines output dimension for diagonal block
+                nn.Linear(self.hs, self.expand_ii[name].num_bias)
             )
             self.expand_ij[name] = Expansion(
                 o3.Irreps(f'{self.hbs}x0e + {self.hbs}x1e + {self.hbs}x2e + {self.hbs}x3e + {self.hbs}x4e'),
@@ -402,13 +402,7 @@ class QHNetLightning(pl.LightningModule):
     def on_test_epoch_end(self) -> None:
         self._reduce_metrics(step_type="test")
 
-#    def on_after_backward(self):
-#        for name, param in self.named_parameters():
-#           if param.grad is None:
-#                print(name)
-
     def _calculate_loss(self, y_pred, y_true, masks) -> float:
-        # Note: since hamiltonians has different shapes, loss calculated per sample
         total_loss = 0.0
         for name, loss in self.hparams.losses.items():
             total_loss += self.hparams.loss_coefs[name] * loss(

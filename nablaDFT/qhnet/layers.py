@@ -172,7 +172,7 @@ class ConvLayer(torch.nn.Module):
         self.edge_attr_dim = edge_attr_dim
         self.node_attr_dim = node_attr_dim
         self.edge_wise = edge_wise
-
+        self.use_norm_gate = use_norm_gate
         self.irrep_in_node = irrep_in_node if isinstance(irrep_in_node, o3.Irreps) else o3.Irreps(irrep_in_node)
         self.irrep_hidden = irrep_hidden \
             if isinstance(irrep_hidden, o3.Irreps) else o3.Irreps(irrep_hidden)
@@ -213,25 +213,25 @@ class ConvLayer(torch.nn.Module):
             shared_weights=True,
             biases=True
         )
-
-        self.use_norm_gate = use_norm_gate
-        self.norm_gate = NormGate(self.irrep_in_node)
         self.irrep_linear_out, instruction_node = get_feasible_irrep(
             self.irrep_in_node, o3.Irreps("0e"), self.irrep_in_node)
-        self.linear_node = Linear(
-            irreps_in=self.irrep_in_node,
-            irreps_out=self.irrep_linear_out,
-            internal_weights=True,
-            shared_weights=True,
-            biases=True
-        )
-        self.linear_node_pre = Linear(
-            irreps_in=self.irrep_in_node,
-            irreps_out=self.irrep_linear_out,
-            internal_weights=True,
-            shared_weights=True,
-            biases=True
-        )
+        if use_norm_gate:
+            # if this first layer, then it doesn't need this
+            self.norm_gate = NormGate(self.irrep_in_node)
+            self.linear_node = Linear(
+                irreps_in=self.irrep_in_node,
+                irreps_out=self.irrep_linear_out,
+                internal_weights=True,
+                shared_weights=True,
+                biases=True
+            )
+            self.linear_node_pre = Linear(
+                irreps_in=self.irrep_in_node,
+                irreps_out=self.irrep_linear_out,
+                internal_weights=True,
+                shared_weights=True,
+                biases=True
+            )
         self.inner_product = InnerProduct(self.irrep_in_node)
 
     def forward(self, data, x):
@@ -399,27 +399,9 @@ class PairNetLayer(torch.nn.Module):
         self.irrep_tp_out_node_pair_2, instruction_node_pair_2 = get_feasible_irrep(
             self.irrep_tp_out_node_pair, self.irrep_tp_out_node_pair, self.irrep_bottle_hidden, tp_mode='uuu')
 
-        self.tp_node_pair_2 = TensorProduct(
-            self.irrep_tp_out_node_pair,
-            self.irrep_tp_out_node_pair,
-            self.irrep_tp_out_node_pair_2,
-            instruction_node_pair_2,
-            shared_weights=True,
-            internal_weights=True
-        )
-
-
         self.fc_node_pair = FullyConnectedNet(
             [self.edge_attr_dim] + invariant_layers * [invariant_neurons] + [self.tp_node_pair.weight_numel],
             self.nonlinear_layer
-        )
-
-        self.linear_node_pair_2 = Linear(
-            irreps_in=self.irrep_tp_out_node_pair_2,
-            irreps_out=self.irrep_out,
-            internal_weights=True,
-            shared_weights=True,
-            biases=True
         )
 
         if self.irrep_in_node == self.irrep_out and resnet:
@@ -588,19 +570,14 @@ class Expansion(nn.Module):
             x1 = x1.reshape(batch_num, mul_ir_in.mul, mul_ir_in.ir.dim)
             w3j_matrix = o3.wigner_3j(ins[1], ins[2], ins[0]).to(self.device).type(x1.type())
             if ins[3] is True or weights is not None:
-                if weights is None:
-                    weight = self.weights[flat_weight_index:flat_weight_index + prod(ins[-1])].reshape(ins[-1])
-                    result = torch.einsum(
-                        f"wuv, ijk, bwk-> buivj", weight, w3j_matrix, x1) / mul_ir_in.mul
-                else:
-                    weight = weights[:, flat_weight_index:flat_weight_index + prod(ins[-1])].reshape([-1] + ins[-1])
-                    result = torch.einsum(f"bwuv, bwk-> buvk", weight, x1)
-                    if ins[0] == 0 and bias_weights is not None:
-                        bias_weight = bias_weights[:,bias_weight_index:bias_weight_index + prod(ins[-1][1:])].\
-                            reshape([-1] + ins[-1][1:])
-                        bias_weight_index += prod(ins[-1][1:])
-                        result = result + bias_weight.unsqueeze(-1)
-                    result = torch.einsum(f"ijk, buvk->buivj", w3j_matrix, result) / mul_ir_in.mul
+                weight = weights[:, flat_weight_index:flat_weight_index + prod(ins[-1])].reshape([-1] + ins[-1])
+                result = torch.einsum(f"bwuv, bwk-> buvk", weight, x1)
+                if ins[0] == 0 and bias_weights is not None:
+                    bias_weight = bias_weights[:,bias_weight_index:bias_weight_index + prod(ins[-1][1:])].\
+                        reshape([-1] + ins[-1][1:])
+                    bias_weight_index += prod(ins[-1][1:])
+                    result = result + bias_weight.unsqueeze(-1)
+                result = torch.einsum(f"ijk, buvk->buivj", w3j_matrix, result) / mul_ir_in.mul
                 flat_weight_index += prod(ins[-1])
             else:
                 result = torch.einsum(
