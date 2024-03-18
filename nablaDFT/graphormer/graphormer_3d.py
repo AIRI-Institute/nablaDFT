@@ -380,17 +380,11 @@ class Graphormer3DLightning(pl.LightningModule):
         y = batch.y
         energy_out, forces_out, mask_out = self(batch)
         loss_energy = self.loss(energy_out, y)
-        # TODO: temp workaround for datasets w/o forces
-        if hasattr(batch, "forces"):
-            forces, mask_forces = to_dense_batch(
-                batch.forces, batch.batch, batch_size=bsz
-            )
-            masked_forces_out = forces_out * mask_forces.unsqueeze(-1)
-            loss_forces = self.loss(masked_forces_out, forces)
-        else:
-            loss_forces = torch.zeros(1).to(self.device)
-            masked_forces_out = torch.zeros(1).to(self.device)
-            forces = torch.zeros(1).to(self.device)
+        forces, mask_forces = to_dense_batch(
+            batch.forces, batch.batch, batch_size=bsz
+        )
+        masked_forces_out = forces_out * mask_forces.unsqueeze(-1)
+        loss_forces = self.loss(masked_forces_out, forces)
         loss = self.loss_forces_coef * loss_forces + self.loss_energy_coef * loss_energy
         if calculate_metrics:
             preds = {"energy": energy_out, "forces": masked_forces_out}

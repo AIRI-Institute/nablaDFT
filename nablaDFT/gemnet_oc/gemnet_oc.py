@@ -1432,10 +1432,7 @@ class GemNetOCLightning(pl.LightningModule):
     def step(self, batch, calculate_metrics: bool = False):
         energy_out, forces_out = self.net(batch)
         # TODO: temp workaround
-        if hasattr(batch, "forces"):
-            forces = batch.forces
-        else:
-            forces = forces_out.clone()
+        forces = batch.forces
         preds = {"energy": energy_out, "forces": forces_out}
         target = {"energy": batch.y, "forces": forces}
         loss = self._calculate_loss(preds, target)

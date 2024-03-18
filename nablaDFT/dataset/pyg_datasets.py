@@ -70,7 +70,7 @@ class PyGNablaDFT(InMemoryDataset):
         return super(PyGNablaDFT, self).get(idx - self.offsets[data_idx])
 
     def download(self) -> None:
-        with open(nablaDFT.__path__[0] + "/links/energy_databases_v2.json", "r") as f:
+        with open(nablaDFT.__path__[0] + "/links/energy_databases.json", "r") as f:
             data = json.load(f)
             url = data[f"{self.split}_databases"][self.dataset_name]
         file_size = get_file_size(url)
@@ -84,10 +84,7 @@ class PyGNablaDFT(InMemoryDataset):
             z = torch.from_numpy(db_row.numbers).long()
             positions = torch.from_numpy(db_row.positions).float()
             y = torch.from_numpy(np.array(db_row.data["energy"])).float()
-            # TODO: temp workaround for dataset w/o forces
-            forces = db_row.data.get("forces", None)
-            if forces is not None:
-                forces = torch.from_numpy(np.array(forces)).float()
+            forces = torch.from_numpy(np.array(db_row.data["forces"])).float()
             samples.append(Data(z=z, pos=positions, y=y, forces=forces))
 
         if self.pre_filter is not None:
