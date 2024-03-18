@@ -1,5 +1,5 @@
 # Global variables
-name: Equiformer_v2_OC20
+name: Equiformer_v2
 dataset_name: dataset_train_2k
 max_steps: 1000000
 warmup_steps: 0
