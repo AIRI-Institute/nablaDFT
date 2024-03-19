@@ -144,13 +144,7 @@ class DimeNetPlusPlusLightning(pl.LightningModule):
     ) -> Union[Tuple[Any, Dict], Any]:
         predictions_energy, predictions_forces = self.forward(batch)
         loss_energy = self.loss(predictions_energy, batch.y)
-        # TODO: temp workaround
-        if hasattr(batch, "forces"):
-            loss_forces = self.loss(predictions_forces, batch.forces)
-        else:
-            loss_forces = torch.zeros(1).to(self.device)
-            predictions_forces = torch.zeros(1).to(self.device)
-            forces = torch.zeros(1).to(self.device)
+        loss_forces = self.loss(predictions_forces, batch.forces)
         loss = self.loss_forces_coef * loss_forces + self.loss_energy_coef * loss_energy
         if calculate_metrics:
             preds = {"energy": predictions_energy, "forces": predictions_forces}
