@@ -5,7 +5,8 @@ accelerator: "gpu"
 devices: [0]
 strategy:
   _target_: pytorch_lightning.strategies.ddp.DDPStrategy
-
+  # QHNet has unused params, uncomment line for train
+  # find_unused_parameters: True
 max_steps: ${max_steps}
 
 # example of additional arguments for trainer

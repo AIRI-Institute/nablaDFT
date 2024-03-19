@@ -9,7 +9,7 @@ from tqdm import tqdm
 import numpy as np
 import torch
 from ase.db import connect
-from torch_geometric.data import InMemoryDataset, Data
+from torch_geometric.data import InMemoryDataset, Data, Dataset
 
 import nablaDFT
 from .hamiltonian_dataset import HamiltonianDatabase
@@ -98,8 +98,7 @@ class PyGNablaDFT(InMemoryDataset):
         logger.info(f"Saved processed dataset: {self.processed_paths[0]}")
 
 
-# TODO: move this to OnDiskDataset
-class PyGHamiltonianNablaDFT(InMemoryDataset):
+class PyGHamiltonianNablaDFT(Dataset):
     """Pytorch Geometric dataset for NablaDFT Hamiltonian database.
 
     Args:
@@ -111,7 +110,7 @@ class PyGHamiltonianNablaDFT(InMemoryDataset):
       - include_core (bool): if True, retrieves core Hamiltonian matrices from database.
       - dtype (torch.dtype): defines torch.dtype for energy, positions, forces tensors.
       - transform (Callable): callable data transform, called on every access to element.
-      - pre_transform (Callable): callable data transform, called during process() for every element.
+      - pre_transform (Callable): callable data transform, called on every access to element.
     Note:
         Hamiltonian matrix for each molecule has different shape. PyTorch Geometric tries to concatenate
         each torch.Tensor in batch, so in order to make batch from data we leave all hamiltonian matrices
@@ -152,26 +151,37 @@ class PyGHamiltonianNablaDFT(InMemoryDataset):
         super(PyGHamiltonianNablaDFT, self).__init__(datapath, transform, pre_transform)
 
         self.max_orbitals = self._get_max_orbitals(datapath, dataset_name)
-        for path in self.processed_paths:
-            data, slices = torch.load(path)
-            self.data_all.append(data)
-            self.slices_all.append(slices)
-            self.offsets.append(
-                len(slices[list(slices.keys())[0]]) - 1 + self.offsets[-1]
-            )
+        self.db = HamiltonianDatabase(self.raw_paths[0])
 
     def len(self) -> int:
-        return sum(
-            len(slices[list(slices.keys())[0]]) - 1 for slices in self.slices_all
-        )
+        return len(self.db)
 
     def get(self, idx):
-        data_idx = 0
-        while data_idx < len(self.data_all) - 1 and idx >= self.offsets[data_idx + 1]:
-            data_idx += 1
-        self.data = self.data_all[data_idx]
-        self.slices = self.slices_all[data_idx]
-        return super(PyGHamiltonianNablaDFT, self).get(idx - self.offsets[data_idx])
+        data = self.db[idx]
+        z = torch.tensor(data[0]).long()
+        positions = torch.tensor(data[1]).to(self.dtype)
+        # see notes
+        hamiltonian = data[4]
+        if self.include_overlap:
+            overlap = data[5]
+        else:
+            overlap = None
+        if self.include_core:
+            core = data[6]
+        else:
+            core = None
+        y = torch.from_numpy(data[2]).to(self.dtype)
+        forces = torch.from_numpy(data[3]).to(self.dtype)
+        data = Data(
+            z=z, pos=positions,
+            y=y, forces=forces,
+            hamiltonian=hamiltonian,
+            overlap=overlap,
+            core=core,
+        )
+        if self.pre_transform is not None:
+            data = self.pre_transform(data)
+        return data
 
     def download(self) -> None:
         with open(nablaDFT.__path__[0] + "/links/hamiltonian_databases.json") as f:
@@ -182,41 +192,7 @@ class PyGHamiltonianNablaDFT(InMemoryDataset):
             request.urlretrieve(url, self.raw_paths[0], reporthook=tqdm_download_hook(t))
 
     def process(self) -> None:
-        database = HamiltonianDatabase(self.raw_paths[0])
-        samples = []
-        for idx in tqdm(range(len(database)), total=len(database)):
-            data = database[idx]
-            z = torch.tensor(data[0]).long()
-            positions = torch.tensor(data[1]).to(self.dtype)
-            # see notes
-            hamiltonian = data[4]
-            if self.include_overlap:
-                overlap = data[5]
-            else:
-                overlap = None
-            if self.include_core:
-                core = data[6]
-            else:
-                core = None
-            y = torch.from_numpy(data[2]).to(self.dtype)
-            forces = torch.from_numpy(data[3]).to(self.dtype)
-            samples.append(Data(
-                z=z, pos=positions,
-                y=y, forces=forces,
-                hamiltonian=hamiltonian,
-                overlap=overlap,
-                core=core,
-            ))
-
-        if self.pre_filter is not None:
-            samples = [data for data in samples if self.pre_filter(data)]
-
-        if self.pre_transform is not None:
-            samples = [self.pre_transform(data) for data in samples]
-
-        data, slices = self.collate(samples)
-        torch.save((data, slices), self.processed_paths[0])
-        logger.info(f"Saved processed dataset: {self.processed_paths[0]}")
+        pass
 
     def _get_max_orbitals(self, datapath, dataset_name):
         db_path = os.path.join(datapath, "raw/" + dataset_name + self.db_suffix)
