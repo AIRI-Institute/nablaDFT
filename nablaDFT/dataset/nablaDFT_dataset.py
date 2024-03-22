@@ -60,7 +60,7 @@ class ASENablaDFT(AtomsDataModule):
         if self.split == "predict" and not exists:
             raise FileNotFoundError("Specified dataset not found")
         elif self.split != "predict" and not exists:
-            with open(nablaDFT.__path__[0] + "/links/energy_databases_v2.json") as f:
+            with open(nablaDFT.__path__[0] + "/links/energy_databases.json") as f:
                 data = json.load(f)
                 if self.train_ratio != 0:
                     url = data["train_databases"][self.dataset_name]
