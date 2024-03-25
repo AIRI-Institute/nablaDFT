@@ -98,9 +98,14 @@ lowdin_charges = wfn.array_variables()["LOWDIN CHARGES"]  # Löwdin atomic charg
 ## Models
 * [Unifying machine learning and quantum chemistry with a deep neural network for molecular wavefunctions (SchNOrb)](https://github.com/KuzmaKhrabrov/SchNOrb)
 * [SE(3)-equivariant prediction of molecular wavefunctions and electronic densities (PhiSNet)](./nablaDFT/phisnet/README.md)
-* [A continuous-filter convolutional neural network for modeling quantum interactions (SchNet)](./nablaDFT/schnet/README.md)
-* [Equivariant message passing for the prediction of tensorial properties and molecular spectra (PaiNN)](./nablaDFT/painn/README.md)
+* [A continuous-filter convolutional neural network for modeling quantum interactions (SchNet)](./nablaDFT/ase_model/README.md)
+* [Equivariant message passing for the prediction of tensorial properties and molecular spectra (PaiNN)](./nablaDFT/ase_model/README.md)
 * [Fast and Uncertainty-Aware Directional Message Passing for Non-Equilibrium Molecules (DimeNet++)](./nablaDFT/dimenetplusplus/README.md)
+* [EquiformerV2: Improved Equivariant Transformer for Scaling to Higher-Degree Representations (EquiformerV2)](./nablaDFT/equiformer_v2/README.md)
+* [Reducing SO(3) Convolutions to SO(2) for Efficient Equivariant GNNs (eSCN)](./nablaDFT/escn/README.md)
+* [GemNet-OC: Developing Graph Neural Networks for Large and Diverse Molecular Simulation Datasets (GemNet-OC)](/nablaDFT/gemnet_oc/README.md)
+* [Benchmarking Graphormer on Large-Scale Molecular Modeling Datasets (Graphormer3D)](./nablaDFT/graphormer/README.md)
+* [Efficient and Equivariant Graph Networks for Predicting Quantum Hamiltonian (QHNet)](./nablaDFT/qhnet/README.md)
 
 ### Dataloaders
 To create a dataset, nablaDFT class is used. Arguments of the function depend on the type of the model (which is specified by the first argument).
