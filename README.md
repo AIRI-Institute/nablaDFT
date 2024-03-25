@@ -185,20 +185,20 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
     </tr>
     <tr>
       <td><i>SchNet</i></td>
-      <td><i>151.8</i></td>
-      <td><i>66.1</i></td>
-      <td><i>29.6</i></td>
+      <td><i>1.71</i></td>
+      <td><i>1.44</i></td>
+      <td><i>1.64</i></td>
+      <td><i>0.85</i></td>
       <td><i>-</i></td>
+      <td><i>1.37</i></td>
+      <td><i>1.10</i></td>
+      <td><i>1.29</i></td>
+      <td><i>0.48</i></td>
       <td><i>-</i></td>
-      <td><i>126.5</i></td>
-      <td><i>68.3</i></td>
-      <td><i>27.4</i></td>
-      <td><i>-</i></td>
-      <td><i>-</i></td>
-      <td><i>79.1</i></td>
-      <td><i>67.3</i></td>
-      <td><i>21.4</i></td>
-      <td><i>-</i></td>
+      <td><i>0.56</i></td>
+      <td><i>0.63</i></td>
+      <td><i>0.88</i></td>
+      <td><i>0.29</i></td>
       <td><i>-</i></td>
     </tr>
     <tr>
@@ -221,38 +221,304 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
     </tr>
     <tr>
       <td><i>DimeNet++</i></td>
-      <td><i>24.1</i></td>
-      <td><i>21.1</i></td>
-      <td><i>10.6</i></td>
-      <td><i>3.2</i></td>
+      <td><i>???</i></td>
+      <td><i>???</i></td>
+      <td><i>???</i></td>
+      <td><i>0.63</i></td>
       <td><i>-</i></td>
-      <td><i>21.6</i></td>
-      <td><i>20.9</i></td>
-      <td><i>10.1</i></td>
-      <td><i>3.0</i></td>
+      <td><i>???</i></td>
+      <td><i>???</i></td>
+      <td><i>???</i></td>
+      <td><i>0.26</i></td>
       <td><i>-</i></td>
-      <td><i>18.3</i></td>
-      <td><i>33.7</i></td>
-      <td><i>5.2</i></td>
-      <td><i>2.5</i></td>
+      <td><i>0.42</i></td>
+      <td><i>0.10</i></td>
+      <td><i>0.09</i></td>
+      <td><i>0.08</i></td>
       <td><i>-</i></td>
     </tr>
     <tr>
       <td><i>PAINN</i></td>
-      <td><i>137.2</i></td>
-      <td><i>62.8</i></td>
-      <td><i>13.1</i></td>
-      <td><i>7.0</i></td>
+      <td><i>1.37</i></td>
+      <td><i>1.14</i></td>
+      <td><i>0.89</i></td>
+      <td><i>0.64</i></td>
       <td><i>-</i></td>
-      <td><i>131.1</i></td>
-      <td><i>53.0</i></td>
-      <td><i>12.6</i></td>
-      <td><i>6.7</i></td>
+      <td><i>1.04</i></td>
+      <td><i>0.79</i></td>
+      <td><i>0.53</i></td>
+      <td><i>0.27</i></td>
       <td><i>-</i></td>
-      <td><i>134.4</i></td>
-      <td><i>50.0</i></td>
-      <td><i>12.1</i></td>
-      <td><i>7.0</i></td>
+      <td><i>0.43</i></td>
+      <td><i>0.49</i></td>
+      <td><i>0.28</i></td>
+      <td><i>0.09</i></td>
+      <td><i>-</i></td>
+    </tr>
+    <tr>
+      <td><i>Graphormer3D-small</i></td>
+      <td><i>2.09</i></td>
+      <td><i>1.50</i></td>
+      <td><i>1.32</i></td>
+      <td><i>0.91</i></td>
+      <td><i>-</i></td>
+      <td><i>1.76</i></td>
+      <td><i>1.12</i></td>
+      <td><i>0.93</i></td>
+      <td><i>0.54</i></td>
+      <td><i>-</i></td>
+      <td><i>0.99</i></td>
+      <td><i>0.67</i></td>
+      <td><i>0.58</i></td>
+      <td><i>0.39</i></td>
+      <td><i>-</i></td>
+    </tr>
+    <tr>
+      <td><i>GemNet-OC</i></td>
+      <td><i>3.33</i></td>
+      <td><i>1.19</i></td>
+      <td><i>0.82</i></td>
+      <td><i>0.76</i></td>
+      <td><i>-</i></td>
+      <td><i>2.8</i></td>
+      <td><i>0.76</i></td>
+      <td><i>0.45</i></td>
+      <td><i>0.41</i></td>
+      <td><i>-</i></td>
+      <td><i>0.52</i></td>
+      <td><i>0.20</i></td>
+      <td><i>0.15</i></td>
+      <td><i>0.13</i></td>
+      <td><i>-</i></td>
+    </tr>
+    <tr>
+      <td><i>Equiformer_V2</i></td>
+      <td><i>3.35</i></td>
+      <td><i>???</i></td>
+      <td><i>???</i></td>
+      <td><i>0.72</i></td>
+      <td><i>-</i></td>
+      <td><i>2.83</i></td>
+      <td><i>???</i></td>
+      <td><i>0.45</i></td>
+      <td><i>0.35</i></td>
+      <td><i>-</i></td>
+      <td><i>0.45</i></td>
+      <td><i>0.23</i></td>
+      <td><i>0.24</i></td>
+      <td><i>0.18</i></td>
+      <td><i>-</i></td>
+    </tr>
+    <tr>
+      <td><i>eSCN</i></td>
+      <td><i>???</i></td>
+      <td><i>???</i></td>
+      <td><i>???</i></td>
+      <td><i>0.96</i></td>
+      <td><i>-</i></td>
+      <td><i>???</i></td>
+      <td><i>???</i></td>
+      <td><i>???</i></td>
+      <td><i>0.59</i></td>
+      <td><i>-</i></td>
+      <td><i>0.48</i></td>
+      <td><i>0.31</i></td>
+      <td><i>0.80</i></td>
+      <td><i>0.40</i></td>
+      <td><i>-</i></td>
+    </tr>
+  </tbody>
+</table>
+
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: center;">
+      <th rowspan="3">Model</th>
+      <th colspan="15"> MAE for forces prediction $\times 10^{−2} E_h*A^{-1}$ (↓)</th>
+    </tr>
+    <tr>
+      <th colspan="5">Test ST</th>
+      <th colspan="5">Test SF</th>
+      <th colspan="5">Test CF</th>
+    </tr>
+    <tr>
+      <th>2k</th>
+      <th>5k</th>
+      <th>10k</th>
+      <th>100k</th>
+      <th>full train</th>
+      <th>2k</th>
+      <th>5k</th>
+      <th>10k</th>
+      <th>100k</th>
+      <th>full train</th>
+      <th>2k</th>
+      <th>5k</th>
+      <th>10k</th>
+      <th>100k</th>
+      <th>full train</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><i>LR</i></td>
+      <td><i>4.6</i></td>
+      <td><i>4.7</i></td>
+      <td><i>4.7</i></td>
+      <td><i>4.7</i></td>
+      <td><i>-</i></td>
+      <td><i>4.6</i></td>
+      <td><i>4.7</i></td>
+      <td><i>4.7</i></td>
+      <td><i>4.7</i></td>
+      <td><i>-</i></td>
+      <td><i>4.0</i></td>
+      <td><i>4.2</i></td>
+      <td><i>4.0</i></td>
+      <td><i>4.0</i></td>
+      <td><i>-</i></td>
+    </tr>
+    <tr>
+      <td><i>SchNet</i></td>
+      <td><i>0.44</i></td>
+      <td><i>0.37</i></td>
+      <td><i>0.41</i></td>
+      <td><i>0.16</i></td>
+      <td><i>-</i></td>
+      <td><i>0.45</i></td>
+      <td><i>0.37</i></td>
+      <td><i>0.41</i></td>
+      <td><i>0.15</i></td>
+      <td><i>-</i></td>
+      <td><i>0.32</i></td>
+      <td><i>0.30</i></td>
+      <td><i>0.37</i></td>
+      <td><i>0.46</i></td>
+      <td><i>-</i></td>
+    </tr>
+    <tr>
+      <td><i>SchNOrb</i></td>
+      <td><i>???</i></td>
+      <td><i>???</i></td>
+      <td><i>???</i></td>
+      <td><i>???</i></td>
+      <td><i>???</i></td>
+      <td><i>???</i></td>
+      <td><i>???</i></td>
+      <td><i>???</i></td>
+      <td><i>???</i></td>
+      <td><i>???</i></td>
+      <td><i>???</i></td>
+      <td><i>???</i></td>
+      <td><i>???</i></td>
+      <td><i>???</i></td>
+    </tr>
+    <tr>
+      <td><i>DimeNet++</i></td>
+      <td><i>???</i></td>
+      <td><i>???</i></td>
+      <td><i>???</i></td>
+      <td><i>0.071</i></td>
+      <td><i>-</i></td>
+      <td><i>???</i></td>
+      <td><i>???</i></td>
+      <td><i>???</i></td>
+      <td><i>0.067</i></td>
+      <td><i>-</i></td>
+      <td><i>0.26</i></td>
+      <td><i>0.12</i></td>
+      <td><i>0.10</i></td>
+      <td><i>0.37</i></td>
+      <td><i>-</i></td>
+    </tr>
+    <tr>
+      <td><i>PAINN</i></td>
+      <td><i>0.38</i></td>
+      <td><i>0.26</i></td>
+      <td><i>0.17</i></td>
+      <td><i>0.062</i></td>
+      <td><i>-</i></td>
+      <td><i>0.38</i></td>
+      <td><i>0.26</i></td>
+      <td><i>0.17</i></td>
+      <td><i>0.059</i></td>
+      <td><i>-</i></td>
+      <td><i>0.23</i></td>
+      <td><i>0.22</i></td>
+      <td><i>0.14</i></td>
+      <td><i>0.20(?)</i></td>
+      <td><i>-</i></td>
+    </tr>
+    <tr>
+      <td><i>Graphormer3D-small</i></td>
+      <td><i>1.05</i></td>
+      <td><i>0.63</i></td>
+      <td><i>0.51</i></td>
+      <td><i>0.24</i></td>
+      <td><i>-</i></td>
+      <td><i>1.07</i></td>
+      <td><i>0.64</i></td>
+      <td><i>0.52</i></td>
+      <td><i>0.26</i></td>
+      <td><i>-</i></td>
+      <td><i>0.76</i></td>
+      <td><i>0.50</i></td>
+      <td><i>0.39</i></td>
+      <td><i>0.45</i></td>
+      <td><i>-</i></td>
+    </tr>
+    <tr>
+      <td><i>GemNet-OC</i></td>
+      <td><i>0.14</i></td>
+      <td><i>0.067</i></td>
+      <td><i>0.046</i></td>
+      <td><i>0.024</i></td>
+      <td><i>-</i></td>
+      <td><i>0.14</i></td>
+      <td><i>0.064</i></td>
+      <td><i>0.044</i></td>
+      <td><i>0.021</i></td>
+      <td><i>-</i></td>
+      <td><i>0.073</i></td>
+      <td><i>0.042</i></td>
+      <td><i>0.032</i></td>
+      <td><i>0.033</i></td>
+      <td><i>-</i></td>
+    </tr>
+    <tr>
+      <td><i>Equiformer_V2</i></td>
+      <td><i>0.31</i></td>
+      <td><i>???</i></td>
+      <td><i>???</i></td>
+      <td><i>0.18</i></td>
+      <td><i>-</i></td>
+      <td><i>0.31</i></td>
+      <td><i>???</i></td>
+      <td><i>0.21</i></td>
+      <td><i>0.17</i></td>
+      <td><i>-</i></td>
+      <td><i>0.16</i></td>
+      <td><i>0.15</i></td>
+      <td><i>0.16</i></td>
+      <td><i>0.45</i></td>
+      <td><i>-</i></td>
+    </tr>
+    <tr>
+      <td><i>eSCN</i></td>
+      <td><i>???</i></td>
+      <td><i>???</i></td>
+      <td><i>???</i></td>
+      <td><i>0.024</i></td>
+      <td><i>-</i></td>
+      <td><i>???</i></td>
+      <td><i>???</i></td>
+      <td><i>???</i></td>
+      <td><i>0.021</i></td>
+      <td><i>-</i></td>
+      <td><i>0.065</i></td>
+      <td><i>0.037</i></td>
+      <td><i>0.029</i></td>
+      <td><i>0.33(?)</i></td>
       <td><i>-</i></td>
     </tr>
   </tbody>
