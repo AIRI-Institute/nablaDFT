@@ -73,9 +73,9 @@ import numpy as np
 import psi4
 wfn = np.load(<PATH_TO_WFN>, allow_pickle=True).tolist()
 orbital_matrix_a = wfn["matrix"]["Ca"]        # alpha orbital coefficients
-orbital_matrix_b = wfn["matrix"]["Cb"]        # betta orbital coefficients
+orbital_matrix_b = wfn["matrix"]["Cb"]        # beta orbital coefficients
 density_matrix_a = wfn["matrix"]["Da"]        # alpha electonic density
-density_matrix_b = wfn["matrix"]["Db"]        # betta electonic density
+density_matrix_b = wfn["matrix"]["Db"]        # beta electonic density
 aotoso_matrix = wfn["matrix"]["aotoso"]       # atomic orbital to symmetry orbital transformation matrix
 core_hamiltonian_matrix = wfn["matrix"]["H"]  # core Hamiltonian matrix
 fock_matrix_a = wfn["matrix"]["Fa"]           # DFT alpha Fock matrix
@@ -108,14 +108,19 @@ lowdin_charges = wfn.array_variables()["LOWDIN CHARGES"]  # Löwdin atomic charg
 * [Efficient and Equivariant Graph Networks for Predicting Quantum Hamiltonian (QHNet)](./nablaDFT/qhnet/README.md)
 
 ### Dataloaders
-To create a dataset, nablaDFT class is used. Arguments of the function depend on the type of the model (which is specified by the first argument).
-
+To create a dataset, we use interfaces from ASE and PyTorch Lightning.  
 An example of the initialisation of ASE-type data classes (for SchNet, PaiNN models) is presented below:
 ```python
+datamodule = ASENablaDFT(split="train", dataset_name="dataset_train_2k")
+```
+For PyTorch Geometric data dataset initialized with PyGNablaDFTDatamodule:
+```python
+datamodule = PyGNablaDFTDataModule(root="path-to-dataset-dir", dataset_name="dataset_train_2k")
 data = NablaDFT(type_of_nn="ASE",  dataset_name="dataset_train_2k")
 ```
 Similarly, Hamiltonian-type data classes (for SchNOrb, PhiSNet models) are initialised in the following way:
 ```python
+datamodule = PyGHamiltonianDataModule()
 data = NablaDFT(type_of_nn="Hamiltonian",  dataset_name="dataset_train_2k")
 ```
 Dataset itself could be acquired in the following way:
@@ -142,27 +147,24 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <th colspan="15"> MAE for energy prediction $\times 10^{−2} E_h$ (↓)</th>
     </tr>
     <tr>
-      <th colspan="5">Test ST</th>
-      <th colspan="5">Test SF</th>
-      <th colspan="5">Test CF</th>
+      <th colspan="4">Test ST</th>
+      <th colspan="4">Test SF</th>
+      <th colspan="4">Test CF</th>
     </tr>
     <tr>
       <th>2k</th>
       <th>5k</th>
       <th>10k</th>
       <th>100k</th>
-      <th>full train</th>
       <th>2k</th>
       <th>5k</th>
       <th>10k</th>
       <th>100k</th>
-      <th>full train</th>
       <th>2k</th>
       <th>5k</th>
       <th>10k</th>
       <th>100k</th>
-      <th>full train</th>
-    </tr>
+      </tr>
   </thead>
   <tbody>
     <tr>
@@ -171,17 +173,14 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>4.7</i></td>
       <td><i>4.7</i></td>
       <td><i>4.7</i></td>
-      <td><i>-</i></td>
       <td><i>4.6</i></td>
       <td><i>4.7</i></td>
       <td><i>4.7</i></td>
       <td><i>4.7</i></td>
-      <td><i>-</i></td>
       <td><i>4.0</i></td>
       <td><i>4.2</i></td>
       <td><i>4.0</i></td>
       <td><i>4.0</i></td>
-      <td><i>-</i></td>
     </tr>
     <tr>
       <td><i>SchNet</i></td>
@@ -189,17 +188,14 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>1.44</i></td>
       <td><i>1.64</i></td>
       <td><i>0.85</i></td>
-      <td><i>-</i></td>
       <td><i>1.37</i></td>
       <td><i>1.10</i></td>
       <td><i>1.29</i></td>
       <td><i>0.48</i></td>
-      <td><i>-</i></td>
       <td><i>0.56</i></td>
       <td><i>0.63</i></td>
       <td><i>0.88</i></td>
       <td><i>0.29</i></td>
-      <td><i>-</i></td>
     </tr>
     <tr>
       <td><i>SchNOrb</i></td>
@@ -207,16 +203,13 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>3.7</i></td>
       <td><i>13.3(*)</i></td>
       <td><i>-</i></td>
-      <td><i>-</i></td>
       <td><i>5.9</i></td>
       <td><i>3.4</i></td>
       <td><i>14.8(*)</i></td>
       <td><i>-</i></td>
-      <td><i>-</i></td>
       <td><i>5.0</i></td>
       <td><i>3.6</i></td>
       <td><i>14.5(*)</i></td>
-      <td><i>-</i></td>
       <td><i>-</i></td>
     </tr>
     <tr>
@@ -225,17 +218,14 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>???</i></td>
       <td><i>???</i></td>
       <td><i>0.63</i></td>
-      <td><i>-</i></td>
       <td><i>???</i></td>
       <td><i>???</i></td>
       <td><i>???</i></td>
       <td><i>0.26</i></td>
-      <td><i>-</i></td>
       <td><i>0.42</i></td>
       <td><i>0.10</i></td>
       <td><i>0.09</i></td>
       <td><i>0.08</i></td>
-      <td><i>-</i></td>
     </tr>
     <tr>
       <td><i>PAINN</i></td>
@@ -243,17 +233,14 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>1.14</i></td>
       <td><i>0.89</i></td>
       <td><i>0.64</i></td>
-      <td><i>-</i></td>
       <td><i>1.04</i></td>
       <td><i>0.79</i></td>
       <td><i>0.53</i></td>
       <td><i>0.27</i></td>
-      <td><i>-</i></td>
       <td><i>0.43</i></td>
       <td><i>0.49</i></td>
       <td><i>0.28</i></td>
       <td><i>0.09</i></td>
-      <td><i>-</i></td>
     </tr>
     <tr>
       <td><i>Graphormer3D-small</i></td>
@@ -261,17 +248,14 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>1.50</i></td>
       <td><i>1.32</i></td>
       <td><i>0.91</i></td>
-      <td><i>-</i></td>
       <td><i>1.76</i></td>
       <td><i>1.12</i></td>
       <td><i>0.93</i></td>
       <td><i>0.54</i></td>
-      <td><i>-</i></td>
       <td><i>0.99</i></td>
       <td><i>0.67</i></td>
       <td><i>0.58</i></td>
       <td><i>0.39</i></td>
-      <td><i>-</i></td>
     </tr>
     <tr>
       <td><i>GemNet-OC</i></td>
@@ -279,17 +263,14 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>1.19</i></td>
       <td><i>0.82</i></td>
       <td><i>0.76</i></td>
-      <td><i>-</i></td>
       <td><i>2.8</i></td>
       <td><i>0.76</i></td>
       <td><i>0.45</i></td>
       <td><i>0.41</i></td>
-      <td><i>-</i></td>
       <td><i>0.52</i></td>
       <td><i>0.20</i></td>
       <td><i>0.15</i></td>
       <td><i>0.13</i></td>
-      <td><i>-</i></td>
     </tr>
     <tr>
       <td><i>Equiformer_V2</i></td>
@@ -297,17 +278,14 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>???</i></td>
       <td><i>???</i></td>
       <td><i>0.72</i></td>
-      <td><i>-</i></td>
       <td><i>2.83</i></td>
       <td><i>???</i></td>
       <td><i>0.45</i></td>
       <td><i>0.35</i></td>
-      <td><i>-</i></td>
       <td><i>0.45</i></td>
       <td><i>0.23</i></td>
       <td><i>0.24</i></td>
       <td><i>0.18</i></td>
-      <td><i>-</i></td>
     </tr>
     <tr>
       <td><i>eSCN</i></td>
@@ -315,17 +293,14 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>???</i></td>
       <td><i>???</i></td>
       <td><i>0.96</i></td>
-      <td><i>-</i></td>
       <td><i>???</i></td>
       <td><i>???</i></td>
       <td><i>???</i></td>
       <td><i>0.59</i></td>
-      <td><i>-</i></td>
       <td><i>0.48</i></td>
       <td><i>0.31</i></td>
       <td><i>0.80</i></td>
       <td><i>0.40</i></td>
-      <td><i>-</i></td>
     </tr>
   </tbody>
 </table>
@@ -337,26 +312,23 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <th colspan="15"> MAE for forces prediction $\times 10^{−2} E_h*A^{-1}$ (↓)</th>
     </tr>
     <tr>
-      <th colspan="5">Test ST</th>
-      <th colspan="5">Test SF</th>
-      <th colspan="5">Test CF</th>
+      <th colspan="4">Test ST</th>
+      <th colspan="4">Test SF</th>
+      <th colspan="4">Test CF</th>
     </tr>
     <tr>
       <th>2k</th>
       <th>5k</th>
       <th>10k</th>
       <th>100k</th>
-      <th>full train</th>
       <th>2k</th>
       <th>5k</th>
       <th>10k</th>
       <th>100k</th>
-      <th>full train</th>
       <th>2k</th>
       <th>5k</th>
       <th>10k</th>
       <th>100k</th>
-      <th>full train</th>
     </tr>
   </thead>
   <tbody>
@@ -366,17 +338,14 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>4.7</i></td>
       <td><i>4.7</i></td>
       <td><i>4.7</i></td>
-      <td><i>-</i></td>
       <td><i>4.6</i></td>
       <td><i>4.7</i></td>
       <td><i>4.7</i></td>
       <td><i>4.7</i></td>
-      <td><i>-</i></td>
       <td><i>4.0</i></td>
       <td><i>4.2</i></td>
       <td><i>4.0</i></td>
       <td><i>4.0</i></td>
-      <td><i>-</i></td>
     </tr>
     <tr>
       <td><i>SchNet</i></td>
@@ -384,22 +353,17 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>0.37</i></td>
       <td><i>0.41</i></td>
       <td><i>0.16</i></td>
-      <td><i>-</i></td>
       <td><i>0.45</i></td>
       <td><i>0.37</i></td>
       <td><i>0.41</i></td>
       <td><i>0.15</i></td>
-      <td><i>-</i></td>
       <td><i>0.32</i></td>
       <td><i>0.30</i></td>
       <td><i>0.37</i></td>
       <td><i>0.46</i></td>
-      <td><i>-</i></td>
     </tr>
     <tr>
       <td><i>SchNOrb</i></td>
-      <td><i>???</i></td>
-      <td><i>???</i></td>
       <td><i>???</i></td>
       <td><i>???</i></td>
       <td><i>???</i></td>
@@ -419,17 +383,14 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>???</i></td>
       <td><i>???</i></td>
       <td><i>0.071</i></td>
-      <td><i>-</i></td>
       <td><i>???</i></td>
       <td><i>???</i></td>
       <td><i>???</i></td>
       <td><i>0.067</i></td>
-      <td><i>-</i></td>
       <td><i>0.26</i></td>
       <td><i>0.12</i></td>
       <td><i>0.10</i></td>
       <td><i>0.37</i></td>
-      <td><i>-</i></td>
     </tr>
     <tr>
       <td><i>PAINN</i></td>
@@ -437,17 +398,14 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>0.26</i></td>
       <td><i>0.17</i></td>
       <td><i>0.062</i></td>
-      <td><i>-</i></td>
       <td><i>0.38</i></td>
       <td><i>0.26</i></td>
       <td><i>0.17</i></td>
       <td><i>0.059</i></td>
-      <td><i>-</i></td>
       <td><i>0.23</i></td>
       <td><i>0.22</i></td>
       <td><i>0.14</i></td>
       <td><i>0.20(?)</i></td>
-      <td><i>-</i></td>
     </tr>
     <tr>
       <td><i>Graphormer3D-small</i></td>
@@ -455,17 +413,14 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>0.63</i></td>
       <td><i>0.51</i></td>
       <td><i>0.24</i></td>
-      <td><i>-</i></td>
       <td><i>1.07</i></td>
       <td><i>0.64</i></td>
       <td><i>0.52</i></td>
       <td><i>0.26</i></td>
-      <td><i>-</i></td>
       <td><i>0.76</i></td>
       <td><i>0.50</i></td>
       <td><i>0.39</i></td>
       <td><i>0.45</i></td>
-      <td><i>-</i></td>
     </tr>
     <tr>
       <td><i>GemNet-OC</i></td>
@@ -473,17 +428,14 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>0.067</i></td>
       <td><i>0.046</i></td>
       <td><i>0.024</i></td>
-      <td><i>-</i></td>
       <td><i>0.14</i></td>
       <td><i>0.064</i></td>
       <td><i>0.044</i></td>
       <td><i>0.021</i></td>
-      <td><i>-</i></td>
       <td><i>0.073</i></td>
       <td><i>0.042</i></td>
       <td><i>0.032</i></td>
       <td><i>0.033</i></td>
-      <td><i>-</i></td>
     </tr>
     <tr>
       <td><i>Equiformer_V2</i></td>
@@ -491,17 +443,14 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>???</i></td>
       <td><i>???</i></td>
       <td><i>0.18</i></td>
-      <td><i>-</i></td>
       <td><i>0.31</i></td>
       <td><i>???</i></td>
       <td><i>0.21</i></td>
       <td><i>0.17</i></td>
-      <td><i>-</i></td>
       <td><i>0.16</i></td>
       <td><i>0.15</i></td>
       <td><i>0.16</i></td>
       <td><i>0.45</i></td>
-      <td><i>-</i></td>
     </tr>
     <tr>
       <td><i>eSCN</i></td>
@@ -509,17 +458,14 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>???</i></td>
       <td><i>???</i></td>
       <td><i>0.024</i></td>
-      <td><i>-</i></td>
       <td><i>???</i></td>
       <td><i>???</i></td>
       <td><i>???</i></td>
       <td><i>0.021</i></td>
-      <td><i>-</i></td>
       <td><i>0.065</i></td>
       <td><i>0.037</i></td>
       <td><i>0.029</i></td>
       <td><i>0.33(?)</i></td>
-      <td><i>-</i></td>
     </tr>
   </tbody>
 </table>
