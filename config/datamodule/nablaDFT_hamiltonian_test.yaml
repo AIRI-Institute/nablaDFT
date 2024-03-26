@@ -1,7 +1,7 @@
 # Dataset config for torch geometric nablaDFT
-_target_: nablaDFT.dataset.PyGHamiltonianNablaDFT
+_target_: nablaDFT.dataset.PyGHamiltonianDataModule
 
-root: ./datasets/nablaDFT/test
+root: ./datasets/nablaDFT/hamiltonian
 dataset_name: ${dataset_name}
 seed: 23
 # Dataloader args

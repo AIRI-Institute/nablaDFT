@@ -128,9 +128,9 @@ class PyGHamiltonianNablaDFT(Dataset):
 
     def __init__(
         self,
-        datapath="database",
-        dataset_name="dataset_train_2k",
-        split: str="train",
+        datapath: str = "database",
+        dataset_name: str = "dataset_train_2k",
+        split: str = "train",
         include_hamiltonian: bool = True,
         include_overlap: bool = False,
         include_core: bool = False,
