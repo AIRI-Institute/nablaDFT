@@ -412,7 +412,11 @@ class QHNetLightning(pl.LightningModule):
 
     def on_test_epoch_end(self) -> None:
         self._reduce_metrics(step_type="test")
-
+    
+    def on_save_checkpoint(self, checkpoint) -> None:
+        with self.ema.average_parameters():
+            checkpoint['state_dict'] = self.state_dict()
+            
     def _calculate_loss(self, y_pred, y_true, masks) -> float:
         total_loss = 0.0
         for name, loss in self.hparams.losses.items():
