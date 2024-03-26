@@ -475,32 +475,13 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
     <tr style="text-align: center;">
       <th rowspan="3">Model</th>
       <th colspan="15"> MAE for Hamiltonian matrix prediction $\times 10^{−4} E_h$ (↓)</th>
-      <th colspan="15"> MAE for overlap matrix prediction $\times 10^{−5}$(↓)</th>
     </tr>
     <tr>
       <th colspan="5">Test ST</th>
       <th colspan="5">Test SF</th>
       <th colspan="5">Test CF</th>
-      <th colspan="5">Test ST</th>
-      <th colspan="5">Test SF</th>
-      <th colspan="5">Test CF</th>
     </tr>
     <tr>
-      <th>2k</th>
-      <th>5k</th>
-      <th>10k</th>
-      <th>100k</th>
-      <th>full train</th>
-      <th>2k</th>
-      <th>5k</th>
-      <th>10k</th>
-      <th>100k</th>
-      <th>full train</th>
-      <th>2k</th>
-      <th>5k</th>
-      <th>10k</th>
-      <th>100k</th>
-      <th>full train</th>
       <th>2k</th>
       <th>5k</th>
       <th>10k</th>
@@ -536,21 +517,6 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>392.0(*)</i></td>
       <td><i>-</i></td>
       <td><i>-</i></td>
-      <td><i>1550</i></td>
-      <td><i>1455</i></td>
-      <td><i>1493(*)</i></td>
-      <td><i>-</i></td>
-      <td><i>-</i></td>
-      <td><i>1543</i></td>
-      <td><i>1440</i></td>
-      <td><i>1496(*)</i></td>
-      <td><i>-</i></td>
-      <td><i>-</i></td>
-      <td><i>1544</i></td>
-      <td><i>1480</i></td>
-      <td><i>1536(*)</i></td>
-      <td><i>-</i></td>
-      <td><i>-</i></td>
     </tr>
     <tr>
       <td><i>PhiSNet</i></td>
@@ -569,6 +535,61 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>2.8</i></td>
       <td><i>-</i></td>
       <td><i>-</i></td>
+    </tr>
+  </tbody>
+</table>
+
+
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: center;">
+      <th rowspan="3">Model</th>
+      <th colspan="15"> MAE for overlap matrix prediction $\times 10^{−5}$(↓)</th>
+    </tr>
+    <tr>
+      <th colspan="5">Test ST</th>
+      <th colspan="5">Test SF</th>
+      <th colspan="5">Test CF</th>
+    </tr>
+    <tr>
+      <th>2k</th>
+      <th>5k</th>
+      <th>10k</th>
+      <th>100k</th>
+      <th>full train</th>
+      <th>2k</th>
+      <th>5k</th>
+      <th>10k</th>
+      <th>100k</th>
+      <th>full train</th>
+      <th>2k</th>
+      <th>5k</th>
+      <th>10k</th>
+      <th>100k</th>
+      <th>full train</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><i>SchNOrb</i></td>
+      <td><i>1550</i></td>
+      <td><i>1455</i></td>
+      <td><i>1493(*)</i></td>
+      <td><i>-</i></td>
+      <td><i>-</i></td>
+      <td><i>1543</i></td>
+      <td><i>1440</i></td>
+      <td><i>1496(*)</i></td>
+      <td><i>-</i></td>
+      <td><i>-</i></td>
+      <td><i>1544</i></td>
+      <td><i>1480</i></td>
+      <td><i>1536(*)</i></td>
+      <td><i>-</i></td>
+      <td><i>-</i></td>
+    </tr>
+    <tr>
+      <td><i>PhiSNet</i></td>
       <td><i>5.1</i></td>
       <td><i>4.3</i></td>
       <td><i>3.5</i></td>
