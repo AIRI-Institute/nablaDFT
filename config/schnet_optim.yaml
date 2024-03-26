@@ -1,7 +1,8 @@
 name: SchNet  # model name, used for output database name
 dataset_name: test_opt # used for output database name
 job_type: optimize
-ckpt_path: ./checkpoints/SchNet/schnet_100k.ckpt
+pretrained: True
+ckpt_path: null
 
 input_db: ./test_opt.db # relative path to input database
 output_dir: ./traj_optimize # relative path to output database

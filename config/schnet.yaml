@@ -2,8 +2,8 @@
 name: SchNet
 dataset_name: dataset_train_2k
 max_steps: 1000000
-warmup_steps: 0
 job_type: train
+pretrained: False
 ckpt_path: null # path to checkpoint for training resume or test run
 
 # configs

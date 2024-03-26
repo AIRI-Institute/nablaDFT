@@ -1,5 +1,6 @@
 import os
 from typing import List
+import warnings
 
 import hydra
 from omegaconf import DictConfig
@@ -13,58 +14,53 @@ from pytorch_lightning import (
     seed_everything,
 )
 
-from nablaDFT.utils import close_loggers, load_model
+from nablaDFT.utils import close_loggers, load_model, download_model
 from nablaDFT.optimization import BatchwiseOptimizeTask
 
 
-JOB_TYPES = ['train', 'test', 'predict', 'optimize']
+JOB_TYPES = ["train", "test", "predict", "optimize"]
 
 
-def predict(trainer: Trainer,
-            model: LightningModule,
-            datamodule: LightningDataModule,
-            ckpt_path: str,
-            config: DictConfig
-        ):
+def predict(
+    trainer: Trainer,
+    model: LightningModule,
+    datamodule: LightningDataModule,
+    ckpt_path: str,
+    config: DictConfig,
+):
     """Function for prediction loop execution.
-       Saves model prediction to "predictions" directory.
+    Saves model prediction to "predictions" directory.
     """
-    trainer.logger = False # need this to disable save_hyperparameters during predict, otherwise OmegaConf DictConf can't be dumped to YAML
+    trainer.logger = False  # need this to disable save_hyperparameters during predict, otherwise OmegaConf DictConf can't be dumped to YAML
     pred_path = os.path.join(os.getcwd(), "predictions")
     os.makedirs(pred_path, exist_ok=True)
-    predictions = trainer.predict(model=model, datamodule=datamodule.dataset, ckpt_path=ckpt_path)
+    predictions = trainer.predict(
+        model=model, datamodule=datamodule.dataset, ckpt_path=ckpt_path
+    )
     torch.save(predictions, f"{pred_path}/{config.name}_{config.dataset_name}.pt")
 
 
-def optimize(config: DictConfig):
+def optimize(config: DictConfig, ckpt_path: str):
     """Function for batched molecules optimization.
-       Uses model defined in config.
+    Uses model defined in config.
     """
-    if config.get("ckpt_path"):
-        ckpt_path = os.path.join(
-            hydra.utils.get_original_cwd(), config.get("ckpt_path")
-        )
-    else:
-        raise RuntimeError(
-            f"Job type is optimize, but ckpt_path is None. Specify checkpoint path in model config"
-        )
     output_dir = config.get("output_dir")
     if not os.path.exists(output_dir):
         os.makedirs(output_dir, exist_ok=True)
-    output_datapath = os.path.join(output_dir, f"{config.name}_{config.dataset_name}.db")
+    output_datapath = os.path.join(
+        output_dir, f"{config.name}_{config.dataset_name}.db"
+    )
     # append to existing database not supported
     if os.path.exists(output_datapath):
-        os.remove(output_datapath)    
+        os.remove(output_datapath)
     model = load_model(config, ckpt_path)
-    calculator = hydra.utils.instantiate(
-        config.calculator, model 
-    )
-    optimizer = hydra.utils.instantiate(
-        config.optimizer, calculator 
-    )
+    calculator = hydra.utils.instantiate(config.calculator, model)
+    optimizer = hydra.utils.instantiate(config.optimizer, calculator)
     task = BatchwiseOptimizeTask(
-        config.input_db, output_datapath,
-        optimizer=optimizer, batch_size=config.batch_size
+        config.input_db,
+        output_datapath,
+        optimizer=optimizer,
+        batch_size=config.batch_size,
     )
     task.run()
 
@@ -75,24 +71,25 @@ def run(config: DictConfig):
     job_type = config.get("job_type")
     if job_type not in JOB_TYPES:
         raise ValueError(f"job_type must be one of {JOB_TYPES}, got {job_type}")
-    if job_type == "optimize":
-        return optimize(config)
-
     if config.get("ckpt_path"):
         ckpt_path = os.path.join(
             hydra.utils.get_original_cwd(), config.get("ckpt_path")
         )
     else:
         ckpt_path = None
-    if job_type in ["test", "predict"]:
+    # download checkpoint if pretrained=True
+    if config.get("pretrained"):
         if ckpt_path is None:
-            raise RuntimeError(
-                f"Job type is {job_type}, but ckpt_path is {ckpt_path}. Specify checkpoint path in model config"
-            )
+            ckpt_path = download_model(config)
         else:
-            model = load_model(config, ckpt_path)
-    else:
-        model: LightningModule = hydra.utils.instantiate(config.model)
+            if not os.path.exists(ckpt_path):
+                warnings.warn(
+                    """Checkpoint path was specified, but it not exists. Continue with randomly initialized weights."""
+                )
+            ckpt_path = None
+    if job_type == "optimize":
+        return optimize(config, ckpt_path)
+    model: LightningModule = hydra.utils.instantiate(config.model)
     # Callbacks
     callbacks: List[Callback] = []
     for _, callback_cfg in config.callbacks.items():
@@ -107,14 +104,13 @@ def run(config: DictConfig):
     )
     # Datamodule
     datamodule: LightningDataModule = hydra.utils.instantiate(config.datamodule)
-    if job_type == 'train':
+    if job_type == "train":
         trainer.fit(model=model, datamodule=datamodule.dataset, ckpt_path=ckpt_path)
-    elif job_type == 'test':
+    elif job_type == "test":
         trainer.test(model=model, datamodule=datamodule.dataset, ckpt_path=ckpt_path)
-    elif job_type == 'predict':
+    elif job_type == "predict":
         predict(trainer, model, datamodule, ckpt_path, config)
     # Finalize
     close_loggers(
         logger=loggers,
     )
-

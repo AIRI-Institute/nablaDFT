@@ -1,20 +1,20 @@
 # Global variables
-name: Graphormer3D-half
-dataset_name: dataset_train_2k
+name: GemNet-OC
+dataset_name: dataset_test_conformations_2k
 max_steps: 1000000
-warmup_steps: 60000
-job_type: train
+warmup_steps: 0
+job_type: test
 pretrained: False
 ckpt_path: null # path to checkpoint for training resume or test run
 
 # configs
 defaults:
   - _self_
-  - datamodule: nablaDFT_pyg.yaml  # dataset config
-  - model: graphormer3d-half.yaml  # model config
+  - datamodule: nablaDFT_pyg_test.yaml  # dataset config
+  - model: gemnet-oc.yaml  # model config
   - callbacks: default.yaml  # pl callbacks config
   - loggers: wandb.yaml  # pl loggers config
-  - trainer: train.yaml  # trainer config
+  - trainer: test.yaml  # trainer config
 
 # need this to set working dir as current dir
 hydra:

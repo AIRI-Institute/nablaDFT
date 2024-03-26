@@ -1,19 +1,19 @@
 # Global variables
 name: PaiNN
-dataset_name: dataset_test_conformations_2k
+dataset_name: dataset_train_2k
 max_steps: 1000000
-warmup_steps: 0
-job_type: test
-ckpt_path: ./checkpoints/PaiNN/painn_100k.ckpt # path to checkpoint for training resume or test run
+job_type: train
+pretrained: False
+ckpt_path: null # path to checkpoint for training resume or test run
 
 # configs
 defaults:
   - _self_
-  - datamodule: nablaDFT_ase_test.yaml  # dataset config
+  - datamodule: nablaDFT_ase.yaml  # dataset config
   - model: painn.yaml  # model config
   - callbacks: callbacks_spk.yaml  # pl callbacks config
   - loggers: wandb.yaml  # pl loggers config
-  - trainer: test.yaml  # trainer config
+  - trainer: train.yaml  # trainer config
 
 # need this to set working dir as current dir
 hydra:
