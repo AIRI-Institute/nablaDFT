@@ -1,7 +1,6 @@
 # Dataset config for ASE nablaDFT
-_target_: nablaDFT.dataset.NablaDFT
+_target_: nablaDFT.dataset.ASENablaDFT
 
-type_of_nn: ASE
 split: ${job_type}
 datapath: ./datasets/nablaDFT/test/raw
 dataset_name: ${dataset_name}

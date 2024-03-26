@@ -1,5 +1,5 @@
 # Global variables
-name: Equiformer_v2
+name: QHNet
 dataset_name: dataset_train_2k
 max_steps: 1000000
 warmup_steps: 0
@@ -10,8 +10,8 @@ ckpt_path: null # path to checkpoint for training resume or test run
 # configs
 defaults:
   - _self_
-  - datamodule: nablaDFT_pyg.yaml  # dataset config
-  - model: equiformer_v2_oc20.yaml  # model config
+  - datamodule: nablaDFT_hamiltonian.yaml  # dataset config
+  - model: qhnet.yaml  # model config
   - callbacks: default.yaml  # pl callbacks config
   - loggers: wandb.yaml  # pl loggers config
   - trainer: train.yaml  # trainer config

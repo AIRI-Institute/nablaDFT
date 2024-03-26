@@ -302,7 +302,6 @@ class HamiltonianDataset(torch.utils.data.Dataset):
                     tuple((int(z), int(l)) for l in self.database.get_orbitals(z))
                 )
                 local_orbitals_number += sum(2 * l + 1 for _, l in local_orbitals[-1])
-            # print (local_orbitals_number, orbitals_number, len(local_orbitals), len(orbitals))
             if (
                 orbitals_number + local_orbitals_number > self.max_batch_orbitals
                 or len(local_orbitals) + len(orbitals) > self.max_batch_atoms

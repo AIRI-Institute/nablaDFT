@@ -1,14 +1,13 @@
 # Dataset config for torch geometric nablaDFT
-_target_: nablaDFT.dataset.PyGNablaDFTDataModule
+_target_: nablaDFT.dataset.PyGHamiltonianDataModule
 
-root: ./datasets/nablaDFT/train
+root: ./datasets/nablaDFT/hamiltonian
 dataset_name: ${dataset_name}
 train_size: 0.9
 val_size: 0.1
 seed: 23
 # Dataloader args
-batch_size: 32
-num_workers: 8
+batch_size: 8
+num_workers: 4
 persistent_workers: True
 pin_memory: True
-
