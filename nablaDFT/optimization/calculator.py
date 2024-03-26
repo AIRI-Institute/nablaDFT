@@ -9,6 +9,8 @@ from schnetpack.interfaces.ase_interface import AtomsConverter, AtomsConverterEr
 
 from .opt_utils import atoms_list_to_PYG
 
+from copy import deepcopy
+
 
 class BatchwiseCalculator:
     """
@@ -153,7 +155,7 @@ class PyGBatchwiseCalculator(BatchwiseCalculator):
         )
 
         self.results = results
-        self.atoms = atoms.copy()
+        self.atoms = deepcopy(atoms)
 
 
 class SpkBatchwiseCalculator(BatchwiseCalculator):
