@@ -145,9 +145,16 @@ Several checkpoints for each model are available here: [checkpoints links](./nab
 
 ### Examples
 
-PaiNN models training and testing example: 
-* [Jupyter notebook](examples/PAINN_example.ipynb)
+Models training and testing example: 
+* [PAINN jupyter](examples/PAINN_example.ipynb)
 * [Collab](https://colab.research.google.com/drive/1vuQ16b2jlM4b76T2iZ9NytRN1_Sg0ljy)
+* [GemNet-OC jupyter](./examples/GemNet-OC_example.ipynb)
+
+Models inference example:
+* [GemNet-OC]()
+
+Molecular geometry optimization example:
+* [GemNet-OC]()
 
 ### Metrics
 In the tables below ST, SF, CF denote structures test set, scaffolds test set and conformations test set correspondingly.

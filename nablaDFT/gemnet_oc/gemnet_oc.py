@@ -1431,7 +1431,6 @@ class GemNetOCLightning(pl.LightningModule):
 
     def step(self, batch, calculate_metrics: bool = False):
         energy_out, forces_out = self.net(batch)
-        # TODO: temp workaround
         forces = batch.forces
         preds = {"energy": energy_out, "forces": forces_out}
         target = {"energy": batch.y, "forces": forces}
