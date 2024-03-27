@@ -293,7 +293,8 @@ class QHNetLightning(pl.LightningModule):
         self.save_hyperparameters(logger=True, ignore=['net'])
 
     def forward(self, data: Data):
-        hamiltonian = self.net(data)
+        with self.ema.average_parameters():
+            hamiltonian = self.net(data)
         return hamiltonian
     
     def step(self, batch, calculate_metrics: bool = False):
@@ -402,12 +403,20 @@ class QHNetLightning(pl.LightningModule):
         self._instantiate_ema()
         self._check_devices()
 
+    def on_predict_start(self) -> None:
+        self._instantiate_ema()
+        self._check_devices()
+
     def on_validation_epoch_end(self) -> None:
         self._reduce_metrics(step_type="val")
 
     def on_test_epoch_end(self) -> None:
         self._reduce_metrics(step_type="test")
-
+    
+    def on_save_checkpoint(self, checkpoint) -> None:
+        with self.ema.average_parameters():
+            checkpoint['state_dict'] = self.state_dict()
+            
     def _calculate_loss(self, y_pred, y_true, masks) -> float:
         total_loss = 0.0
         for name, loss in self.hparams.losses.items():
@@ -461,7 +470,7 @@ class QHNetLightning(pl.LightningModule):
         sizes = [0]
         for idx in range(batch.ptr.shape[0] - 1):
             atoms = batch.z[batch.ptr[idx]: batch.ptr[idx + 1]]
-            size = sum([self.net.orbital_mask[atom] for atom in atoms])
+            size = sum([self.net.orbital_mask[atom.item()].shape[0] for atom in atoms])
             sizes.append(size + sum(sizes))
         return sizes
     

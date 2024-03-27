@@ -1175,6 +1175,10 @@ class eSCNLightning(pl.LightningModule):
 
     def on_test_epoch_end(self) -> None:
         self._reduce_metrics(step_type="test")
+    
+    def on_save_checkpoint(self, checkpoint) -> None:
+        with self.ema.average_parameters():
+            checkpoint['state_dict'] = self.state_dict()
 
     def _calculate_loss(self, y_pred, y_true) -> float:
         total_loss = 0.0

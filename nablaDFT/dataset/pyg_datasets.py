@@ -128,9 +128,9 @@ class PyGHamiltonianNablaDFT(Dataset):
 
     def __init__(
         self,
-        datapath="database",
-        dataset_name="dataset_train_2k",
-        split: str="train",
+        datapath: str = "database",
+        dataset_name: str = "dataset_train_2k",
+        split: str = "train",
         include_hamiltonian: bool = True,
         include_overlap: bool = False,
         include_core: bool = False,
@@ -158,20 +158,20 @@ class PyGHamiltonianNablaDFT(Dataset):
 
     def get(self, idx):
         data = self.db[idx]
-        z = torch.tensor(data[0]).long()
-        positions = torch.tensor(data[1]).to(self.dtype)
+        z = torch.tensor(data[0].copy()).long()
+        positions = torch.tensor(data[1].copy()).to(self.dtype)
         # see notes
-        hamiltonian = data[4]
+        hamiltonian = data[4].copy()
         if self.include_overlap:
-            overlap = data[5]
+            overlap = data[5].copy()
         else:
             overlap = None
         if self.include_core:
-            core = data[6]
+            core = data[6].copy()
         else:
             core = None
-        y = torch.from_numpy(data[2]).to(self.dtype)
-        forces = torch.from_numpy(data[3]).to(self.dtype)
+        y = torch.from_numpy(data[2].copy()).to(self.dtype)
+        forces = torch.from_numpy(data[3].copy()).to(self.dtype)
         data = Data(
             z=z, pos=positions,
             y=y, forces=forces,
