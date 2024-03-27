@@ -293,8 +293,7 @@ class QHNetLightning(pl.LightningModule):
         self.save_hyperparameters(logger=True, ignore=['net'])
 
     def forward(self, data: Data):
-        with self.ema.average_parameters():
-            hamiltonian = self.net(data)
+        hamiltonian = self.net(data)
         return hamiltonian
     
     def step(self, batch, calculate_metrics: bool = False):

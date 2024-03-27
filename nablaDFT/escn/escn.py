@@ -1126,8 +1126,7 @@ class eSCNLightning(pl.LightningModule):
 
     def test_step(self, batch, batch_idx):
         bsz = self._get_batch_size(batch)
-        with self.ema.average_parameters():
-            loss, metrics = self.step(batch, calculate_metrics=True)
+        loss, metrics = self.step(batch, calculate_metrics=True)
         self.log(
             "test/loss",
             loss,
@@ -1167,7 +1166,6 @@ class eSCNLightning(pl.LightningModule):
         self._check_devices()
 
     def on_test_start(self) -> None:
-        self._instantiate_ema()
         self._check_devices()
 
     def on_validation_epoch_end(self) -> None:
@@ -1213,12 +1211,11 @@ class eSCNLightning(pl.LightningModule):
 
     def _check_devices(self):
         self.hparams.metric = self.hparams.metric.to(self.device)
-        if self.ema is not None:
-            self.ema.to(self.device)
 
     def _instantiate_ema(self):
         if self.ema is not None:
             self.ema = self.ema(self.parameters())
+            self.ema.to(self.device)
 
     def _get_batch_size(self, batch):
         """Function for batch size infer."""
