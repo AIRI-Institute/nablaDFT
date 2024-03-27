@@ -81,8 +81,8 @@ class PyGNablaDFT(InMemoryDataset):
         db = connect(self.raw_paths[0])
         samples = []
         for db_row in tqdm(db.select(), total=len(db)):
-            z = torch.from_numpy(db_row.numbers).long()
-            positions = torch.from_numpy(db_row.positions).float()
+            z = torch.from_numpy(db_row.numbers.copy()).long()
+            positions = torch.from_numpy(db_row.positions.copy()).float()
             y = torch.from_numpy(np.array(db_row.data["energy"])).float()
             forces = torch.from_numpy(np.array(db_row.data["forces"])).float()
             samples.append(Data(z=z, pos=positions, y=y, forces=forces))
