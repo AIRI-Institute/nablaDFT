@@ -107,26 +107,31 @@ lowdin_charges = wfn.array_variables()["LOWDIN CHARGES"]  # Löwdin atomic charg
 * [Benchmarking Graphormer on Large-Scale Molecular Modeling Datasets (Graphormer3D)](./nablaDFT/graphormer/README.md)
 * [Efficient and Equivariant Graph Networks for Predicting Quantum Hamiltonian (QHNet)](./nablaDFT/qhnet/README.md)
 
-### Dataloaders
+### Datamodules
 To create a dataset, we use interfaces from ASE and PyTorch Lightning.  
 An example of the initialisation of ASE-type data classes (for SchNet, PaiNN models) is presented below:
 ```python
 datamodule = ASENablaDFT(split="train", dataset_name="dataset_train_2k")
+datamodule.prepare_data()
+# access to dataset
+datamodule.dataset
 ```
 For PyTorch Geometric data dataset initialized with PyGNablaDFTDatamodule:
 ```python
-datamodule = PyGNablaDFTDataModule(root="path-to-dataset-dir", dataset_name="dataset_train_2k")
-data = NablaDFT(type_of_nn="ASE",  dataset_name="dataset_train_2k")
+datamodule = PyGNablaDFTDataModule(root="path-to-dataset-dir", dataset_name="dataset_train_2k", train_size=0.9, val_size=0.1)
+datamodule.setup(stage="fit")
 ```
 Similarly, Hamiltonian-type data classes (for SchNOrb, PhiSNet models) are initialised in the following way:
 ```python
-datamodule = PyGHamiltonianDataModule()
-data = NablaDFT(type_of_nn="Hamiltonian",  dataset_name="dataset_train_2k")
+datamodule = PyGHamiltonianDataModule(root="path-to-dataset-dir", dataset_name="dataset_train_2k", train_size=0.9, val_size=0.1)
+datamodule.setup(stage="fit")
 ```
-Dataset itself could be acquired in the following way:
+Dataset itself could be acquired in the following ways:
 ```python
-data.dataset
+datamodule.dataset_train
+datamodule.dataset_val
 ```
+For more detailed list of datamodules parameters please refer to [datamodule example config](./config/datamodule/nablaDFT_pyg.yaml).
 
 ### Checkpoint
 Several checkpoints for each model are available here: [checkpoints links](./nablaDFT/links/models_checkpoints.json)
@@ -218,9 +223,9 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>???</i></td>
       <td><i>???</i></td>
       <td><i>0.63</i></td>
-      <td><i>???</i></td>
-      <td><i>???</i></td>
-      <td><i>???</i></td>
+      <td><i>3.76</i></td>
+      <td><i>0.59</i></td>
+      <td><i>0.37</i></td>
       <td><i>0.26</i></td>
       <td><i>0.42</i></td>
       <td><i>0.10</i></td>
@@ -279,7 +284,7 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>???</i></td>
       <td><i>0.72</i></td>
       <td><i>2.83</i></td>
-      <td><i>???</i></td>
+      <td><i>1.31</i></td>
       <td><i>0.45</i></td>
       <td><i>0.35</i></td>
       <td><i>0.45</i></td>
@@ -293,8 +298,8 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>???</i></td>
       <td><i>???</i></td>
       <td><i>0.96</i></td>
-      <td><i>???</i></td>
-      <td><i>???</i></td>
+      <td><i>1.88</i></td>
+      <td><i>0.63</i></td>
       <td><i>???</i></td>
       <td><i>0.59</i></td>
       <td><i>0.48</i></td>
@@ -383,9 +388,9 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>???</i></td>
       <td><i>???</i></td>
       <td><i>0.071</i></td>
-      <td><i>???</i></td>
-      <td><i>???</i></td>
-      <td><i>???</i></td>
+      <td><i>1.36</i></td>
+      <td><i>0.19</i></td>
+      <td><i>0.13</i></td>
       <td><i>0.067</i></td>
       <td><i>0.26</i></td>
       <td><i>0.12</i></td>
@@ -444,7 +449,7 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>???</i></td>
       <td><i>0.18</i></td>
       <td><i>0.31</i></td>
-      <td><i>???</i></td>
+      <td><i>0.23</i></td>
       <td><i>0.21</i></td>
       <td><i>0.17</i></td>
       <td><i>0.16</i></td>
@@ -458,8 +463,8 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>???</i></td>
       <td><i>???</i></td>
       <td><i>0.024</i></td>
-      <td><i>???</i></td>
-      <td><i>???</i></td>
+      <td><i>1.06</i></td>
+      <td><i>0.052</i></td>
       <td><i>???</i></td>
       <td><i>0.021</i></td>
       <td><i>0.065</i></td>
