@@ -107,6 +107,13 @@ lowdin_charges = wfn.array_variables()["LOWDIN CHARGES"]  # Löwdin atomic charg
 * [Benchmarking Graphormer on Large-Scale Molecular Modeling Datasets (Graphormer3D)](./nablaDFT/graphormer/README.md)
 * [Efficient and Equivariant Graph Networks for Predicting Quantum Hamiltonian (QHNet)](./nablaDFT/qhnet/README.md)
 
+### Run
+For task start run this command from repository root directory:
+```bash
+python run.py --config-name <config-name>.yaml
+```
+For detailed run configuration please refer to [run configuration README](./nablaDFT/README.md).
+
 ### Datamodules
 To create a dataset, we use interfaces from ASE and PyTorch Lightning.  
 An example of the initialisation of ASE-type data classes (for SchNet, PaiNN models) is presented below:
