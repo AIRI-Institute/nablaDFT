@@ -233,9 +233,9 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
     </tr>
     <tr>
       <td><i>DimeNet++</i></td>
-      <td><i>???</i></td>
-      <td><i>???</i></td>
-      <td><i>???</i></td>
+      <td><i>4.34</i></td>
+      <td><i>1.10</i></td>
+      <td><i>0.76</i></td>
       <td><i>0.63</i></td>
       <td><i>3.76</i></td>
       <td><i>0.59</i></td>
@@ -308,7 +308,7 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
     </tr>
     <tr>
       <td><i>eSCN</i></td>
-      <td><i>???</i></td>
+      <td><i>2.4</i></td>
       <td><i>???</i></td>
       <td><i>???</i></td>
       <td><i>0.96</i></td>
@@ -398,9 +398,9 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
     </tr>
     <tr>
       <td><i>DimeNet++</i></td>
-      <td><i>???</i></td>
-      <td><i>???</i></td>
-      <td><i>???</i></td>
+      <td><i>1.32</i></td>
+      <td><i>0.20</i></td>
+      <td><i>0.14</i></td>
       <td><i>0.071</i></td>
       <td><i>1.36</i></td>
       <td><i>0.19</i></td>
@@ -473,18 +473,18 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
     </tr>
     <tr>
       <td><i>eSCN</i></td>
-      <td><i>???</i></td>
+      <td><i>0.11</i></td>
       <td><i>???</i></td>
       <td><i>???</i></td>
       <td><i>0.024</i></td>
       <td><i>1.06</i></td>
       <td><i>0.052</i></td>
-      <td><i>???</i></td>
+      <td><i>0.036</i></td>
       <td><i>0.021</i></td>
       <td><i>0.065</i></td>
       <td><i>0.037</i></td>
       <td><i>0.029</i></td>
-      <td><i>0.33(?)</i></td>
+      <td><i>0.33</i></td>
     </tr>
   </tbody>
 </table>
