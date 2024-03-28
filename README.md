@@ -147,7 +147,7 @@ Several checkpoints for each model are available here: [checkpoints links](./nab
 
 Models training and testing example: 
 * [PAINN jupyter](examples/PAINN_example.ipynb)
-* [Collab](https://colab.research.google.com/drive/1vuQ16b2jlM4b76T2iZ9NytRN1_Sg0ljy)
+* [Collab](https://colab.research.google.com/drive/1VaiPa05pu-55XR6eR4DXv6cC6fy3lUwJ?usp=sharing)
 * [GemNet-OC jupyter](./examples/GemNet-OC_example.ipynb)
 
 Models inference example:
@@ -237,7 +237,7 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>1.10</i></td>
       <td><i>0.76</i></td>
       <td><i>0.63</i></td>
-      <td><i>3.76</i></td>
+      <td><i>37.58</i></td>
       <td><i>0.59</i></td>
       <td><i>0.37</i></td>
       <td><i>0.26</i></td>
