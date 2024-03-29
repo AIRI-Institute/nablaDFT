@@ -158,7 +158,7 @@ Models training and testing example:
 * [GemNet-OC jupyter](./examples/GemNet-OC_example.ipynb)
 
 Models inference example:
-* [GemNet-OC]()
+* [GemNet-OC](./examples/Inference%20example.ipynb)
 
 Molecular geometry optimization example:
 * [GemNet-OC](./examples/Geometry%20Optimization.ipynb)
