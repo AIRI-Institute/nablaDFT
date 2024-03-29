@@ -26,6 +26,13 @@ url  ="http://dx.doi.org/10.1039/D2CP03966D"}
 ![pipeline](images/pipeline.png)
 
 
+## Installation
+
+```python
+git clone https://github.com/AIRI-Institute/nablaDFT && cd nablaDFT/
+pip install .
+```
+
 ## Dataset
 
 We propose a benchmarking dataset based on a subset of [Molecular Sets (MOSES) dataset](https://github.com/molecularsets/moses). Resulting dataset contains 1 004 918 molecules with atoms C, N, S, O, F, Cl, Br, H. It contains 226 424 unique Bemis-Murcko scaffolds and 34 572 unique BRICS fragments.<br/>
@@ -309,7 +316,7 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
     <tr>
       <td><i>eSCN</i></td>
       <td><i>2.4</i></td>
-      <td><i>???</i></td>
+      <td><i>1.01</i></td>
       <td><i>???</i></td>
       <td><i>0.96</i></td>
       <td><i>1.88</i></td>
@@ -474,7 +481,7 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
     <tr>
       <td><i>eSCN</i></td>
       <td><i>0.11</i></td>
-      <td><i>???</i></td>
+      <td><i>0.055</i></td>
       <td><i>???</i></td>
       <td><i>0.024</i></td>
       <td><i>1.06</i></td>
