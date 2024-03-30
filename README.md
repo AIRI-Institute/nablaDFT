@@ -301,7 +301,7 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>Equiformer_V2</i></td>
       <td><i>3.35</i></td>
       <td><i>1.67</i></td>
-      <td><i>???</i></td>
+      <td><i>0.82</i></td>
       <td><i>0.72</i></td>
       <td><i>2.83</i></td>
       <td><i>1.31</i></td>
@@ -466,7 +466,7 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>Equiformer_V2</i></td>
       <td><i>0.31</i></td>
       <td><i>0.23</i></td>
-      <td><i>???</i></td>
+      <td><i>0.21</i></td>
       <td><i>0.18</i></td>
       <td><i>0.31</i></td>
       <td><i>0.23</i></td>
