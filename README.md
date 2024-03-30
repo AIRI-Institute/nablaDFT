@@ -41,9 +41,8 @@ We provide several splits of the dataset that can serve as the basis for compari
 As part of the benchmark, we provide separate databases for each subset and task and a complete archive with wave function files produced by the Psi4 package that contains quantum chemical properties of the corresponding molecule and can be used in further computations.
 ### Downloading dataset
 #### Hamiltonian databases
-The full hamiltonian database is available at [nablaDFT Hamiltonian database](https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/moses_db/dataset_full.db) (7 TB)<br/> 
 Links to other hamiltonian databases including different train and test subsets are in file [Hamiltonian databases](./nablaDFT/links/hamiltonian_databases.json)<br/>
-An archive with numpy indexes:  [splits indexes](https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/moses_db/data_splits.tar.gz)<br/>
+An archive with numpy indexes:  [splits indexes](https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/hamiltonian_databases/splits.tar.gz)<br/>
 #### Energy databases
 Links to energy databases including different train and test subsets are in file [Energy databases](./nablaDFT/links/energy_databases.json)
 
@@ -301,7 +300,7 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
     <tr>
       <td><i>Equiformer_V2</i></td>
       <td><i>3.35</i></td>
-      <td><i>???</i></td>
+      <td><i>1.67</i></td>
       <td><i>???</i></td>
       <td><i>0.72</i></td>
       <td><i>2.83</i></td>
@@ -317,11 +316,11 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>eSCN</i></td>
       <td><i>2.4</i></td>
       <td><i>1.01</i></td>
-      <td><i>???</i></td>
+      <td><i>1.48</i></td>
       <td><i>0.96</i></td>
       <td><i>1.88</i></td>
       <td><i>0.63</i></td>
-      <td><i>???</i></td>
+      <td><i>1.10</i></td>
       <td><i>0.59</i></td>
       <td><i>0.48</i></td>
       <td><i>0.31</i></td>
@@ -466,7 +465,7 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
     <tr>
       <td><i>Equiformer_V2</i></td>
       <td><i>0.31</i></td>
-      <td><i>???</i></td>
+      <td><i>0.23</i></td>
       <td><i>???</i></td>
       <td><i>0.18</i></td>
       <td><i>0.31</i></td>
@@ -482,7 +481,7 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>eSCN</i></td>
       <td><i>0.11</i></td>
       <td><i>0.055</i></td>
-      <td><i>???</i></td>
+      <td><i>0.040</i></td>
       <td><i>0.024</i></td>
       <td><i>1.06</i></td>
       <td><i>0.052</i></td>
