@@ -4,7 +4,7 @@ from typing import Dict, Optional, Tuple, Union
 
 import torch
 from torch import nn
-from torch_geometric.nn import MessagePassing
+from torch_geometric.nn import MessagePassing, radius_graph
 from torch_scatter import scatter, segment_coo
 from torch.optim import Optimizer
 from torch.optim.lr_scheduler import LRScheduler
@@ -24,7 +24,6 @@ from .utils import (
     compute_neighbors,
     get_edge_id,
     get_pbc_distances,
-    radius_graph,
     radius_graph_pbc,
     repeat_blocks,
     load_scales_compat,
@@ -389,9 +388,9 @@ class PaiNN(nn.Module):
             else:
                 forces = -1 * (
                     torch.autograd.grad(
-                        per_atom_energy,
+                        energy,
                         pos,
-                        grad_outputs=torch.ones_like(per_atom_energy),
+                        grad_outputs=torch.ones_like(energy),
                         create_graph=self.training,
                     )[0]
                 )

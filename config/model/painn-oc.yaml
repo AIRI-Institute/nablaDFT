@@ -3,10 +3,10 @@ _target_: nablaDFT.painn_pyg.PaiNNLightning
 model_name: "PAINN-OC"
 net:
   _target_: nablaDFT.painn_pyg.PaiNN
-  hidden_channels: 512
+  hidden_channels: 128
   num_layers: 6
-  num_rbf: 128
-  cutoff: 12.0
+  num_rbf: 100
+  cutoff: 5.0
   max_neighbors: 50
   rbf: 
       name: 'gaussian'
@@ -23,9 +23,7 @@ net:
 optimizer:
   _target_: torch.optim.AdamW
   _partial_: true
-  amsgrad: true
-  betas: [0.9, 0.95]
-  lr: 1e-3
+  lr: 1e-4
   weight_decay: 0
 
 lr_scheduler:
@@ -33,6 +31,7 @@ lr_scheduler:
   _partial_: true
   factor: 0.8
   patience: 10
+  min_lr: 1e-6
 
 losses:
   energy:
@@ -41,7 +40,7 @@ losses:
     _target_: nablaDFT.gemnet_oc.loss.L2Loss
 loss_coefs:
   energy: 1.0
-  forces: 100.0
+  forces: 1.0
 
 ema:
   _target_: torch_ema.ExponentialMovingAverage
