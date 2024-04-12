@@ -468,7 +468,7 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>0.055</i></td>
       <td><i>0.040</i></td>
       <td><i>0.024</i></td>
-      <td><i>1.06</i></td>
+      <td><i>0.11</i></td>
       <td><i>0.052</i></td>
       <td><i>0.036</i></td>
       <td><i>0.021</i></td>
