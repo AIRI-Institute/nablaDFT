@@ -16,8 +16,6 @@ from .layers import (
     AtomEmbedding,
     RadialBasis,
     ScaledSiLU,
-    ScaleFactor,
-    CosineCutoff
 )
 
 from .utils import (
