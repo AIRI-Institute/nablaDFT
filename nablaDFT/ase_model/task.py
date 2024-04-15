@@ -51,10 +51,11 @@ class AtomisticTaskFixed(spk.task.AtomisticTask):
     def on_save_checkpoint(self, checkpoint: Dict[str, Any]) -> None:
         # reshape model.postprocessors (AddOffsets)
         #  otherwise during test error will occur
-        checkpoint["state_dict"]["model.postprocessors.0.mean"] = checkpoint[
-            "state_dict"
-        ]["model.postprocessors.0.mean"].reshape(1)
-
+        if checkpoint["state_dict"].get("model.postprocessors.0.mean", None):
+            checkpoint["state_dict"]["model.postprocessors.0.mean"] = checkpoint[
+                "state_dict"
+            ]["model.postprocessors.0.mean"].reshape(1)
+            
     # override base class method
     def predict_without_postprocessing(self, batch):
         pred = self(batch)
