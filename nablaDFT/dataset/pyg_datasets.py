@@ -191,9 +191,6 @@ class PyGHamiltonianNablaDFT(Dataset):
         with tqdm(unit="B", unit_scale=True, unit_divisor=1024, miniters=1, total=file_size, desc=f"Downloading split: {self.dataset_name}") as t:
             request.urlretrieve(url, self.raw_paths[0], reporthook=tqdm_download_hook(t))
 
-    def process(self) -> None:
-        pass
-
     def _get_max_orbitals(self, datapath, dataset_name):
         db_path = os.path.join(datapath, "raw/" + dataset_name + self.db_suffix)
         if not os.path.exists(db_path):
