@@ -17,16 +17,15 @@ from .layers import (
     RadialBasis,
     ScaledSiLU,
     ScaleFactor,
+    CosineCutoff
 )
 
-# from torch_geometric.nn import radius_graph
 from .utils import (
     compute_neighbors,
     get_edge_id,
     get_pbc_distances,
     radius_graph_pbc,
     repeat_blocks,
-    load_scales_compat,
 )
 
 
@@ -53,7 +52,6 @@ class PaiNN(nn.Module):
         use_pbc: bool = True,
         otf_graph: bool = True,
         num_elements: int = 83,
-        scale_file: Optional[str] = None,
     ) -> None:
         super(PaiNN, self).__init__()
 
@@ -89,22 +87,75 @@ class PaiNN(nn.Module):
                 PaiNNMessage(hidden_channels, num_rbf).jittable()
             )
             self.update_layers.append(PaiNNUpdate(hidden_channels))
-            setattr(self, "upd_out_scalar_scale_%d" % i, ScaleFactor())
 
         self.out_energy = nn.Sequential(
             nn.Linear(hidden_channels, hidden_channels // 2),
-            ScaledSiLU(),
+            nn.SiLU(),
             nn.Linear(hidden_channels // 2, 1),
         )
 
         if self.regress_forces is True and self.direct_forces is True:
             self.out_forces = PaiNNOutput(hidden_channels)
-
-        self.inv_sqrt_2 = 1 / math.sqrt(2.0)
-
         self.reset_parameters()
 
-        load_scales_compat(self, scale_file)
+
+    @torch.enable_grad()
+    def forward(self, data):
+        pos = data.pos
+        batch = data.batch
+        z = data.z.long()
+
+        if self.regress_forces and not self.direct_forces:
+            pos = pos.requires_grad_(True)
+
+        (
+            edge_index,
+            neighbors,
+            edge_dist,
+            edge_vector,
+            id_swap,
+        ) = self.generate_graph_values(data)
+
+        assert z.dim() == 1 and z.dtype == torch.long
+
+        edge_rbf = self.radial_basis(edge_dist)  # rbf * envelope
+
+        x = self.atom_emb(z)
+        vec = torch.zeros(x.size(0), 3, x.size(1), device=x.device)
+
+        #### Interaction blocks ###############################################
+
+        for i in range(self.num_layers):
+            dx, dvec = self.message_layers[i](x, vec, edge_index, edge_rbf, edge_vector)
+
+            x = x + dx
+            vec = vec + dvec
+
+            dx, dvec = self.update_layers[i](x, vec)
+
+            x = x + dx
+            vec = vec + dvec
+
+        #### Output block #####################################################
+        per_atom_energy = self.out_energy(x).squeeze(1)
+        energy = scatter(per_atom_energy, batch, dim=0)
+
+        if self.regress_forces:
+            if self.direct_forces:
+                forces = self.out_forces(x, vec)
+                return energy, forces
+            else:
+                forces = -1 * (
+                    torch.autograd.grad(
+                        energy,
+                        pos,
+                        grad_outputs=torch.ones_like(energy),
+                        create_graph=self.training,
+                    )[0]
+                )
+                return energy, forces
+        else:
+            return energy
 
     def reset_parameters(self) -> None:
         nn.init.xavier_uniform_(self.out_energy[0].weight)
@@ -307,11 +358,6 @@ class PaiNN(nn.Module):
         empty_image = neighbors == 0
         if torch.any(empty_image):
             print(f"An image has no neighbors! #images = {empty_image.sum().item()}")
-            # raise ValueError(
-            #     f"An image has no neighbors: id={data.id[empty_image]}, "
-            #     f"sid={data.sid[empty_image]}, fid={data.fid[empty_image]}"
-            # )
-
         # Symmetrize edges for swapping in symmetric message passing
         (
             edge_index,
@@ -336,67 +382,6 @@ class PaiNN(nn.Module):
             edge_vector,
             id_swap,
         )
-
-
-    @torch.enable_grad()
-    def forward(self, data):
-        pos = data.pos
-        batch = data.batch
-        z = data.z.long()
-
-        if self.regress_forces and not self.direct_forces:
-            pos = pos.requires_grad_(True)
-
-        (
-            edge_index,
-            neighbors,
-            edge_dist,
-            edge_vector,
-            id_swap,
-        ) = self.generate_graph_values(data)
-
-        assert z.dim() == 1 and z.dtype == torch.long
-
-        edge_rbf = self.radial_basis(edge_dist)  # rbf * envelope
-
-        x = self.atom_emb(z)
-        vec = torch.zeros(x.size(0), 3, x.size(1), device=x.device)
-
-        #### Interaction blocks ###############################################
-
-        for i in range(self.num_layers):
-            dx, dvec = self.message_layers[i](x, vec, edge_index, edge_rbf, edge_vector)
-
-            x = x + dx
-            vec = vec + dvec
-            x = x * self.inv_sqrt_2
-
-            dx, dvec = self.update_layers[i](x, vec)
-
-            x = x + dx
-            vec = vec + dvec
-            x = getattr(self, "upd_out_scalar_scale_%d" % i)(x)
-
-        #### Output block #####################################################
-        per_atom_energy = self.out_energy(x).squeeze(1)
-        energy = scatter(per_atom_energy, batch, dim=0)
-
-        if self.regress_forces:
-            if self.direct_forces:
-                forces = self.out_forces(x, vec)
-                return energy, forces
-            else:
-                forces = -1 * (
-                    torch.autograd.grad(
-                        energy,
-                        pos,
-                        grad_outputs=torch.ones_like(energy),
-                        create_graph=self.training,
-                    )[0]
-                )
-                return energy, forces
-        else:
-            return energy
 
     def _generate_graph(
         self,
@@ -470,7 +455,6 @@ class PaiNN(nn.Module):
             j, i = edge_index
             distance_vec = data.pos[j] - data.pos[i]
             edge_dist = (data.pos[i] - data.pos[j]).pow(2).sum(dim=-1).sqrt()
-            # edge_dist = distance_vec.norm(dim=-1)
             cell_offsets = torch.zeros(edge_index.shape[1], 3, device=data.pos.device)
             cell_offset_distances = torch.zeros_like(
                 cell_offsets, device=data.pos.device
@@ -513,15 +497,10 @@ class PaiNNMessage(MessagePassing):
 
         self.x_proj = nn.Sequential(
             nn.Linear(hidden_channels, hidden_channels),
-            ScaledSiLU(),
+            nn.SiLU(),
             nn.Linear(hidden_channels, hidden_channels * 3),
         )
         self.rbf_proj = nn.Linear(num_rbf, hidden_channels * 3)
-
-        self.inv_sqrt_3 = 1 / math.sqrt(3.0)
-        self.inv_sqrt_h = 1 / math.sqrt(hidden_channels)
-        self.x_layernorm = nn.LayerNorm(hidden_channels)
-
         self.reset_parameters()
 
     def reset_parameters(self) -> None:
@@ -531,10 +510,9 @@ class PaiNNMessage(MessagePassing):
         self.x_proj[2].bias.data.fill_(0)
         nn.init.xavier_uniform_(self.rbf_proj.weight)
         self.rbf_proj.bias.data.fill_(0)
-        self.x_layernorm.reset_parameters()
 
     def forward(self, x, vec, edge_index, edge_rbf, edge_vector):
-        xh = self.x_proj(self.x_layernorm(x))
+        xh = self.x_proj(x)
 
         # TODO(@abhshkdz): Nans out with AMP here during backprop. Debug / fix.
         rbfh = self.rbf_proj(edge_rbf)
@@ -553,10 +531,7 @@ class PaiNNMessage(MessagePassing):
 
     def message(self, xh_j, vec_j, rbfh_ij, r_ij):
         x, xh2, xh3 = torch.split(xh_j * rbfh_ij, self.hidden_channels, dim=-1)
-        xh2 = xh2 * self.inv_sqrt_3
-
         vec = vec_j * xh2.unsqueeze(1) + xh3.unsqueeze(1) * r_ij.unsqueeze(2)
-        vec = vec * self.inv_sqrt_h
 
         return x, vec
 
@@ -586,13 +561,9 @@ class PaiNNUpdate(nn.Module):
         self.vec_proj = nn.Linear(hidden_channels, hidden_channels * 2, bias=False)
         self.xvec_proj = nn.Sequential(
             nn.Linear(hidden_channels * 2, hidden_channels),
-            ScaledSiLU(),
+            nn.SiLU(),
             nn.Linear(hidden_channels, hidden_channels * 3),
         )
-
-        self.inv_sqrt_2 = 1 / math.sqrt(2.0)
-        self.inv_sqrt_h = 1 / math.sqrt(hidden_channels)
-
         self.reset_parameters()
 
     def reset_parameters(self) -> None:
@@ -604,7 +575,7 @@ class PaiNNUpdate(nn.Module):
 
     def forward(self, x, vec):
         vec1, vec2 = torch.split(self.vec_proj(vec), self.hidden_channels, dim=-1)
-        vec_dot = (vec1 * vec2).sum(dim=1) * self.inv_sqrt_h
+        vec_dot = (vec1 * vec2).sum(dim=1)
 
         # NOTE: Can't use torch.norm because the gradient is NaN for input = 0.
         # Add an epsilon offset to make sure sqrt is always positive.
@@ -614,7 +585,6 @@ class PaiNNUpdate(nn.Module):
         xvec1, xvec2, xvec3 = torch.split(x_vec_h, self.hidden_channels, dim=-1)
 
         dx = xvec1 + xvec2 * vec_dot
-        dx = dx * self.inv_sqrt_2
 
         dvec = xvec3.unsqueeze(1) * vec1
 
@@ -701,14 +671,12 @@ class PaiNNLightning(pl.LightningModule):
         optimizer: Optimizer,
         lr_scheduler: LRScheduler,
         losses: Dict,
-        ema,
         metric,
         loss_coefs
     ) -> None:
         super(PaiNNLightning, self).__init__()
-        self.ema = ema
         self.net = net
-        self.save_hyperparameters(logger=True, ignore=["net", "ema"])
+        self.save_hyperparameters(logger=True, ignore=["net"])
 
     def forward(self, data):
         energy, forces = self.net(data)
@@ -747,8 +715,7 @@ class PaiNNLightning(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         bsz = self._get_batch_size(batch)
-        with self.ema.average_parameters():
-            loss, metrics = self.step(batch, calculate_metrics=True)
+        loss, metrics = self.step(batch, calculate_metrics=True)
         self.log(
             "val/loss",
             loss,
@@ -773,8 +740,7 @@ class PaiNNLightning(pl.LightningModule):
 
     def test_step(self, batch, batch_idx):
         bsz = self._get_batch_size(batch)
-        with self.ema.average_parameters():
-            loss, metrics = self.step(batch, calculate_metrics=True)
+        loss, metrics = self.step(batch, calculate_metrics=True)
         self.log(
             "test/loss",
             loss,
@@ -806,15 +772,10 @@ class PaiNNLightning(pl.LightningModule):
             }
         return {"optimizer": optimizer}
 
-    def on_before_zero_grad(self, optimizer: Optimizer) -> None:
-        self.ema.update()
-
     def on_fit_start(self) -> None:
-        self._instantiate_ema()
         self._check_devices()
 
     def on_test_start(self) -> None:
-        self._instantiate_ema()
         self._check_devices()
 
     def on_validation_epoch_end(self) -> None:
@@ -854,13 +815,7 @@ class PaiNNLightning(pl.LightningModule):
 
     def _check_devices(self):
         self.hparams.metric = self.hparams.metric.to(self.device)
-        if self.ema is not None:
-            self.ema.to(self.device)
-
-    def _instantiate_ema(self):
-        if self.ema is not None:
-            self.ema = self.ema(self.parameters())
-
+        
     def _get_batch_size(self, batch):
         """Function for batch size infer."""
         bsz = batch.batch.max().detach().item() + 1  # get batch size

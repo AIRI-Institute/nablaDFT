@@ -7,7 +7,7 @@ net:
   num_layers: 6
   num_rbf: 100
   cutoff: 5.0
-  max_neighbors: 50
+  max_neighbors: 100
   rbf: 
       name: 'gaussian'
   envelope: 
@@ -17,20 +17,20 @@ net:
   direct_forces: false
   use_pbc: false
   otf_graph: true
-  num_elements: 65
+  num_elements: 100
 
 
 optimizer:
   _target_: torch.optim.AdamW
   _partial_: true
-  lr: 1e-4
+  lr: 5e-4
   weight_decay: 0
 
 lr_scheduler:
   _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
   _partial_: true
   factor: 0.8
-  patience: 10
+  patience: 100
   min_lr: 1e-6
 
 losses:
@@ -41,11 +41,6 @@ losses:
 loss_coefs:
   energy: 1.0
   forces: 1.0
-
-ema:
-  _target_: torch_ema.ExponentialMovingAverage
-  _partial_: true
-  decay: 0.9999
 
 metric:
   _target_: torchmetrics.MultitaskWrapper
