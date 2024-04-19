@@ -220,7 +220,7 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>0.56</i></td>
       <td><i>0.63</i></td>
       <td><i>0.88</i></td>
-      <td><i>0.29</i></td>
+      <td><i>0.28</i></td>
     </tr>
     <tr>
       <td><i>SchNOrb</i></td>
@@ -250,7 +250,7 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>0.42</i></td>
       <td><i>0.10</i></td>
       <td><i>0.09</i></td>
-      <td><i>0.08</i></td>
+      <td><i>0.07</i></td>
     </tr>
     <tr>
       <td><i>PAINN</i></td>
@@ -265,7 +265,7 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>0.43</i></td>
       <td><i>0.49</i></td>
       <td><i>0.28</i></td>
-      <td><i>0.09</i></td>
+      <td><i>0.08</i></td>
     </tr>
     <tr>
       <td><i>Graphormer3D-small</i></td>
@@ -295,7 +295,7 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>0.52</i></td>
       <td><i>0.20</i></td>
       <td><i>0.15</i></td>
-      <td><i>0.13</i></td>
+      <td><i>0.24</i></td>
     </tr>
     <tr>
       <td><i>Equiformer_V2</i></td>
@@ -310,7 +310,7 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>0.45</i></td>
       <td><i>0.23</i></td>
       <td><i>0.24</i></td>
-      <td><i>0.18</i></td>
+      <td><i>0.16</i></td>
     </tr>
     <tr>
       <td><i>eSCN</i></td>
@@ -325,7 +325,7 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>0.48</i></td>
       <td><i>0.31</i></td>
       <td><i>0.80</i></td>
-      <td><i>0.40</i></td>
+      <td><i>0.44</i></td>
     </tr>
   </tbody>
 </table>
@@ -370,7 +370,7 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>0.32</i></td>
       <td><i>0.30</i></td>
       <td><i>0.37</i></td>
-      <td><i>0.46</i></td>
+      <td><i>0.14</i></td>
     </tr>
     <tr>
       <td><i>SchNOrb</i></td>
@@ -400,7 +400,7 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>0.26</i></td>
       <td><i>0.12</i></td>
       <td><i>0.10</i></td>
-      <td><i>0.37</i></td>
+      <td><i>0.062</i></td>
     </tr>
     <tr>
       <td><i>PAINN</i></td>
@@ -415,7 +415,7 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>0.23</i></td>
       <td><i>0.22</i></td>
       <td><i>0.14</i></td>
-      <td><i>0.20(?)</i></td>
+      <td><i>0.052</i></td>
     </tr>
     <tr>
       <td><i>Graphormer3D-small</i></td>
@@ -430,7 +430,7 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>0.76</i></td>
       <td><i>0.50</i></td>
       <td><i>0.39</i></td>
-      <td><i>0.45</i></td>
+      <td><i>0.27</i></td>
     </tr>
     <tr>
       <td><i>GemNet-OC</i></td>
@@ -445,7 +445,7 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>0.073</i></td>
       <td><i>0.042</i></td>
       <td><i>0.032</i></td>
-      <td><i>0.33</i></td>
+      <td><i>0.019</i></td>
     </tr>
     <tr>
       <td><i>Equiformer_V2</i></td>
@@ -460,7 +460,7 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>0.16</i></td>
       <td><i>0.15</i></td>
       <td><i>0.16</i></td>
-      <td><i>0.45</i></td>
+      <td><i>0.13</i></td>
     </tr>
     <tr>
       <td><i>eSCN</i></td>
@@ -475,7 +475,7 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>0.065</i></td>
       <td><i>0.037</i></td>
       <td><i>0.029</i></td>
-      <td><i>0.33</i></td>
+      <td><i>0.019</i></td>
     </tr>
   </tbody>
 </table>
