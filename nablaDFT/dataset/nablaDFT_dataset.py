@@ -139,6 +139,16 @@ class PyGDataModule(LightningDataModule):
         self.dataset_name = dataset_name
         self.seed = seed
         self.sizes = [train_size, val_size]
+        dataloader_keys = [
+            "batch_size", "num_workers",
+            "pin_memory", "persistent_workers"
+        ]
+        self.dataloader_kwargs = {}
+        for key in dataloader_keys:
+            val = kwargs.get(key, None)
+            self.dataloader_kwargs[key] = val
+            if val is not None:
+                del kwargs[key]
         self.kwargs = kwargs
 
     def dataloader(self, dataset, **kwargs):
