@@ -22,7 +22,11 @@ class HamiltonianDatabase:
     C (Norb, Norb)        core hamiltonian in atomic units
     moses_id () (int)     molecule id in MOSES dataset
     conformer_id () (int) conformation id
+
+    Args:
+        filename (str): path to database.
     """
+
     def __init__(self, filename, flags=apsw.SQLITE_OPEN_READONLY):
         self.db = filename
         self.connections = {}  # allow multiple connections (needed for multi-threading)
@@ -38,12 +42,24 @@ class HamiltonianDatabase:
             data = cursor.execute(
                 """SELECT * FROM data WHERE id IN (""" + str(idx)[1:-1] + ")"
             ).fetchall()
-            return [self._unpack_data_tuple(i) for i in data]
+            ids = cursor.execute(
+                """SELECT * FROM dataset_ids WHERE id IN (""" + str(idx)[1:-1] + ")"
+            ).fetchall()
+            moses_ids, conformer_ids = [i[1] for i in ids], [i[2] for i in ids]
+            unpacked_data = [
+                (*self._unpack_data_tuple(chunk), moses_ids[i], conformer_ids[i])
+                for i, chunk in enumerate(data)
+            ]
+            return unpacked_data
         else:
             data = cursor.execute(
                 """SELECT * FROM data WHERE id=""" + str(idx)
             ).fetchone()
-            return self._unpack_data_tuple(data)
+            ids = cursor.execute(
+                """SELECT * FROM dataset_ids WHERE id=""" + str(idx)
+            ).fetchall()[0]
+            moses_id, conformer_id = ids[1], ids[2]
+            return (*self._unpack_data_tuple(data), moses_id, conformer_id)
 
     def _unpack_data_tuple(self, data):
         N = (
@@ -244,8 +260,21 @@ class HamiltonianDatabase:
         return self._deblob(data[2], dtype=np.int32, shape=(N,))
 
 
-
 class HamiltonianDataset(torch.utils.data.Dataset):
+    """PyTorch interface for nablaDFT Hamiltonian databases.
+
+    Collates hamiltonian, overlap and core hamiltonian matrices
+    from batch into block diagonal matrix.
+
+    Args:
+        - filepath (str): path to database.
+        - max_batch_orbitals (int): maximum number of orbitals in one batch.
+        - max_batch_atoms (int): maximum number of atoms in one batch..
+        - max_squares (int): maximum size of block diagonal matrix in one batch.
+        - subset() path to saved numpy array with selected indexes.
+        - dtype (torch.dtype): defines torch.dtype for tensors.
+    """
+
     def __init__(
         self,
         filepath,

@@ -30,6 +30,10 @@ def predict(
 ):
     """Function for prediction loop execution.
     Saves model prediction to "predictions" directory.
+
+    Args:
+        ckpt_path (str): path to model checkpoint.
+        config (DictConfig): config for task. see r'config/' for examples.
     """
     trainer.logger = False  # need this to disable save_hyperparameters during predict, otherwise OmegaConf DictConf can't be dumped to YAML
     pred_path = os.path.join(os.getcwd(), "predictions")
@@ -43,6 +47,10 @@ def predict(
 def optimize(config: DictConfig, ckpt_path: str):
     """Function for batched molecules optimization.
     Uses model defined in config.
+
+    Args:
+        ckpt_path (str): path to model checkpoint.
+        config (DictConfig): config for task. see r'config/' for examples.
     """
     output_dir = config.get("output_dir")
     if not os.path.exists(output_dir):
@@ -66,6 +74,12 @@ def optimize(config: DictConfig, ckpt_path: str):
 
 
 def run(config: DictConfig):
+    """Main function to perform task runs on nablaDFT datasets.
+    Refer to r'nablaDFT/README.md' for detailed description of run configuration.
+
+    Args:
+        config (DictConfig): config for task. see r'config/' for examples.
+    """
     if config.get("seed"):
         seed_everything(config.seed)
     job_type = config.get("job_type")

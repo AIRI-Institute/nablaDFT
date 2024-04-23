@@ -27,7 +27,11 @@ import nablaDFT
 logger = logging.getLogger()
 
 def get_file_size(url: str) -> int:
-    """Returns file size in bytes"""
+    """Returns file size in bytes
+    
+    Args:
+        url (str): url of file to download
+    """
     req = request.Request(url, method="HEAD")
     with request.urlopen(req) as f:
         file_size = f.headers.get('Content-Length')
@@ -87,7 +91,11 @@ def init_wandb():
 
 
 def download_model(config: DictConfig) -> str:
-    """Downloads best model checkpoint from vault."""
+    """Downloads best model checkpoint from vault.
+
+    Args:
+        config (DictConfig): config for task. see r'config/' for examples.
+    """
     model_name = config.get("name")
     ckpt_path = os.path.join(
         hydra.utils.get_original_cwd(),
@@ -108,6 +116,12 @@ def download_model(config: DictConfig) -> str:
 
 
 def load_model(config: DictConfig, ckpt_path: str) -> LightningModule:
+    """Instantiates model and loads model weights from checkpoint.
+
+    Args:
+        config (DictConfig): config for task. see r'config/' for examples.
+        ckpt_path (str): path to checkpoint.
+    """
     model: LightningModule = hydra.utils.instantiate(config.model)
     if ckpt_path is None:
         warnings.warn(
