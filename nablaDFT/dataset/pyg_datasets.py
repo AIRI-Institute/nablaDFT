@@ -207,7 +207,7 @@ class PyGHamiltonianNablaDFT(Dataset):
     def download(self) -> None:
         with open(nablaDFT.__path__[0] + "/links/hamiltonian_databases.json") as f:
             data = json.load(f)
-            url = data["train_databases"][self.dataset_name]
+            url = data[f"{self.split}_databases"][self.dataset_name]
         file_size = get_file_size(url)
         with tqdm(
             unit="B",
