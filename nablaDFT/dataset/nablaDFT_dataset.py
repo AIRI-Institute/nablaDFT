@@ -158,16 +158,16 @@ class PyGDataModule(LightningDataModule):
         raise NotImplementedError
 
     def train_dataloader(self):
-        return self.dataloader(self.dataset_train, shuffle=True, **self.kwargs)
+        return self.dataloader(self.dataset_train, shuffle=True, **self.dataloader_kwargs)
 
     def val_dataloader(self):
-        return self.dataloader(self.dataset_val, shuffle=False, **self.kwargs)
+        return self.dataloader(self.dataset_val, shuffle=False, **self.dataloader_kwargs)
 
     def test_dataloader(self):
-        return self.dataloader(self.dataset_test, shuffle=False, **self.kwargs)
+        return self.dataloader(self.dataset_test, shuffle=False, **self.dataloader_kwargs)
 
     def predict_dataloader(self):
-        return self.dataloader(self.dataset_predict, shuffle=False, **self.kwargs)
+        return self.dataloader(self.dataset_predict, shuffle=False, **self.dataloader_kwargs)
 
 
 class PyGHamiltonianDataModule(PyGDataModule):
