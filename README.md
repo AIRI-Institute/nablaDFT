@@ -547,8 +547,8 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>-</i></td>
       <td><i>-</i></td>
       <td><i>-</i></td>
-      <td><i>-</i></td>
-      <td><i>-</i></td>
+      <td><i>8.4</i></td>
+      <td><i>7.3</i></td>
       <td><i>1.3</i></td>
       <td><i>-</i></td>
     </tr>
@@ -560,7 +560,7 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
   <thead>
     <tr style="text-align: center;">
       <th rowspan="3">Model</th>
-      <th colspan="15"> MAE for overlap matrix prediction $\times 10^{−5}$(↓)</th>
+      <th colspan="12"> MAE for overlap matrix prediction $\times 10^{−5}$(↓)</th>
     </tr>
     <tr>
       <th colspan="4">Test ST</th>
