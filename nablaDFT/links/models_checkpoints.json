@@ -55,5 +55,11 @@
     "dataset_train_10k": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/models_checkpoints/graphormer/small/Graphormer3D-small_dataset_train_10k_epoch_1095_val_loss_0.010159.ckpt",
     "dataset_train_5k": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/models_checkpoints/graphormer/small/Graphormer3D-small_dataset_train_5k_epoch_1331_val_loss_0.012179.ckpt",
     "dataset_train_2k": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/models_checkpoints/graphormer/small/Graphormer3D-small_dataset_train_2k_epoch_672_val_loss_0.018476.ckpt"
+  },
+  "QHNet": {
+    "dataset_train_100k": null,
+    "dataset_train_10k": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/models_checkpoints/QHNet/QHNet-10k_dataset_train_10k_epoch=034_val_loss=0.001594.ckpt",
+    "dataset_train_5k": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/models_checkpoints/QHNet/QHNet-5k_dataset_train_5k_epoch=067_val_loss=0.002631.ckpt",
+    "dataset_train_2k": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/models_checkpoints/QHNet/QHNet-2k_dataset_train_2k_epoch=055_val_loss=0.002044.ckpt"
   }
 }
