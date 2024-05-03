@@ -169,7 +169,7 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
   <thead>
     <tr style="text-align: center;">
       <th rowspan="3">Model</th>
-      <th colspan="15"> MAE for energy prediction $\times 10^{−2} E_h$ (↓)</th>
+      <th colspan="12"> MAE for energy prediction $\times 10^{−2} E_h$ (↓)</th>
     </tr>
     <tr>
       <th colspan="4">Test ST</th>
@@ -224,18 +224,18 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
     </tr>
     <tr>
       <td><i>SchNOrb</i></td>
-      <td><i>5.9</i></td>
-      <td><i>3.7</i></td>
-      <td><i>13.3(*)</i></td>
-      <td><i>-</i></td>
-      <td><i>5.9</i></td>
-      <td><i>3.4</i></td>
-      <td><i>14.8(*)</i></td>
-      <td><i>-</i></td>
-      <td><i>5.0</i></td>
-      <td><i>3.6</i></td>
-      <td><i>14.5(*)</i></td>
-      <td><i>-</i></td>
+      <td><i>0.83</i></td>
+      <td><i>0.47</i></td>
+      <td><i>0.39</i></td>
+      <td><i>0.39</i></td>
+      <td><i>0.86</i></td>
+      <td><i>0.46</i></td>
+      <td><i>0.37</i></td>
+      <td><i>0.39</i></td>
+      <td><i>0.37</i></td>
+      <td><i>0.26</i></td>
+      <td><i>0.27</i></td>
+      <td><i>0.36</i></td>
     </tr>
     <tr>
       <td><i>DimeNet++</i></td>
@@ -334,7 +334,7 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
   <thead>
     <tr style="text-align: center;">
       <th rowspan="3">Model</th>
-      <th colspan="15"> MAE for forces prediction $\times 10^{−2} E_h*A^{-1}$ (↓)</th>
+      <th colspan="12"> MAE for forces prediction $\times 10^{−2} E_h*A^{-1}$ (↓)</th>
     </tr>
     <tr>
       <th colspan="4">Test ST</th>
@@ -371,21 +371,6 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>0.30</i></td>
       <td><i>0.37</i></td>
       <td><i>0.14</i></td>
-    </tr>
-    <tr>
-      <td><i>SchNOrb</i></td>
-      <td><i>???</i></td>
-      <td><i>???</i></td>
-      <td><i>???</i></td>
-      <td><i>???</i></td>
-      <td><i>???</i></td>
-      <td><i>???</i></td>
-      <td><i>???</i></td>
-      <td><i>???</i></td>
-      <td><i>???</i></td>
-      <td><i>???</i></td>
-      <td><i>???</i></td>
-      <td><i>???</i></td>
     </tr>
     <tr>
       <td><i>DimeNet++</i></td>
@@ -509,33 +494,33 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
   <tbody>
     <tr>
       <td><i>SchNOrb</i></td>
-      <td><i>386.5</i></td>
-      <td><i>383.4</i></td>
-      <td><i>382.0(*)</i></td>
-      <td><i>-</i></td>
-      <td><i>385.3</i></td>
-      <td><i>380.7</i></td>
-      <td><i>383.6(*)</i></td>
-      <td><i>-</i></td>
-      <td><i>385.0</i></td>
-      <td><i>384.8</i></td>
-      <td><i>392.0(*)</i></td>
-      <td><i>-</i></td>
+      <td><i>198</i></td>
+      <td><i>196</i></td>
+      <td><i>196</i></td>
+      <td><i>198</i></td>
+      <td><i>199</i></td>
+      <td><i>198</i></td>
+      <td><i>200</i></td>
+      <td><i>199</i></td>
+      <td><i>215</i></td>
+      <td><i>207</i></td>
+      <td><i>207</i></td>
+      <td><i>206</i></td>
     </tr>
     <tr>
       <td><i>PhiSNet</i></td>
-      <td><i>7.4</i></td>
-      <td><i>3.2</i></td>
-      <td><i>2.9</i></td>
-      <td><i>-</i></td>
-      <td><i>7.2</i></td>
-      <td><i>3.2</i></td>
-      <td><i>2.9</i></td>
-      <td><i>-</i></td>
-      <td><i>6.5</i></td>
-      <td><i>3.2</i></td>
-      <td><i>2.8</i></td>
-      <td><i>-</i></td>
+      <td><i>1.9</i></td>
+      <td><i>3.2(*)</i></td>
+      <td><i>3.4(*)</i></td>
+      <td><i>3.6(*)</i></td>
+      <td><i>1.9</i></td>
+      <td><i>3.2(*)</i></td>
+      <td><i>3.4(*)</i></td>
+      <td><i>3.6(*)</i></td>
+      <td><i>1.8</i></td>
+      <td><i>3.3(*)</i></td>
+      <td><i>3.5(*)</i></td>
+      <td><i>3.7(*)</i></td>
     </tr>
     <tr>
       <td><i>QHNet</i></td>
@@ -585,33 +570,33 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
   <tbody>
     <tr>
       <td><i>SchNOrb</i></td>
-      <td><i>1550</i></td>
-      <td><i>1455</i></td>
-      <td><i>1493(*)</i></td>
-      <td><i>-</i></td>
-      <td><i>1543</i></td>
-      <td><i>1440</i></td>
-      <td><i>1496(*)</i></td>
-      <td><i>-</i></td>
-      <td><i>1544</i></td>
-      <td><i>1480</i></td>
-      <td><i>1536(*)</i></td>
-      <td><i>-</i></td>
+      <td><i>1320</i></td>
+      <td><i>1310</i></td>
+      <td><i>1320</i></td>
+      <td><i>1340</i></td>
+      <td><i>1330</i></td>
+      <td><i>1320</i></td>
+      <td><i>1330</i></td>
+      <td><i>1340</i></td>
+      <td><i>1410</i></td>
+      <td><i>1360</i></td>
+      <td><i>1370</i></td>
+      <td><i>1370</i></td>
     </tr>
     <tr>
       <td><i>PhiSNet</i></td>
-      <td><i>5.1</i></td>
-      <td><i>4.3</i></td>
-      <td><i>3.5</i></td>
-      <td><i>-</i></td>
-      <td><i>5.0</i></td>
-      <td><i>4.3</i></td>
-      <td><i>3.5</i></td>
-      <td><i>-</i></td>
-      <td><i>5.1</i></td>
-      <td><i>4.6</i></td>
-      <td><i>3.6</i></td>
-      <td><i>-</i></td>
+      <td><i>2.7</i></td>
+      <td><i>3.0(*)</i></td>
+      <td><i>2.9(*)</i></td>
+      <td><i>3.3(*)</i></td>
+      <td><i>2.6</i></td>
+      <td><i>2.9(*)</i></td>
+      <td><i>2.9(*)</i></td>
+      <td><i>3.2(*)</i></td>
+      <td><i>3.0</i></td>
+      <td><i>3.2(*)</i></td>
+      <td><i>3.1(*)</i></td>
+      <td><i>3.5(*)</i></td>
     </tr>
   </tbody>
 </table>
