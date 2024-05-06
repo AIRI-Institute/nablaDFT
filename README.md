@@ -415,7 +415,7 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>0.82</i></td>
       <td><i>0.54</i></td>
       <td><i>0.45</i></td>
-      <td><i>0.27</i></td>
+      <td><i>0.23</i></td>
     </tr>
     <tr>
       <td><i>GemNet-OC</i></td>
