@@ -46,7 +46,7 @@ metric:
   _convert_: all
   task_metrics:
     hamiltonian:
-      _target_: torchmetrics.MeanAbsoluteError
+      _target_: nablaDFT.qhnet.MaskedMeanAbsoluteError
 
 ema:
   _target_: torch_ema.ExponentialMovingAverage
