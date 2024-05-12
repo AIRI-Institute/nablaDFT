@@ -524,18 +524,18 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
     </tr>
     <tr>
       <td><i>QHNet</i></td>
-      <td><i>-</i></td>
-      <td><i>-</i></td>
-      <td><i>-</i></td>
-      <td><i>-</i></td>
-      <td><i>-</i></td>
-      <td><i>-</i></td>
-      <td><i>-</i></td>
-      <td><i>-</i></td>
+      <td><i>9.8</i></td>
+      <td><i>7.9</i></td>
+      <td><i>5.2</i></td>
+      <td><i>6.9(*)</i></td>
+      <td><i>9.8</i></td>
+      <td><i>7.9</i></td>
+      <td><i>5.2</i></td>
+      <td><i>6.9(*)</i></td>
       <td><i>8.4</i></td>
       <td><i>7.3</i></td>
-      <td><i>1.3</i></td>
-      <td><i>-</i></td>
+      <td><i>5.2</i></td>
+      <td><i>6.8(*)</i></td>
     </tr>
   </tbody>
 </table>
