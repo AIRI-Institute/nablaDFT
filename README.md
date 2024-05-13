@@ -61,14 +61,14 @@ Tar archive with xyz files [archive](https://n-usr-31b1j.s3pd12.sbercloud.ru/b-u
 ```python
 from nablaDFT.dataset import HamiltonianDatabase
 
-train = HamiltonianDatabase("dataset_train_2k.db")
+train = HamiltonianDatabase("dataset_train_tiny.db")
 Z, R, E, F, H, S, C = train[0]  # atoms numbers, atoms positions, energy, forces, core hamiltonian, overlap matrix, coefficients matrix
 ```
 #### Energies database
 ```python
 from ase.db import connect
 
-train = connect("train_2k_energy.db")
+train = connect("dataset_train_tiny.db")
 atoms_data = connect.get(1)
 ```
 #### Working with raw psi4 wavefunctions
@@ -124,19 +124,19 @@ For detailed run configuration please refer to [run configuration README](./nabl
 To create a dataset, we use interfaces from ASE and PyTorch Lightning.  
 An example of the initialisation of ASE-type data classes (for SchNet, PaiNN models) is presented below:
 ```python
-datamodule = ASENablaDFT(split="train", dataset_name="dataset_train_2k")
+datamodule = ASENablaDFT(split="train", dataset_name="dataset_train_tiny")
 datamodule.prepare_data()
 # access to dataset
 datamodule.dataset
 ```
 For PyTorch Geometric data dataset initialized with PyGNablaDFTDatamodule:
 ```python
-datamodule = PyGNablaDFTDataModule(root="path-to-dataset-dir", dataset_name="dataset_train_2k", train_size=0.9, val_size=0.1)
+datamodule = PyGNablaDFTDataModule(root="path-to-dataset-dir", dataset_name="dataset_train_tiny", train_size=0.9, val_size=0.1)
 datamodule.setup(stage="fit")
 ```
 Similarly, Hamiltonian-type data classes (for SchNOrb, PhiSNet models) are initialised in the following way:
 ```python
-datamodule = PyGHamiltonianDataModule(root="path-to-dataset-dir", dataset_name="dataset_train_2k", train_size=0.9, val_size=0.1)
+datamodule = PyGHamiltonianDataModule(root="path-to-dataset-dir", dataset_name="dataset_train_tiny", train_size=0.9, val_size=0.1)
 datamodule.setup(stage="fit")
 ```
 Dataset itself could be acquired in the following ways:
@@ -177,18 +177,18 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <th colspan="4">Test CF</th>
     </tr>
     <tr>
-      <th>2k</th>
-      <th>5k</th>
-      <th>10k</th>
-      <th>100k</th>
-      <th>2k</th>
-      <th>5k</th>
-      <th>10k</th>
-      <th>100k</th>
-      <th>2k</th>
-      <th>5k</th>
-      <th>10k</th>
-      <th>100k</th>
+      <th>tiny</th>
+      <th>small</th>
+      <th>medium</th>
+      <th>large</th>
+      <th>tiny</th>
+      <th>small</th>
+      <th>medium</th>
+      <th>large</th>
+      <th>tiny</th>
+      <th>small</th>
+      <th>medium</th>
+      <th>large</th>
       </tr>
   </thead>
   <tbody>
@@ -342,18 +342,18 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <th colspan="4">Test CF</th>
     </tr>
     <tr>
-      <th>2k</th>
-      <th>5k</th>
-      <th>10k</th>
-      <th>100k</th>
-      <th>2k</th>
-      <th>5k</th>
-      <th>10k</th>
-      <th>100k</th>
-      <th>2k</th>
-      <th>5k</th>
-      <th>10k</th>
-      <th>100k</th>
+      <th>tiny</th>
+      <th>small</th>
+      <th>medium</th>
+      <th>large</th>
+      <th>tiny</th>
+      <th>small</th>
+      <th>medium</th>
+      <th>large</th>
+      <th>tiny</th>
+      <th>small</th>
+      <th>medium</th>
+      <th>large</th>
     </tr>
   </thead>
   <tbody>
@@ -477,18 +477,18 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <th colspan="4">Test CF</th>
     </tr>
     <tr>
-      <th>2k</th>
-      <th>5k</th>
-      <th>10k</th>
-      <th>100k</th>
-      <th>2k</th>
-      <th>5k</th>
-      <th>10k</th>
-      <th>100k</th>
-      <th>2k</th>
-      <th>5k</th>
-      <th>10k</th>
-      <th>100k</th>
+      <th>tiny</th>
+      <th>small</th>
+      <th>medium</th>
+      <th>large</th>
+      <th>tiny</th>
+      <th>small</th>
+      <th>medium</th>
+      <th>large</th>
+      <th>tiny</th>
+      <th>small</th>
+      <th>medium</th>
+      <th>large</th>
     </tr>
   </thead>
   <tbody>
@@ -553,18 +553,18 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <th colspan="4">Test CF</th>
     </tr>
     <tr>
-      <th>2k</th>
-      <th>5k</th>
-      <th>10k</th>
-      <th>100k</th>
-      <th>2k</th>
-      <th>5k</th>
-      <th>10k</th>
-      <th>100k</th>
-      <th>2k</th>
-      <th>5k</th>
-      <th>10k</th>
-      <th>100k</th>
+      <th>tiny</th>
+      <th>small</th>
+      <th>medium</th>
+      <th>large</th>
+      <th>tiny</th>
+      <th>small</th>
+      <th>medium</th>
+      <th>large</th>
+      <th>tiny</th>
+      <th>small</th>
+      <th>medium</th>
+      <th>large</th>
     </tr>
   </thead>
   <tbody>
