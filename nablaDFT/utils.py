@@ -26,6 +26,7 @@ import nablaDFT
 
 logger = logging.getLogger()
 
+
 def get_file_size(url: str) -> int:
     """Returns file size in bytes
     
@@ -36,6 +37,7 @@ def get_file_size(url: str) -> int:
     with request.urlopen(req) as f:
         file_size = f.headers.get('Content-Length')
     return int(file_size)
+
 
 def tqdm_download_hook(t):
     """wraps TQDM progress bar instance"""

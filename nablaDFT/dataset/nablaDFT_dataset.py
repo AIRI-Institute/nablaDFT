@@ -36,7 +36,7 @@ class ASENablaDFT(AtomsDataModule):
     def __init__(
         self,
         split: str,
-        dataset_name: str = "dataset_train_2k",
+        dataset_name: str = "dataset_train_tiny",
         datapath: str = "database",
         data_workdir: Optional[str] = "logs",
         batch_size: int = 2000,

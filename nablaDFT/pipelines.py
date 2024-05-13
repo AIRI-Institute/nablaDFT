@@ -35,7 +35,8 @@ def predict(
         ckpt_path (str): path to model checkpoint.
         config (DictConfig): config for task. see r'config/' for examples.
     """
-    trainer.logger = False  # need this to disable save_hyperparameters during predict, otherwise OmegaConf DictConf can't be dumped to YAML
+    trainer.logger = False  # need this to disable save_hyperparameters during predict,
+    # otherwise OmegaConf DictConf can't be dumped to YAML
     pred_path = os.path.join(os.getcwd(), "predictions")
     os.makedirs(pred_path, exist_ok=True)
     predictions = trainer.predict(

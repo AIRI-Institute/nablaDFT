@@ -44,7 +44,7 @@ class PyGNablaDFT(InMemoryDataset):
     def __init__(
         self,
         datapath: str = "database",
-        dataset_name: str = "dataset_train_2k",
+        dataset_name: str = "dataset_train_tiny",
         split: str = "train",
         transform: Callable = None,
         pre_transform: Callable = None,
@@ -148,7 +148,7 @@ class PyGHamiltonianNablaDFT(Dataset):
     def __init__(
         self,
         datapath: str = "database",
-        dataset_name: str = "dataset_train_2k",
+        dataset_name: str = "dataset_train_tiny",
         split: str = "train",
         include_hamiltonian: bool = True,
         include_overlap: bool = False,
