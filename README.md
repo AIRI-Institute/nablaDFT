@@ -2,6 +2,8 @@
 <p align="left">
 <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 </p>
+
+This is the repository for nablaDFT Dataset and Benchmark. The current version is 2.0. The code and data from the initial publication are accessible here: [1.0 branch](https://github.com/AIRI-Institute/nablaDFT/tree/1.0). <br/>
 Electronic wave function calculation is a fundamental task of computational quantum chemistry. Knowledge of the wave function parameters allows one to compute physical and chemical properties of molecules and materials.<br/>
 In this work we: introduce a new curated large-scale dataset of electron structures of drug-like molecules, establish a novel benchmark for the estimation of molecular properties in the multi-molecule setting, and evaluate a wide range of methods with this benchmark.<br/>
 
@@ -55,7 +57,7 @@ The csv file with conformations index, SMILES, atomic DFT properties and wfn arc
 #### Conformations files
 Tar archive with xyz files [archive](https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/nablaDFT/conformations_archive.tar)
 
-### Accessing elements of the dataset
+### Acces sing elements of the dataset
 #### Hamiltonian database
 
 ```python
@@ -597,6 +599,143 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>3.2(*)</i></td>
       <td><i>3.1(*)</i></td>
       <td><i>3.5(*)</i></td>
+    </tr>
+  </tbody>
+</table>
+
+We test the ability of the trained models to find low energy conformations.
+
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: center;">
+      <th rowspan="3">Model</th>
+      <th colspan="12"> Optimization metrics</th>
+    </tr>
+    <tr>
+      <th colspan="4">Optimization $pct$ % (↑)</th>
+      <th colspan="4">Optimization $pct_{div}$ % (↓)</th>
+      <th colspan="4">Optimization success $pct$ % (↑)</th>
+    </tr>
+    <tr>
+      <th>tiny</th>
+      <th>small</th>
+      <th>medium</th>
+      <th>large</th>
+      <th>tiny</th>
+      <th>small</th>
+      <th>medium</th>
+      <th>large</th>
+      <th>tiny</th>
+      <th>small</th>
+      <th>medium</th>
+      <th>large</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><i>SchNet</i></td>
+      <td><i>61.35</i></td>
+      <td><i>65.00</i></td>
+      <td><i>61.10</i></td>
+      <td><i>80.82</i></td>
+      <td><i>8.45</i></td>
+      <td><i>4.05</i></td>
+      <td><i>3.5</i></td>
+      <td><i>0.1</i></td>
+      <td><i>0</i></td>
+      <td><i>0</i></td>
+      <td><i>0</i></td>
+      <td><i>1.15</i></td>
+    </tr>
+    <tr>
+      <td><i>PAINN</i></td>
+      <td><i>69.31</i></td>
+      <td><i>73.66</i></td>
+      <td><i>76.99</i></td>
+      <td><i>89.40</i></td>
+      <td><i>2.15</i></td>
+      <td><i>3.00</i></td>
+      <td><i>3.4</i></td>
+      <td><i>0.05</i></td>
+      <td><i>0</i></td>
+      <td><i>0.15</i></td>
+      <td><i>1.00</i></td>
+      <td><i>11.05</i></td>
+    </tr>
+    <tr>
+      <td><i>Graphormer3D</i></td>
+      <td><i>0</i></td>
+      <td><i>0</i></td>
+      <td><i>9.17</i></td>
+      <td><i>21.82</i></td>
+      <td><i>100</i></td>
+      <td><i>100</i></td>
+      <td><i>99.95</i></td>
+      <td><i>99.45</i></td>
+      <td><i>0</i></td>
+      <td><i>0</i></td>
+      <td><i>0</i></td>
+      <td><i>0</i></td>
+    </tr>
+    <tr>
+      <td><i>DimeNet++</i></td>
+      <td><i>32.59</i></td>
+      <td><i>70.25</i></td>
+      <td><i>84.93</i></td>
+      <td><i>87.11</i></td>
+      <td><i>97.08</i></td>
+      <td><i>4.58</i></td>
+      <td><i>1.72</i></td>
+      <td><i>0.42</i></td>
+      <td><i>0</i></td>
+      <td><i>0.99</i></td>
+      <td><i>3.39</i></td>
+      <td><i>5.73</i></td>
+    </tr>
+    <tr>
+      <td><i>GemNet-OC</i></td>
+      <td><i>69.38</i></td>
+      <td><i>81.59</i></td>
+      <td><i>83.71</i></td>
+      <td><i>89.58</i></td>
+      <td><i>26.55</i></td>
+      <td><i>13.35</i></td>
+      <td><i>19.90</i></td>
+      <td><i>0.35</i></td>
+      <td><i>0.25</i></td>
+      <td><i>1.05</i></td>
+      <td><i>1.6</i></td>
+      <td><i>9.2</i></td>
+    </tr>
+    <tr>
+      <td><i>EquiformerV2</i></td>
+      <td><i>65.85</i></td>
+      <td><i>74.12</i></td>
+      <td><i>76.15</i></td>
+      <td><i>81.95</i></td>
+      <td><i>56.45</i></td>
+      <td><i>45.29</i></td>
+      <td><i>48.80</i></td>
+      <td><i>49.30</i></td>
+      <td><i>1.0</i></td>
+      <td><i>2.65</i></td>
+      <td><i>2.8</i></td>
+      <td><i>3.85</i></td>
+    </tr>
+    <tr>
+      <td><i>eSCN</i></td>
+      <td><i>82.31</i></td>
+      <td><i>86.2</i></td>
+      <td><i>87.28</i></td>
+      <td><i>88.67</i></td>
+      <td><i>21.85</i></td>
+      <td><i>8.35</i></td>
+      <td><i>1.75</i></td>
+      <td><i>0.2</i></td>
+      <td><i>1.9</i></td>
+      <td><i>4.25</i></td>
+      <td><i>5.25</i></td>
+      <td><i>7.9</i></td>
     </tr>
   </tbody>
 </table>
