@@ -54,7 +54,7 @@ In the case of training resume, just specify checkpoint path in `ckpt_path` para
 
 [Example](../config/gemnet-oc_test.yaml)  
 Same as for training run, you may need to change `dataset_name` parameter for desired test split.  
-To reproduce test results for pretrained on biggest training dataset split (100k) set `pretrained` parameter to `True` with ckpt_path to `null`. Otherwise, specify path to checkpoint with pretrained model in `ckpt_path`.  
+To reproduce test results for pretrained on biggest training dataset split (large) set `pretrained` parameter to `True` with ckpt_path to `null`. Otherwise, specify path to checkpoint with pretrained model in `ckpt_path`.  
 
 ## Predict
 
