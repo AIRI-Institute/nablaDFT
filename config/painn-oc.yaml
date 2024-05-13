@@ -1,8 +1,8 @@
 # Global variables
 name: PaiNN-OC
-dataset_name: dataset_train_2k
+dataset_name: dataset_train_tiny
 max_steps: 1000000
-job_type: test
+job_type: train
 pretrained: False
 ckpt_path: null # path to checkpoint for training resume or test run
 

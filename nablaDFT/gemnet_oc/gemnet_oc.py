@@ -1431,11 +1431,7 @@ class GemNetOCLightning(pl.LightningModule):
 
     def step(self, batch, calculate_metrics: bool = False):
         energy_out, forces_out = self.net(batch)
-        # TODO: temp workaround
-        if hasattr(batch, "forces"):
-            forces = batch.forces
-        else:
-            forces = forces_out.clone()
+        forces = batch.forces
         preds = {"energy": energy_out, "forces": forces_out}
         target = {"energy": batch.y, "forces": forces}
         loss = self._calculate_loss(preds, target)
@@ -1487,8 +1483,7 @@ class GemNetOCLightning(pl.LightningModule):
 
     def test_step(self, batch, batch_idx):
         bsz = self._get_batch_size(batch)
-        with self.ema.average_parameters():
-            loss, metrics = self.step(batch, calculate_metrics=True)
+        loss, metrics = self.step(batch, calculate_metrics=True)
         self.log(
             "test/loss",
             loss,
@@ -1528,7 +1523,6 @@ class GemNetOCLightning(pl.LightningModule):
         self._check_devices()
 
     def on_test_start(self) -> None:
-        self._instantiate_ema()
         self._check_devices()
 
     def on_validation_epoch_end(self) -> None:
@@ -1536,6 +1530,10 @@ class GemNetOCLightning(pl.LightningModule):
 
     def on_test_epoch_end(self) -> None:
         self._reduce_metrics(step_type="test")
+
+    def on_save_checkpoint(self, checkpoint) -> None:
+        with self.ema.average_parameters():
+            checkpoint['state_dict'] = self.state_dict()
 
     def _calculate_loss(self, y_pred, y_true) -> float:
         total_loss = 0.0
@@ -1569,13 +1567,12 @@ class GemNetOCLightning(pl.LightningModule):
         self.hparams.metric.reset()
 
     def _check_devices(self):
-        self.hparams.metric = self.hparams.metric.to(self.device)
-        if self.ema is not None:
-            self.ema.to(self.device)
+        self.hparams.metric = self.hparams.metric.to(self.device)            
 
     def _instantiate_ema(self):
         if self.ema is not None:
             self.ema = self.ema(self.parameters())
+            self.ema.to(self.device)
 
     def _get_batch_size(self, batch):
         """Function for batch size infer."""
