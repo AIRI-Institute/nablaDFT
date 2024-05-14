@@ -1,4 +1,5 @@
 """Module defines Pytorch Lightning DataModule interfaces for various NablaDFT datasets"""
+
 import json
 import os
 from typing import Optional
@@ -20,10 +21,24 @@ from .pyg_datasets import PyGNablaDFT, PyGHamiltonianNablaDFT
 
 
 class ASENablaDFT(AtomsDataModule):
+    """PytorchLightning interface for nablaDFT ASE datasets.
+
+    Args:
+        split (str): type of split, must be one of ['train', 'test', 'predict'].
+        dataset_name (str): split name from links .json or filename of existing file from datapath directory.
+        datapath (str): path to existing dataset directory or location for download.
+        train_ratio (float): dataset part used for training.
+        val_ratio (float): dataset part used for validation.
+        test_ratio (float): dataset part used for test or prediction.
+        train_transforms (Callable): data transform, called for every sample in training dataset.
+        val_transforms (Callable): data transform, called for every sample in validation dataset.
+        test_transforms (Callable): data transform, called for every sample in test dataset.
+    """
+
     def __init__(
         self,
         split: str,
-        dataset_name: str = "dataset_train_2k",
+        dataset_name: str = "dataset_train_tiny",
         datapath: str = "database",
         data_workdir: Optional[str] = "logs",
         batch_size: int = 2000,
@@ -36,6 +51,7 @@ class ASENablaDFT(AtomsDataModule):
         format: Optional[AtomsDataFormat] = AtomsDataFormat.ASE,
         **kwargs,
     ):
+        """"""
         super().__init__(
             split=split,
             datapath=datapath,
@@ -96,26 +112,27 @@ class ASENablaDFT(AtomsDataModule):
 
 
 class PyGDataModule(LightningDataModule):
-    """Parent class which encapsulates PyG dataset for use with Pytorch Lightning Trainer.
+    """Parent class which encapsulates PyG dataset to use with Pytorch Lightning Trainer.
     In order to add new dataset variant, define children class with setup() method.
 
     Args:
-        - root (str): path to directory with r'raw/' subfolder with existing dataset or download location.
-        - dataset_name (str): split name from links .json file.
-        - train_size (float): part of dataset used for training, must be in [0, 1].
-        - val_size (float): part of dataset used for validation, must be in [0, 1]. 
-        - seed (int): seed number, used for torch.Generator object during train/val split.
-        - kwargs (Dict): other arguments for dataset. 
+        root (str): path to directory with r'raw/' subfolder with existing dataset or download location.
+        dataset_name (str): split name from links .json or filename of existing file from datapath directory.
+        train_size (float): part of dataset used for training, must be in [0, 1].
+        val_size (float): part of dataset used for validation, must be in [0, 1].
+        seed (int): seed number, used for torch.Generator object during train/val split.
+        **kwargs: arguments for torch.DataLoader.
     """
+
     def __init__(
-            self,
-            root: str,
-            dataset_name: str,
-            train_size: float = 0.9,
-            val_size: float = 0.1,
-            seed: int = 23,
-            **kwargs
-        ) -> None:
+        self,
+        root: str,
+        dataset_name: str,
+        train_size: float = 0.9,
+        val_size: float = 0.1,
+        seed: int = 23,
+        **kwargs,
+    ) -> None:
         super().__init__()
         self.dataset_train = None
         self.dataset_val = None
@@ -143,58 +160,83 @@ class PyGDataModule(LightningDataModule):
 
     def setup(self, stage: str) -> None:
         raise NotImplementedError
-    
+
     def train_dataloader(self):
         return self.dataloader(self.dataset_train, shuffle=True, **self.dataloader_kwargs)
-    
+
     def val_dataloader(self):
         return self.dataloader(self.dataset_val, shuffle=False, **self.dataloader_kwargs)
-    
+
     def test_dataloader(self):
         return self.dataloader(self.dataset_test, shuffle=False, **self.dataloader_kwargs)
-    
+
     def predict_dataloader(self):
         return self.dataloader(self.dataset_predict, shuffle=False, **self.dataloader_kwargs)
 
 
 class PyGHamiltonianDataModule(PyGDataModule):
-    """DataModule for Hamiltonian NablaDFT dataset
-    
+    """DataModule for Hamiltonian nablaDFT dataset, subclass of PyGDataModule.
+
     Keyword arguments:
-        - hamiltonian (bool): retrieve from database molecule's full hamiltonian matrix. True by default.
-        - include_overlap (bool): retrieve from database molecule's overlab matrix. 
-        - include_core (bool): retrieve from databaes molecule's core hamiltonian matrix.
+        hamiltonian (bool): retrieve from database molecule's full hamiltonian matrix. True by default.
+        include_overlap (bool): retrieve from database molecule's overlab matrix.
+        include_core (bool): retrieve from databaes molecule's core hamiltonian matrix.
+        **kwargs: arguments for torch.DataLoader and PyGDataModule instance. See PyGDatamodule docs.
     """
+
     def __init__(
-            self,
-            root: str, 
-            dataset_name: str,
-            train_size: float = None, 
-            val_size: float = None,
-            **kwargs) -> None:
+        self,
+        root: str,
+        dataset_name: str,
+        train_size: float = None,
+        val_size: float = None,
+        **kwargs,
+    ) -> None:
         super().__init__(root, dataset_name, train_size, val_size, **kwargs)
 
     def setup(self, stage: str) -> None:
         if stage == "fit":
-            dataset = PyGHamiltonianNablaDFT(self.root, self.dataset_name, "train", **self.kwargs)
-            self.dataset_train, self.dataset_val = random_split(dataset, self.sizes,
-                                                                generator=torch.Generator().manual_seed(self.seed))
+            dataset = PyGHamiltonianNablaDFT(
+                self.root, self.dataset_name, "train", **self.kwargs
+            )
+            self.dataset_train, self.dataset_val = random_split(
+                dataset, self.sizes, generator=torch.Generator().manual_seed(self.seed)
+            )
         elif stage == "test":
-            self.dataset_test = PyGHamiltonianNablaDFT(self.root, self.dataset_name, "test", **self.kwargs)
+            self.dataset_test = PyGHamiltonianNablaDFT(
+                self.root, self.dataset_name, "test", **self.kwargs
+            )
         elif stage == "predict":
-            self.dataset_predict = PyGHamiltonianNablaDFT(self.root, self.dataset_name, "predict", **self.kwargs)
+            self.dataset_predict = PyGHamiltonianNablaDFT(
+                self.root, self.dataset_name, "predict", **self.kwargs
+            )
 
 
 class PyGNablaDFTDataModule(PyGDataModule):
-    def __init__(self, root: str, dataset_name: str, train_size: float = None, val_size: float = None, **kwargs) -> None:
+    """DataModule for nablaDFT dataset, subclass of PyGDataModule.
+    See PyGDatamodule doc."""
+
+    def __init__(
+        self,
+        root: str,
+        dataset_name: str,
+        train_size: float = None,
+        val_size: float = None,
+        **kwargs,
+    ) -> None:
         super().__init__(root, dataset_name, train_size, val_size, **kwargs)
 
     def setup(self, stage: str) -> None:
         if stage == "fit":
             dataset = PyGNablaDFT(self.root, self.dataset_name, "train", **self.kwargs)
-            self.dataset_train, self.dataset_val = random_split(dataset, self.sizes, 
-                                                                generator=torch.Generator().manual_seed(self.seed))
+            self.dataset_train, self.dataset_val = random_split(
+                dataset, self.sizes, generator=torch.Generator().manual_seed(self.seed)
+            )
         elif stage == "test":
-            self.dataset_test = PyGNablaDFT(self.root, self.dataset_name, "test", **self.kwargs)
+            self.dataset_test = PyGNablaDFT(
+                self.root, self.dataset_name, "test", **self.kwargs
+            )
         elif stage == "predict":
-            self.dataset_predict = PyGNablaDFT(self.root, self.dataset_name, "predict", **self.kwargs)
+            self.dataset_predict = PyGNablaDFT(
+                self.root, self.dataset_name, "predict", **self.kwargs
+            )

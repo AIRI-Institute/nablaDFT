@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import List
 
 import tqdm
 from ase.db import connect
@@ -7,7 +7,15 @@ from .optimizers import BatchwiseOptimizer
 
 
 class BatchwiseOptimizeTask:
-    """Use for batchwise molecules conformations geometry optimization."""
+    """Use for batchwise molecules conformations geometry optimization.
+    
+    Args:
+        input_datapath (str): path to ASE database with molecules.
+        output_datapath (str): path to output database.
+        optimizer (BatchwiseOptimizer): used for molecule geometry optimization.
+        converter (AtomsConverter): optional, mandatory for SchNetPack models.
+        batch_size (int): number of samples per batch.
+    """
 
     def __init__(
         self,
@@ -16,14 +24,6 @@ class BatchwiseOptimizeTask:
         optimizer: BatchwiseOptimizer,
         batch_size: int,
     ) -> None:
-        """
-        Args:
-            input_datapath (str): path to ASE database with molecules.
-            output_datapath (str): path to output database.
-            optimizer (BatchwiseOptimizer): used for molecule geometry optimization.
-            converter (AtomsConverter): optional, mandatory for SchNetPack models.
-            batch_size (int): number of samples per batch.
-        """
         self.optimizer = optimizer
         self.bs = batch_size
         self.data_db_conn = None

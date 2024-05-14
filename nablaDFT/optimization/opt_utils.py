@@ -10,6 +10,11 @@ def np_scatter_add(updates, indices, shape):
 
 
 def atoms_list_to_PYG(ase_atoms_list, device):
+    """Function to convert ase.Atoms object to PyG data batches.
+    Args:
+        ase_atoms_list (List[ase.Atoms]): list of ase.Atoms object to convert.
+        device (str): task device.
+    """
     data = []
     for ase_atoms in ase_atoms_list:
         z = torch.from_numpy(ase_atoms.numbers).long()

@@ -1,2 +1,4 @@
 include nablaDFT/links/*
 include nablaDFT/data/*
+include nablaDFT/equiformer_v2/Jd.pt
+include nablaDFT/escn/Jd.pt

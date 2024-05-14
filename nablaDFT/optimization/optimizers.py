@@ -305,7 +305,6 @@ class ASEBatchwiseLBFGS(BatchwiseOptimizer):
     extension/adaptation of the ase.optimize.LBFGS optimizer particularly designed for batch-wise relaxation
     of atomic structures. The inverse Hessian is approximated for each sample separately, which allows for
     optimizing batches of different structures/compositions.
-
     """
 
     atoms = None
@@ -326,7 +325,7 @@ class ASEBatchwiseLBFGS(BatchwiseOptimizer):
         fixed_atoms_mask: Optional[List[int]] = None,
         verbose: bool = False,
     ):
-        """Parameters:
+        """Args:
 
         calculator:
             This calculator provides properties such as forces and energy, which can be used for MD simulations or
