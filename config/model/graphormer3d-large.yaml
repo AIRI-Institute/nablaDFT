@@ -22,7 +22,7 @@ optimizer:
   weight_decay: 1e-3
 
 lr_scheduler:
-  _target_: nablaDFT.graphormer.schedulers.get_linear_schedule_with_warmup
+  _target_: nablaDFT.schedulers.get_linear_schedule_with_warmup
   _partial_: true
   num_warmup_steps: ${warmup_steps}
   num_training_steps: ${max_steps}

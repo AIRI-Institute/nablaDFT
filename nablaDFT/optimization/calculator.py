@@ -13,6 +13,14 @@ from .opt_utils import atoms_list_to_PYG
 class BatchwiseCalculator:
     """
     Base class calculator for neural network models for batchwise optimization.
+    Args:
+        model (nn.Module): loaded trained model.
+        device (str): device used for calculations (default="cpu")
+        energy_key (str): name of energies in model (default="energy")
+        force_key (str): name of forces in model (default="forces")
+        energy_unit (str): energy units used by model (default="eV")
+        position_unit (str): position units used by model (default="Angstrom")
+        dtype (torch.dtype): required data type for the model input (default: torch.float32)
     """
 
     def __init__(
@@ -25,34 +33,6 @@ class BatchwiseCalculator:
         position_unit: str = "Ang",
         dtype: torch.dtype = torch.float32,
     ):
-        """
-        model:
-            path to trained model or trained model
-
-        atoms_converter:
-            Class used to convert ase Atoms objects to schnetpack input
-
-        device:
-            device used for calculations (default="cpu")
-
-        auxiliary_output_modules:
-            auxiliary module to manipulate output properties (e.g., prior energy or forces)
-
-        energy_key:
-            name of energies in model (default="energy")
-
-        force_key:
-            name of forces in model (default="forces")
-
-        energy_unit:
-            energy units used by model (default="eV")
-
-        position_unit:
-            position units used by model (default="Angstrom")
-
-        dtype:
-            required data type for the model input (default: torch.float32)
-        """
 
         self.results = None
         self.atoms = None
@@ -93,11 +73,10 @@ class BatchwiseCalculator:
     def get_forces(
         self, atoms: List[ase.Atoms], fixed_atoms_mask: Optional[List[int]] = None
     ) -> np.array:
-        """
-        atoms:
-
-        fixed_atoms_mask:
-            list of indices corresponding to atoms with positions fixed in space.
+        """Return atom's forces.
+        Args:
+            atoms (List[ase.Atoms]): list of ase.Atoms objects.
+            fixed_atoms_mask (optional, List[int]): list of indices corresponding to atoms with positions fixed in space.
         """
         if self._requires_calculation(
             property_keys=[self.energy_key, self.force_key], atoms=atoms
@@ -118,8 +97,11 @@ class BatchwiseCalculator:
 
 
 class PyGBatchwiseCalculator(BatchwiseCalculator):
-    """Batchwise calculator for PyTorch Geometric models for batchwise optimization"""
-
+    """Batchwise calculator for PyTorch Geometric models for batchwise optimization
+    Args:
+        model (nn.Module): loaded PyG model.
+    """
+       
     def __init__(
         self,
         model: nn.Module,
@@ -157,7 +139,12 @@ class PyGBatchwiseCalculator(BatchwiseCalculator):
 
 
 class SpkBatchwiseCalculator(BatchwiseCalculator):
-    """Batchwise calculator for SchNetPack models for batchwise optimization"""
+    """Batchwise calculator for SchNetPack models for batchwise optimization.
+
+    Args:
+        model (nn.Module): loaded train schnetpack model.
+        atoms_converter (AtomsConverter): Class used to convert ase Atoms objects to schnetpack input.
+    """
 
     def __init__(
         self,

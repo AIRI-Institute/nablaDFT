@@ -40,6 +40,17 @@ class PYGCalculator(Calculator):
     """
     ASE calculator for pytorch geometric machine learning models.
 
+    Args:
+        model_file (str): path to trained model
+        energy_key (str): name of energies in model (default="energy")
+        force_key (str): name of forces in model (default="forces")
+        energy_unit (str, float): energy units used by model (default="kcal/mol")
+        position_unit (str, float): position units used by model (default="Angstrom")
+        device (torch.device): device used for calculations (default="cpu")
+        dtype (torch.dtype): select model precision (default=float32)
+        converter (callable): converter used to set up input batches
+        additional_inputs (dict): additional inputs required for some transforms in the converter.
+        **kwargs: Additional arguments for basic ASE calculator class. 
     """
 
     energy = "energy"
@@ -58,19 +69,6 @@ class PYGCalculator(Calculator):
         dtype: torch.dtype = torch.float32,
         **kwargs,
     ):
-        """
-        Args:
-            model_file (str): path to trained model
-            energy_key (str): name of energies in model (default="energy")
-            force_key (str): name of forces in model (default="forces")
-            energy_unit (str, float): energy units used by model (default="kcal/mol")
-            position_unit (str, float): position units used by model (default="Angstrom")
-            device (torch.device): device used for calculations (default="cpu")
-            dtype (torch.dtype): select model precision (default=float32)
-            converter (callable): converter used to set up input batches
-            additional_inputs (dict): additional inputs required for some transforms in the converter.
-            **kwargs: Additional arguments for basic ase calculator class
-        """
         Calculator.__init__(self, **kwargs)
 
         self.energy_key = energy_key
@@ -124,8 +122,8 @@ class PYGCalculator(Calculator):
         """
         Args:
             atoms (ase.Atoms): ASE atoms object.
-            properties (list of str): select properties computed and stored to results.
-            system_changes (list of str): List of changes for ASE.
+            properties (List[str]): select properties computed and stored to results.
+            system_changes (List[str]): List of changes for ASE.
         """
         # First call original calculator to set atoms attribute
         # (see https://wiki.fysik.dtu.dk/ase/_modules/ase/calculators/calculator.html#Calculator)
@@ -151,6 +149,19 @@ class PYGCalculator(Calculator):
 class PYGAseInterface:
     """
     Interface for ASE calculations (optimization and molecular dynamics)
+
+    Args:
+        molecule_path (str): Path to initial geometry
+        working_dir (str): Path to directory where files should be stored
+        model_file (str): path to trained model
+        energy_key (str): name of energies in model (default="energy")
+        force_key (str): name of forces in model (default="forces")
+        energy_unit (str, float): energy units used by model (default="kcal/mol")
+        position_unit (str, float): position units used by model (default="Angstrom")
+        device (torch.device): device used for calculations (default="cpu")
+        dtype (torch.dtype): select model precision (default=float32)
+        optimizer_class (ase.optimize.optimizer): ASE optimizer used for structure relaxation.
+        fixed_atoms (list(int)): list of indices corresponding to atoms with positions fixed in space.
     """
 
     def __init__(
@@ -168,21 +179,6 @@ class PYGAseInterface:
         optimizer_class: type = QuasiNewton,
         fixed_atoms: Optional[List[int]] = None,
     ):
-        """
-        Args:
-            molecule_path: Path to initial geometry
-            working_dir: Path to directory where files should be stored
-            model_file (str): path to trained model
-            energy_key (str): name of energies in model (default="energy")
-            force_key (str): name of forces in model (default="forces")
-            energy_unit (str, float): energy units used by model (default="kcal/mol")
-            position_unit (str, float): position units used by model (default="Angstrom")
-            device (torch.device): device used for calculations (default="cpu")
-            dtype (torch.dtype): select model precision (default=float32)
-            optimizer_class (ase.optimize.optimizer): ASE optimizer used for structure relaxation.
-            fixed_atoms (list(int)): list of indices corresponding to atoms with positions fixed in space.
-
-        """
         # Setup directory
         self.working_dir = working_dir
         if not os.path.exists(self.working_dir):

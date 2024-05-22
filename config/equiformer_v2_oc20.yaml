@@ -1,6 +1,6 @@
 # Global variables
 name: Equiformer_v2
-dataset_name: dataset_train_2k
+dataset_name: dataset_train_tiny
 max_steps: 1000000
 warmup_steps: 0
 job_type: train

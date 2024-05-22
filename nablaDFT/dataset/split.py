@@ -40,6 +40,8 @@ class RandomSplit(SplittingStrategy):
 class TestSplit(SplittingStrategy):
     """Splitting strategy that allows to put all dataset
     elements in test split without index permutations.
+    Used for schnetpack datasets to overcome limitation
+    when train and val split are empty.
     """
 
     def split(self, dataset, *split_sizes):
