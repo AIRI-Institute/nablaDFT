@@ -427,7 +427,6 @@ class QHNetLightning(pl.LightningModule):
 
     def _calculate_metrics(self, y_pred, y_true, mask) -> Dict:
         """Function for metrics calculation during step."""
-        # TODO: temp workaround for metric normalization by mask sum
         norm_coef = (y_pred['hamiltonian'].numel() / mask.sum())
         metric = self.hparams.metric(y_pred, y_true)
         metric['hamiltonian'] = metric['hamiltonian'] * norm_coef
