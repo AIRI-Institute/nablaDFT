@@ -211,14 +211,14 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
     </tr>
     <tr>
       <td><i>SchNet</i></td>
-      <td><i>1.71</i></td>
-      <td><i>1.44</i></td>
-      <td><i>1.64</i></td>
-      <td><i>0.85</i></td>
-      <td><i>1.37</i></td>
+      <td><i>1.17</i></td>
+      <td><i>0.90</i></td>
       <td><i>1.10</i></td>
-      <td><i>1.29</i></td>
-      <td><i>0.48</i></td>
+      <td><i>0.31</i></td>
+      <td><i>1.19</i></td>
+      <td><i>0.92</i></td>
+      <td><i>1.11</i></td>
+      <td><i>0.31</i></td>
       <td><i>0.56</i></td>
       <td><i>0.63</i></td>
       <td><i>0.88</i></td>
@@ -241,14 +241,14 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
     </tr>
     <tr>
       <td><i>DimeNet++</i></td>
-      <td><i>4.34</i></td>
-      <td><i>1.10</i></td>
-      <td><i>0.76</i></td>
-      <td><i>0.63</i></td>
-      <td><i>37.58</i></td>
-      <td><i>0.59</i></td>
-      <td><i>0.37</i></td>
-      <td><i>0.26</i></td>
+      <td><i>3.80</i></td>
+      <td><i>0.56</i></td>
+      <td><i>0.21</i></td>
+      <td><i>0.09</i></td>
+      <td><i>37.41</i></td>
+      <td><i>0.41</i></td>
+      <td><i>0.19</i></td>
+      <td><i>0.08</i></td>
       <td><i>0.42</i></td>
       <td><i>0.10</i></td>
       <td><i>0.09</i></td>
@@ -256,14 +256,14 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
     </tr>
     <tr>
       <td><i>PAINN</i></td>
-      <td><i>1.37</i></td>
-      <td><i>1.14</i></td>
-      <td><i>0.89</i></td>
-      <td><i>0.64</i></td>
-      <td><i>1.04</i></td>
-      <td><i>0.79</i></td>
-      <td><i>0.53</i></td>
-      <td><i>0.27</i></td>
+      <td><i>0.82</i></td>
+      <td><i>0.60</i></td>
+      <td><i>0.36</i></td>
+      <td><i>0.09</i></td>
+      <td><i>0.86</i></td>
+      <td><i>0.61</i></td>
+      <td><i>0.36</i></td>
+      <td><i>0.09</i></td>
       <td><i>0.43</i></td>
       <td><i>0.49</i></td>
       <td><i>0.28</i></td>
@@ -271,14 +271,14 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
     </tr>
     <tr>
       <td><i>Graphormer3D-small</i></td>
-      <td><i>2.09</i></td>
-      <td><i>1.50</i></td>
-      <td><i>1.32</i></td>
-      <td><i>0.91</i></td>
-      <td><i>1.76</i></td>
-      <td><i>1.12</i></td>
-      <td><i>0.93</i></td>
-      <td><i>0.54</i></td>
+      <td><i>1.54</i></td>
+      <td><i>0.96</i></td>
+      <td><i>0.77</i></td>
+      <td><i>0.37</i></td>
+      <td><i>1.58</i></td>
+      <td><i>0.94</i></td>
+      <td><i>0.75</i></td>
+      <td><i>0.36</i></td>
       <td><i>0.99</i></td>
       <td><i>0.67</i></td>
       <td><i>0.58</i></td>
@@ -286,14 +286,14 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
     </tr>
     <tr>
       <td><i>GemNet-OC</i></td>
-      <td><i>3.33</i></td>
-      <td><i>1.19</i></td>
-      <td><i>0.82</i></td>
-      <td><i>0.76</i></td>
-      <td><i>2.8</i></td>
-      <td><i>0.76</i></td>
-      <td><i>0.45</i></td>
-      <td><i>0.41</i></td>
+      <td><i>2.79</i></td>
+      <td><i>0.65</i></td>
+      <td><i>0.28</i></td>
+      <td><i>0.22</i></td>
+      <td><i>2.59</i></td>
+      <td><i>0.59</i></td>
+      <td><i>0.27</i></td>
+      <td><i>0.23</i></td>
       <td><i>0.52</i></td>
       <td><i>0.20</i></td>
       <td><i>0.15</i></td>
@@ -301,14 +301,14 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
     </tr>
     <tr>
       <td><i>Equiformer_V2</i></td>
-      <td><i>3.35</i></td>
-      <td><i>1.67</i></td>
-      <td><i>0.82</i></td>
-      <td><i>0.72</i></td>
-      <td><i>2.83</i></td>
-      <td><i>1.31</i></td>
-      <td><i>0.45</i></td>
-      <td><i>0.35</i></td>
+      <td><i>2.81</i></td>
+      <td><i>1.13</i></td>
+      <td><i>0.28</i></td>
+      <td><i>0.18</i></td>
+      <td><i>2.65</i></td>
+      <td><i>1.13</i></td>
+      <td><i>0.27</i></td>
+      <td><i>0.17</i></td>
       <td><i>0.45</i></td>
       <td><i>0.23</i></td>
       <td><i>0.24</i></td>
@@ -316,14 +316,14 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
     </tr>
     <tr>
       <td><i>eSCN</i></td>
-      <td><i>2.4</i></td>
-      <td><i>1.01</i></td>
-      <td><i>1.48</i></td>
-      <td><i>0.96</i></td>
-      <td><i>1.88</i></td>
-      <td><i>0.63</i></td>
-      <td><i>1.10</i></td>
-      <td><i>0.59</i></td>
+      <td><i>1.87</i></td>
+      <td><i>0.47</i></td>
+      <td><i>0.94</i></td>
+      <td><i>0.42</i></td>
+      <td><i>1.87</i></td>
+      <td><i>0.47</i></td>
+      <td><i>0.92</i></td>
+      <td><i>0.42</i></td>
       <td><i>0.48</i></td>
       <td><i>0.31</i></td>
       <td><i>0.80</i></td>
@@ -368,7 +368,7 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>0.45</i></td>
       <td><i>0.37</i></td>
       <td><i>0.41</i></td>
-      <td><i>0.15</i></td>
+      <td><i>0.16</i></td>
       <td><i>0.32</i></td>
       <td><i>0.30</i></td>
       <td><i>0.37</i></td>
@@ -376,14 +376,14 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
     </tr>
     <tr>
       <td><i>DimeNet++</i></td>
-      <td><i>1.32</i></td>
+      <td><i>1.31</i></td>
       <td><i>0.20</i></td>
-      <td><i>0.14</i></td>
-      <td><i>0.071</i></td>
+      <td><i>0.13</i></td>
+      <td><i>0.065</i></td>
       <td><i>1.36</i></td>
       <td><i>0.19</i></td>
       <td><i>0.13</i></td>
-      <td><i>0.067</i></td>
+      <td><i>0.066</i></td>
       <td><i>0.26</i></td>
       <td><i>0.12</i></td>
       <td><i>0.10</i></td>
@@ -391,14 +391,14 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
     </tr>
     <tr>
       <td><i>PAINN</i></td>
+      <td><i>0.37</i></td>
+      <td><i>0.26</i></td>
+      <td><i>0.17</i></td>
+      <td><i>0.058</i></td>
       <td><i>0.38</i></td>
       <td><i>0.26</i></td>
       <td><i>0.17</i></td>
-      <td><i>0.062</i></td>
-      <td><i>0.38</i></td>
-      <td><i>0.26</i></td>
-      <td><i>0.17</i></td>
-      <td><i>0.059</i></td>
+      <td><i>0.058</i></td>
       <td><i>0.23</i></td>
       <td><i>0.22</i></td>
       <td><i>0.14</i></td>
@@ -406,13 +406,13 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
     </tr>
     <tr>
       <td><i>Graphormer3D-small</i></td>
-      <td><i>1.05</i></td>
-      <td><i>0.63</i></td>
-      <td><i>0.51</i></td>
-      <td><i>0.24</i></td>
-      <td><i>1.07</i></td>
-      <td><i>0.64</i></td>
-      <td><i>0.52</i></td>
+      <td><i>1.11</i></td>
+      <td><i>0.67</i></td>
+      <td><i>0.54</i></td>
+      <td><i>0.26</i></td>
+      <td><i>1.13</i></td>
+      <td><i>0.68</i></td>
+      <td><i>0.55</i></td>
       <td><i>0.26</i></td>
       <td><i>0.82</i></td>
       <td><i>0.54</i></td>
@@ -427,8 +427,8 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>0.024</i></td>
       <td><i>0.14</i></td>
       <td><i>0.064</i></td>
-      <td><i>0.044</i></td>
-      <td><i>0.021</i></td>
+      <td><i>0.043</i></td>
+      <td><i>0.020</i></td>
       <td><i>0.073</i></td>
       <td><i>0.042</i></td>
       <td><i>0.032</i></td>
@@ -451,12 +451,12 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
     </tr>
     <tr>
       <td><i>eSCN</i></td>
-      <td><i>0.11</i></td>
-      <td><i>0.055</i></td>
+      <td><i>0.10</i></td>
+      <td><i>0.051</i></td>
       <td><i>0.040</i></td>
       <td><i>0.024</i></td>
-      <td><i>0.11</i></td>
-      <td><i>0.052</i></td>
+      <td><i>0.10</i></td>
+      <td><i>0.051</i></td>
       <td><i>0.036</i></td>
       <td><i>0.021</i></td>
       <td><i>0.065</i></td>
