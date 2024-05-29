@@ -241,7 +241,7 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
     </tr>
     <tr>
       <td><i>DimeNet++</i></td>
-      <td><i>3.80</i></td>
+      <td><i>42.84</i></td>
       <td><i>0.56</i></td>
       <td><i>0.21</i></td>
       <td><i>0.09</i></td>
@@ -436,7 +436,7 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
     </tr>
     <tr>
       <td><i>Equiformer_V2</i></td>
-      <td><i>0.31</i></td>
+      <td><i>0.30</i></td>
       <td><i>0.23</i></td>
       <td><i>0.21</i></td>
       <td><i>0.18</i></td>
