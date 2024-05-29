@@ -293,7 +293,8 @@ class QHNetLightning(pl.LightningModule):
         self.save_hyperparameters(logger=True, ignore=['net'])
 
     def forward(self, data: Data):
-        hamiltonian = self.net(data)
+        with self.ema.average_parameters():
+            hamiltonian = self.net(data)
         return hamiltonian
     
     def step(self, batch, calculate_metrics: bool = False):
@@ -305,7 +306,7 @@ class QHNetLightning(pl.LightningModule):
         target = {'hamiltonian': hamiltonian}
         loss = self._calculate_loss(preds, target, masks)
         if calculate_metrics:
-            metrics = self._calculate_metrics(preds, target)
+            metrics = self._calculate_metrics(preds, target, masks)
             return loss, metrics
         return loss
 
@@ -352,7 +353,8 @@ class QHNetLightning(pl.LightningModule):
 
     def test_step(self, batch, batch_idx):
         bsz = self._get_batch_size(batch)
-        loss, metrics = self.step(batch, calculate_metrics=True)
+        with self.ema.average_parameters():
+            loss, metrics = self.step(batch, calculate_metrics=True)
         self.log(
             "test/loss",
             loss,
@@ -423,9 +425,11 @@ class QHNetLightning(pl.LightningModule):
             )
         return total_loss
 
-    def _calculate_metrics(self, y_pred, y_true) -> Dict:
+    def _calculate_metrics(self, y_pred, y_true, mask) -> Dict:
         """Function for metrics calculation during step."""
+        norm_coef = (y_pred['hamiltonian'].numel() / mask.sum())
         metric = self.hparams.metric(y_pred, y_true)
+        metric['hamiltonian'] = metric['hamiltonian'] * norm_coef
         return metric
 
     def _log_current_lr(self) -> None:

@@ -680,14 +680,12 @@ class EquiformerV2_OC20_Lightning(pl.LightningModule):
         optimizer: Optimizer,
         lr_scheduler: LRScheduler,
         losses: Dict,
-        ema,
         metric,
         loss_coefs,
     ) -> None:
         super(EquiformerV2_OC20_Lightning, self).__init__()
-        self.ema = ema
         self.net = net
-        self.save_hyperparameters(logger=True, ignore=["net", "ema"])
+        self.save_hyperparameters(logger=True, ignore=["net"])
 
     def forward(self, data: Data):
         energy, forces = self.net(data)
@@ -724,8 +722,7 @@ class EquiformerV2_OC20_Lightning(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         bsz = self._get_batch_size(batch)
-        with self.ema.average_parameters():
-            loss, metrics = self.step(batch, calculate_metrics=True)
+        loss, metrics = self.step(batch, calculate_metrics=True)
         self.log(
             "val/loss",
             loss,
@@ -782,11 +779,7 @@ class EquiformerV2_OC20_Lightning(pl.LightningModule):
             }
         return {"optimizer": optimizer}
 
-    def on_before_zero_grad(self, optimizer: Optimizer) -> None:
-        self.ema.update()
-
     def on_fit_start(self) -> None:
-        self._instantiate_ema()
         self._check_devices()
 
     def on_test_start(self) -> None:
@@ -798,10 +791,6 @@ class EquiformerV2_OC20_Lightning(pl.LightningModule):
     def on_test_epoch_end(self) -> None:
         self._reduce_metrics(step_type="test")
     
-    def on_save_checkpoint(self, checkpoint) -> None:
-        with self.ema.average_parameters():
-            checkpoint['state_dict'] = self.state_dict()
-            
     def _calculate_loss(self, y_pred, y_true) -> float:
         total_loss = 0.0
         for name, loss in self.hparams.losses.items():
@@ -835,11 +824,6 @@ class EquiformerV2_OC20_Lightning(pl.LightningModule):
 
     def _check_devices(self):
         self.hparams.metric = self.hparams.metric.to(self.device)
-
-    def _instantiate_ema(self):
-        if self.ema is not None:
-            self.ema = self.ema(self.parameters())
-            self.ema.to(self.device)
 
     def _get_batch_size(self, batch):
         """Function for batch size infer."""

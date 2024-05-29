@@ -4,12 +4,11 @@ _target_: nablaDFT.dataset.ASENablaDFT
 split: ${job_type}
 datapath: ./datasets/nablaDFT/test/raw
 dataset_name: ${dataset_name}
-data_workdir: ./spk_logs
 train_ratio: 0.0
 val_ratio: 0.0
 test_ratio: 1.0
-batch_size: 32
-num_workers: 8
+batch_size: 64
+num_workers: 4
 split_file: ${.datapath}/${dataset_name}_split.npz
 # define split strategy
 splitting:

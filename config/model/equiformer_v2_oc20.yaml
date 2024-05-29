@@ -68,11 +68,6 @@ loss_coefs:
   energy: 2.0
   forces: 100.0
 
-ema:
-  _target_: torch_ema.ExponentialMovingAverage
-  _partial_: true
-  decay: 0.9999
-
 metric:
   _target_: torchmetrics.MultitaskWrapper
   _convert_: all

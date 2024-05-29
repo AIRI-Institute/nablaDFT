@@ -4,7 +4,7 @@ dataset_name: null # filename w/o extension from root directory, see datamodule 
 max_steps: 1000000
 warmup_steps: 0
 job_type: predict
-pretrained: False
+pretrained: True
 ckpt_path: null # path to checkpoint for training resume or test run
 
 # configs
