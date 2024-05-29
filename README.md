@@ -37,14 +37,13 @@ pip install .
 
 ## Dataset
 
-We propose a benchmarking dataset based on a subset of [Molecular Sets (MOSES) dataset](https://github.com/molecularsets/moses). Resulting dataset contains 1 004 918 molecules with atoms C, N, S, O, F, Cl, Br, H. It contains 226 424 unique Bemis-Murcko scaffolds and 34 572 unique BRICS fragments.<br/>
-For each molecule in the dataset we provide from 1 to 62 unique conformations, with 5 340 152 total conformations. For each conformation, we have calculated its electronic properties including the energy (E), DFT Hamiltonian matrix (H), and DFT overlap matrix (S). All properties were calculated using the Kohn-Sham method at ωB97X-D/def2-SVP levels of theory using the quantum-chemical software package [Psi4](https://github.com/psi4/psi4), version 1.5. <br/>
-We provide several splits of the dataset that can serve as the basis for comparison across different models. First, we fix the training set that consists of 100 000 molecules with 436 581 conformations and its smaller subsets with 10 000, 5 000, and 2 000 molecules and 38 364, 20 349, and 5 768 conformations respectively; these subsets can help determine how much additional data helps various models. We choose another 100 000 random molecules as a structure test set. The scaffold test set has 100 000 molecules containing a Bemis-Murcko scaffold from a random subset of scaffolds which are not present in the training set. Finally, the conformation test set consists of 91 182 (resp., 10 000, 5 000, 2 000) molecules from the training set with new conformations, numbering in total 92 821 (8 892, 4 897, 1 724) conformations; this set can be used for the single-molecule setup. <br/>
+We propose a benchmarking dataset based on a subset of [Molecular Sets (MOSES) dataset](https://github.com/molecularsets/moses). Resulting dataset contains 1 936 931 molecules with atoms C, N, S, O, F, Cl, Br, H. It contains 226 424 unique Bemis-Murcko scaffolds and 34 572 unique BRICS fragments.<br/>
+For each molecule in the dataset we provide from 1 to 62 unique conformations, with 12 676 264 total conformations. For each conformation, we have calculated its electronic properties including the energy (E), DFT Hamiltonian matrix (H), and DFT overlap matrix (S). All properties were calculated using the Kohn-Sham method at ωB97X-D/def2-SVP levels of theory using the quantum-chemical software package [Psi4](https://github.com/psi4/psi4), version 1.5. <br/>
+We provide several splits of the dataset that can serve as the basis for comparison across different models.<br/>
 As part of the benchmark, we provide separate databases for each subset and task and a complete archive with wave function files produced by the Psi4 package that contains quantum chemical properties of the corresponding molecule and can be used in further computations.
 ### Downloading dataset
 #### Hamiltonian databases
-Links to other hamiltonian databases including different train and test subsets are in file [Hamiltonian databases](./nablaDFT/links/hamiltonian_databases.json)<br/>
-An archive with numpy indexes:  [splits indexes](https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/hamiltonian_databases/splits.tar.gz)<br/>
+Links to  hamiltonian databases including different train and test subsets are in file [Hamiltonian databases](./nablaDFT/links/hamiltonian_databases.json)<br/>
 #### Energy databases
 Links to energy databases including different train and test subsets are in file [Energy databases](./nablaDFT/links/energy_databases.json)
 
@@ -55,9 +54,9 @@ Links to tarballs: [wave functions](./nablaDFT/links/nablaDFT_psi4wfn_links.txt)
 The csv file with conformations index, SMILES, atomic DFT properties and wfn archive names: [summary.csv](https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFT/summary.csv)
 
 #### Conformations files
-Tar archive with xyz files [archive](https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/nablaDFT/conformations_archive.tar)
+Tar archive with xyz files [archive](https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/conformers_archive_v2.tar)
 
-### Acces sing elements of the dataset
+### Accessing elements of the dataset
 #### Hamiltonian database
 
 ```python
