@@ -420,14 +420,14 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
     </tr>
     <tr>
       <td><i>GemNet-OC</i></td>
-      <td><i>0.14</i></td>
-      <td><i>0.067</i></td>
-      <td><i>0.046</i></td>
-      <td><i>0.024</i></td>
-      <td><i>0.14</i></td>
-      <td><i>0.064</i></td>
-      <td><i>0.043</i></td>
-      <td><i>0.020</i></td>
+      <td><i>0.10</i></td>
+      <td><i>0.051</i></td>
+      <td><i>0.036</i></td>
+      <td><i>0.021</i></td>
+      <td><i>0.10</i></td>
+      <td><i>0.051</i></td>
+      <td><i>0.036</i></td>
+      <td><i>0.021</i></td>
       <td><i>0.073</i></td>
       <td><i>0.042</i></td>
       <td><i>0.032</i></td>
@@ -452,8 +452,8 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
       <td><i>eSCN</i></td>
       <td><i>0.10</i></td>
       <td><i>0.051</i></td>
-      <td><i>0.040</i></td>
-      <td><i>0.024</i></td>
+      <td><i>0.036</i></td>
+      <td><i>0.021</i></td>
       <td><i>0.10</i></td>
       <td><i>0.051</i></td>
       <td><i>0.036</i></td>
