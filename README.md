@@ -195,18 +195,18 @@ In the tables below ST, SF, CF denote structures test set, scaffolds test set an
   <tbody>
     <tr>
       <td><i>LR</i></td>
-      <td><i>4.6</i></td>
-      <td><i>4.7</i></td>
-      <td><i>4.7</i></td>
-      <td><i>4.7</i></td>
-      <td><i>4.6</i></td>
-      <td><i>4.7</i></td>
-      <td><i>4.7</i></td>
-      <td><i>4.7</i></td>
-      <td><i>4.0</i></td>
-      <td><i>4.2</i></td>
-      <td><i>4.0</i></td>
-      <td><i>4.0</i></td>
+      <td><i>4.86</i></td>
+      <td><i>4.64</i></td>
+      <td><i>4.56</i></td>
+      <td><i>4.56</i></td>
+      <td><i>4.37</i></td>
+      <td><i>4.18</i></td>
+      <td><i>4.12</i></td>
+      <td><i>4.15</i></td>
+      <td><i>3.76</i></td>
+      <td><i>3.61</i></td>
+      <td><i>3.69</i></td>
+      <td><i>3.95</i></td>
     </tr>
     <tr>
       <td><i>SchNet</i></td>
