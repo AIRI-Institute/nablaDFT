@@ -416,6 +416,7 @@ class ASEBatchwiseLBFGS(BatchwiseOptimizer):
 
     def initialize(self) -> None:
         """Initialize everything so no checks have to be done in step"""
+        self.nsteps = 0
         self.iteration = 0
         self.s = []
         self.y = []
