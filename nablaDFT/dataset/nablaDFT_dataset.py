@@ -178,7 +178,7 @@ class ASENablaDFT(AtomsDataModule):
             # partition dataset
             self._train_dataset = self.dataset.subset(self.train_idx)
             self._val_dataset = self.dataset.subset(self.val_idx)
-            if self.split == "preidct":
+            if self.split == "predict":
                 self._predict_dataset = self.dataset.subset(self.test_idx)
             else:
                 self._test_dataset = self.dataset.subset(self.test_idx)
@@ -195,6 +195,21 @@ class ASENablaDFT(AtomsDataModule):
                 shuffle=False,
             )
         return self._predict_dataloader
+
+    def _setup_transforms(self):
+        from pdb import set_trace; set_trace()
+        for t in self.train_transforms:
+            t.datamodule(self)
+        for t in self.val_transforms:
+            t.datamodule(self)
+        for t in self.test_transforms:
+            t.datamodule(self)
+        self._train_dataset.transforms = self.train_transforms
+        self._val_dataset.transforms = self.val_transforms
+        if self.split == "test":
+            self._test_dataset.transforms = self.test_transforms
+        if self.split == "predict":
+            self._predict_dataset.transforms = self.test_transforms
 
 
 class PyGDataModule(LightningDataModule):
