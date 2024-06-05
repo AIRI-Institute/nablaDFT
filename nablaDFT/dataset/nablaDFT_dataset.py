@@ -197,7 +197,6 @@ class ASENablaDFT(AtomsDataModule):
         return self._predict_dataloader
 
     def _setup_transforms(self):
-        from pdb import set_trace; set_trace()
         for t in self.train_transforms:
             t.datamodule(self)
         for t in self.val_transforms:
