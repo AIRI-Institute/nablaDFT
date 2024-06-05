@@ -109,7 +109,7 @@ def download_model(config: DictConfig) -> str:
         os.makedirs(f"./checkpoints/{model_name}", exist_ok=True)
     with open(nablaDFT.__path__[0] + "/links/models_checkpoints.json", "r") as f:
         data = json.load(f)
-        url = data[f"{model_name}"]["dataset_train_100k"]
+        url = data[f"{model_name}"]["dataset_train_large"]
     file_size = get_file_size(url)
     with tqdm(unit="B", unit_scale=True, unit_divisor=1024, miniters=1, total=file_size, desc=f"Downloading {model_name} checkpoint") as t:
         request.urlretrieve(url, ckpt_path, reporthook=tqdm_download_hook(t))
