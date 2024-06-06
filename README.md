@@ -1,7 +1,18 @@
+<p align="center">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="images/logo_white.png">
+  <source media="(prefers-color-scheme: light)" srcset="images/logo_black.png">
+  <img alt="nablaDFT logo" src="images/logo_black.png">
+</picture>
+</p>
+
 # nablaDFT: Large-Scale Conformational Energy and Hamiltonian Prediction benchmark and dataset
 <p align="left">
+<a href="https://developer.nvidia.com/cuda-downloads"><img alt="CUDA versions" src="https://img.shields.io/badge/cuda-11.8~12.1-green"></a>
+<a href="https://github.com/AIRI-Institute/nablaDFT/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-blue"></a>
 <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 </p>
+
 
 This is the repository for nablaDFT Dataset and Benchmark. The current version is 2.0. The code and data from the initial publication are accessible here: [1.0 branch](https://github.com/AIRI-Institute/nablaDFT/tree/1.0). <br/>
 Electronic wave function calculation is a fundamental task of computational quantum chemistry. Knowledge of the wave function parameters allows one to compute physical and chemical properties of molecules and materials.<br/>
