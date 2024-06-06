@@ -9,7 +9,6 @@ In this work we: introduce a new curated large-scale dataset of electron structu
 
 More details can be found in the [paper](https://pubs.rsc.org/en/content/articlelanding/2022/CP/D2CP03966D).
 
-
 If you are using nablaDFT in your research paper, please cite us as
 ```
 @article{10.1039/D2CP03966D,
@@ -58,27 +57,41 @@ Tar archive with xyz files [archive](https://a002dlils-kadurin-nabladft.obs.ru-m
 
 ### Accessing elements of the dataset
 #### Hamiltonian database
-
+Downloading of the smallest file (`train-tiny` data split, 14 Gb):
+```bash
+wget https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/hamiltonian_databases/train_2k.db
+```
+Minimal usage example:
 ```python
 from nablaDFT.dataset import HamiltonianDatabase
 
-train = HamiltonianDatabase("dataset_train_tiny.db")
+train = HamiltonianDatabase("train_2k.db")
 Z, R, E, F, H, S, C = train[0]  # atoms numbers, atoms positions, energy, forces, core hamiltonian, overlap matrix, coefficients matrix
 ```
 #### Energies database
+Downloading of the smallest file (`train-tiny` data split, 51 Mb):
+```bash
+wget https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/train_2k_v2_formation_energy_w_forces.db
+```
+Minimal usage example:
 ```python
 from ase.db import connect
 
-train = connect("dataset_train_tiny.db")
-atoms_data = connect.get(1)
+train = connect("train_2k_v2_formation_energy_w_forces.db")
+atoms_data = train.get(1)
 ```
 #### Working with raw psi4 wavefunctions
-
-A variety of properties can also be loaded directly from the wavefunctions files. See main paper for more details. Properties include DFT matrices:
+Downloading of the smallest file (6,8 Gb):
+```bash
+https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/moses_wfns_big/wfns_moses_conformers_archive_0.tar
+tar -xf wfns_moses_conformers_archive_0.tar
+cd mnt/sdd/data/moses_wfns_big/
+```
+A variety of properties can be loaded directly from the wavefunction files. 
+See main paper for more details. Properties include DFT matrices:
 ```python
 import numpy as np
-import psi4
-wfn = np.load(<PATH_TO_WFN>, allow_pickle=True).tolist()
+wfn = np.load('wfn_conf_50000_0.npy', allow_pickle=True).tolist()
 orbital_matrix_a = wfn["matrix"]["Ca"]        # alpha orbital coefficients
 orbital_matrix_b = wfn["matrix"]["Cb"]        # beta orbital coefficients
 density_matrix_a = wfn["matrix"]["Da"]        # alpha electonic density
@@ -90,7 +103,8 @@ fock_matrix_b = wfn["matrix"]["Fb"]           # DFT betta Fock matrix
 ```
 and bond orders for covalent and non-covalent interactions and atomic charges: 
 ```python
-wfn = psi4.core.Wavefunction.from_file(<PATH_TO_WFN>)
+import psi4
+wfn = psi4.core.Wavefunction.from_file('wfn_conf_50000_0.npy')
 psi4.oeprop(wfn, "MAYER_INDICES")
 psi4.oeprop(wfn, "WIBERG_LOWDIN_INDICES")
 psi4.oeprop(wfn, "MULLIKEN_CHARGES")
@@ -100,7 +114,6 @@ lodwin_bos = wfn.array_variables()["WIBERG LOWDIN INDICES"]  # Wiberg bond indic
 mulliken_charges = wfn.array_variables()["MULLIKEN CHARGES"]  # Mulliken atomic charges
 lowdin_charges = wfn.array_variables()["LOWDIN CHARGES"]  # Löwdin atomic charges
 ```
-
 
 ## Models
 * [Unifying machine learning and quantum chemistry with a deep neural network for molecular wavefunctions (SchNOrb)](https://github.com/KuzmaKhrabrov/SchNOrb)
