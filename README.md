@@ -6,7 +6,7 @@
 </picture>
 </p>
 
-# $nabla^2$ DFT: A Universal Quantum Chemistry Dataset of Drug-Like Molecules and a Benchmark for Neural Network Potentials
+# $\nabla^2$ DFT: A Universal Quantum Chemistry Dataset of Drug-Like Molecules and a Benchmark for Neural Network Potentials
 <p align="left">
 <a href="https://developer.nvidia.com/cuda-downloads"><img alt="CUDA versions" src="https://img.shields.io/badge/cuda-11.8~12.1-green"></a>
 <a href="https://github.com/AIRI-Institute/nablaDFT/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-blue"></a>
