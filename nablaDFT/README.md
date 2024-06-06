@@ -23,6 +23,8 @@ Each config consists of global variables and section with other trainer parts:
 [ASE Example](../config/datamodule/nablaDFT_ase.yaml)  
 [Hamiltonian Example](../config/datamodule/nablaDFT_hamiltonian.yaml)  
 Datamodule config defines type of dataset (ASE, Hamiltonian, PyG), dataset root path, batch size, train/val ratio for training job.  
+Note: for ASE type `datapath` parameter must direct to directory with database. For PyG type `root` parameter should direct to directory 
+with `raw/` subfolder with database. Processed PyG dataset will be stored in the same directory in `processed/` folder.
 
 ### Model
 [Example](../config/model/gemnet-oc.yaml)  
@@ -40,7 +42,7 @@ By default we use solely `WandbLogger`, you may add other loggers in `config/cal
 ### Trainer
 [Train](../config/trainer/train.yaml)  
 [Test](../config/trainer/test.yaml)  
-Defines additional parameters for trainer like accelerator, strategy and devices.
+Defines additional parameters for trainer like accelerator, strategy and devices. 
 
 ## Train
 
@@ -53,7 +55,7 @@ In the case of training resume, just specify checkpoint path in `ckpt_path` para
 ## Test
 
 [Example](../config/gemnet-oc_test.yaml)  
-Same as for training run, you may need to change `dataset_name` parameter for desired test split.  
+Same as for training run, you need to change `dataset_name` parameter for desired test split.  
 To reproduce test results for pretrained on biggest training dataset split (large) set `pretrained` parameter to `True` with ckpt_path to `null`. Otherwise, specify path to checkpoint with pretrained model in `ckpt_path`.  
 
 ## Predict
