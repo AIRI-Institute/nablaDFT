@@ -66,11 +66,17 @@ train = HamiltonianDatabase("dataset_train_tiny.db")
 Z, R, E, F, H, S, C = train[0]  # atoms numbers, atoms positions, energy, forces, core hamiltonian, overlap matrix, coefficients matrix
 ```
 #### Energies database
+
+Downloading of the smallest file (51M):
+```bash
+wget https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/train_2k_v2_formation_energy_w_forces.db
+```
+
 ```python
 from ase.db import connect
 
-train = connect("dataset_train_tiny.db")
-atoms_data = connect.get(1)
+train = connect("train_2k_v2_formation_energy_w_forces.db")
+atoms_data = train.get(1)
 ```
 #### Working with raw psi4 wavefunctions
 
