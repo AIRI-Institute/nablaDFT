@@ -63,6 +63,7 @@ Links to tarballs: [wave functions](./nablaDFT/links/nablaDFT_psi4wfn_links.txt)
 #### Summary file
 The csv file with conformations index, SMILES, atomic DFT properties and wfn archive names: [summary.csv](https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFT/summary.csv)
 
+The csv file with conformations index, energies and forces for optimization trajectories: [trajectories_summary.csv](https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/summary_relaxation_trajectories.csv.gz)
 #### Conformations files
 Tar archive with xyz files [archive](https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/conformers_archive_v2.tar)
 
