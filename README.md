@@ -57,7 +57,7 @@ Tar archive with xyz files [archive](https://a002dlils-kadurin-nabladft.obs.ru-m
 
 ### Accessing elements of the dataset
 #### Hamiltonian database
-Downloading of the smallest file (`traj-train-tiny` data split, 14 Gb):
+Downloading of the smallest file (`train-tiny` data split, 14 Gb):
 ```bash
 wget https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/hamiltonian_databases/train_2k.db
 ```
