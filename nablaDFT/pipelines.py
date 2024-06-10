@@ -14,7 +14,7 @@ from pytorch_lightning import (
     seed_everything,
 )
 
-from nablaDFT.utils import close_loggers, load_model, download_model
+from nablaDFT.utils import close_loggers, load_model, download_model, set_additional_params
 from nablaDFT.optimization import BatchwiseOptimizeTask
 
 
@@ -92,6 +92,7 @@ def run(config: DictConfig):
         )
     else:
         ckpt_path = None
+    config = set_additional_params(config)
     # download checkpoint if pretrained=True
     if config.get("pretrained"):
         if ckpt_path is None:

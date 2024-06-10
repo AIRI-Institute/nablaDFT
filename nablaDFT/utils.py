@@ -17,7 +17,7 @@ from pytorch_lightning.strategies.ddp import DDPStrategy
 import hydra
 import numpy as np
 from dotenv import load_dotenv
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf, open_dict
 import wandb
 import torch
 
@@ -141,11 +141,14 @@ def load_model(config: DictConfig, ckpt_path: str) -> LightningModule:
 def set_additional_params(config: DictConfig) -> DictConfig:
     datamodule_cls = config.datamodule._target_
     if datamodule_cls == "nablaDFT.dataset.ASENablaDFT":
-        config.datapath = Path(config.datapath).joinpath("raw")
+        config.root = os.path.join(config.root, "raw")
     if config.name in ['SchNet', 'PaiNN', 'Dimenet++']:
-        config.trainer.inference_mode = False
+        with open_dict(config):
+            config.trainer.inference_mode = False
     if len(config.devices) > 1:
-        config.trainer.strategy = DDPStrategy()
+        with open_dict(config):
+            config.trainer.strategy = DDPStrategy()
     if config.job_type == "train" and config.name == "QHNet":
-        config.trainer.find_unused_parameters = True
+        with open_dict(config):
+            config.trainer.find_unused_parameters = True
     return config
