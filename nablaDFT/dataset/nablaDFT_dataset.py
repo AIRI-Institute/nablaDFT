@@ -31,7 +31,7 @@ class ASENablaDFT(AtomsDataModule):
     Args:
         split (str): type of split, must be one of ['train', 'test', 'predict'].
         dataset_name (str): split name from links .json or filename of existing file from datapath directory.
-        datapath (str): path to existing dataset directory or location for download.
+        root (str): path to existing dataset directory or location for download.
         train_ratio (float): dataset part used for training.
         val_ratio (float): dataset part used for validation.
         test_ratio (float): dataset part used for test or prediction.
@@ -49,7 +49,7 @@ class ASENablaDFT(AtomsDataModule):
         self,
         dataset_name: str,
         split: str,
-        datapath: str,
+        root: str,
         batch_size: int,
         train_ratio: float = 0.9,
         val_ratio: float = 0.1,
@@ -58,7 +58,7 @@ class ASENablaDFT(AtomsDataModule):
         num_train: Union[int, float] = None,
         num_val: Union[int, float] = None,
         num_test: Optional[Union[int, float]] = None,
-        split_file: Optional[str] = "split.npz",
+        split_file: Optional[str] = None,
         load_properties: Optional[List[str]] = None,
         val_batch_size: Optional[int] = None,
         test_batch_size: Optional[int] = None,
@@ -77,7 +77,7 @@ class ASENablaDFT(AtomsDataModule):
     ):
         """"""
         super().__init__(
-            datapath=datapath,
+            datapath=root,
             batch_size=batch_size,
             num_train=num_train,
             num_val=num_val,
@@ -119,28 +119,9 @@ class ASENablaDFT(AtomsDataModule):
         if self.split == "predict" and not exists:
             raise FileNotFoundError("Specified dataset not found")
         elif self.split != "predict" and not exists:
-            with open(nablaDFT.__path__[0] + "/links/energy_databases.json") as f:
-                data = json.load(f)
-                if self.train_ratio != 0:
-                    url = data["train_databases"][self.dataset_name]
-                else:
-                    url = data["test_databases"][self.dataset_name]
-                file_size = get_file_size(url)
-                with tqdm(unit="B", unit_scale=True, unit_divisor=1024, miniters=1, total=file_size, desc=f"Downloading split: {self.dataset_name}") as t:
-                    request.urlretrieve(url, self.datapath, reporthook=tqdm_download_hook(t))
+            self._download()
         with connect(self.datapath) as ase_db:
-            if not ase_db.metadata:
-                atomrefs = np.load(
-                    nablaDFT.__path__[0] + "/data/atomization_energies.npy"
-                )
-                ase_db.metadata = {
-                    "_distance_unit": "Ang",
-                    "_property_unit_dict": {
-                        "energy": "Hartree",
-                        "forces": "Hartree/Ang",
-                    },
-                    "atomrefs": {"energy": list(atomrefs)},
-                }
+            self._check_metadata(ase_db)
             dataset_length = len(ase_db)
             self.num_train = int(dataset_length * self.train_ratio)
             self.num_val = int(dataset_length * self.val_ratio)
@@ -209,6 +190,32 @@ class ASENablaDFT(AtomsDataModule):
             self._test_dataset.transforms = self.test_transforms
         if self.split == "predict":
             self._predict_dataset.transforms = self.test_transforms
+
+    def _download(self):
+        with open(nablaDFT.__path__[0] + "/links/energy_databases.json") as f:
+            data = json.load(f)
+            if self.train_ratio != 0:
+                url = data["train_databases"][self.dataset_name]
+            else:
+                url = data["test_databases"][self.dataset_name]
+            file_size = get_file_size(url)
+            with tqdm(unit="B", unit_scale=True, unit_divisor=1024, miniters=1, total=file_size,
+                      desc=f"Downloading split: {self.dataset_name}") as t:
+                request.urlretrieve(url, self.datapath, reporthook=tqdm_download_hook(t))
+
+    def _check_metadata(self, conn):
+        if not conn.metadata:
+            atomrefs = np.load(
+                nablaDFT.__path__[0] + "/data/atomization_energies.npy"
+            )
+            conn.metadata = {
+                "_distance_unit": "Ang",
+                "_property_unit_dict": {
+                    "energy": "Hartree",
+                    "forces": "Hartree/Ang",
+                },
+                "atomrefs": {"energy": list(atomrefs)},
+            }
 
 
 class PyGDataModule(LightningDataModule):
@@ -280,7 +287,7 @@ class PyGHamiltonianDataModule(PyGDataModule):
     Keyword arguments:
         hamiltonian (bool): retrieve from database molecule's full hamiltonian matrix. True by default.
         include_overlap (bool): retrieve from database molecule's overlab matrix.
-        include_core (bool): retrieve from databaes molecule's core hamiltonian matrix.
+        include_core (bool): retrieve from database molecule's core hamiltonian matrix.
         **kwargs: arguments for torch.DataLoader and PyGDataModule instance. See PyGDatamodule docs.
     """
 

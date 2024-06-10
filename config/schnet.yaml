@@ -3,8 +3,23 @@ name: SchNet
 dataset_name: dataset_train_tiny
 max_steps: 1000000
 job_type: train
-pretrained: False
+pretrained: False # if True downloads checkpoint trained on the largest split
 ckpt_path: null # path to checkpoint for training resume or test run
+
+# cutoff for schnetpack.transform.ASENeighborList
+cutoff: 5.0
+
+# Datamodule parameters
+root: ./datasets/nablaDFT/${.job_type}
+batch_size: 32
+num_workers: 8
+
+# Devices
+devices: [0]
+
+# Trainer parameters
+gradient_clip_algorithm: null
+gradient_clip_val: null
 
 # configs
 defaults:

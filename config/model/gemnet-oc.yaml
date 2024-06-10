@@ -29,7 +29,7 @@ net:
   direct_forces: true
   use_pbc: false
   scale_backprop_forces: false
-  cutoff: 12.0
+  cutoff: ${cutoff}
   cutoff_qint: 12.0
   cutoff_aeaint: 12.0
   cutoff_aint: 12.0

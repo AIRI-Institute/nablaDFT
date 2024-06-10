@@ -2,8 +2,4 @@ _target_: pytorch_lightning.Trainer
 _convert_: all
 
 deterministic: True
-accelerator: "gpu"
-devices: [1]
-
-# if you want to test/infer Dimenet/PaiNN/SchNet then uncomment line below
-# inference_mode: False
+devices: ${devices}

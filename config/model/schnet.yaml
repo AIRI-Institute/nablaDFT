@@ -13,7 +13,7 @@ model:
       cutoff: 5
     cutoff_fn:
       _target_: schnetpack.nn.cutoff.CosineCutoff
-      cutoff: 5
+      cutoff: ${cutoff}
   input_modules:
     - _target_: schnetpack.atomistic.PairwiseDistances
   output_modules:
