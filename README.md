@@ -47,6 +47,11 @@ pip install .
 
 ## Dataset
 
+- [Tutorials](./nablaDFT/docs)
+- [Examples](./nablaDFT/examples)
+
+## Dataset
+
 We propose a benchmarking dataset based on a subset of [Molecular Sets (MOSES) dataset](https://github.com/molecularsets/moses). Resulting dataset contains 1 936 931 molecules with atoms C, N, S, O, F, Cl, Br, H. It contains 226 424 unique Bemis-Murcko scaffolds and 34 572 unique BRICS fragments.<br/>
 For each molecule in the dataset we provide from 1 to 62 unique conformations, with 12 676 264 total conformations. For each conformation, we have calculated its electronic properties including the energy (E), DFT Hamiltonian matrix (H), and DFT overlap matrix (S). All properties were calculated using the Kohn-Sham method at ωB97X-D/def2-SVP levels of theory using the quantum-chemical software package [Psi4](https://github.com/psi4/psi4), version 1.5. <br/>
 We provide several splits of the dataset that can serve as the basis for comparison across different models.<br/>
