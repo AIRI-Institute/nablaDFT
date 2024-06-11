@@ -78,7 +78,9 @@ Minimal usage example:
 from nablaDFT.dataset import HamiltonianDatabase
 
 train = HamiltonianDatabase("train_2k.db")
-Z, R, E, F, H, S, C = train[0]  # atoms numbers, atoms positions, energy, forces, core hamiltonian, overlap matrix, coefficients matrix
+# atoms numbers, atoms positions, energy, forces, core hamiltonian, overlap matrix, coefficients matrix, 
+# moses_id, conformation_id
+Z, R, E, F, H, S, C, moses_id, conformation_id = train[0]  
 ```
 #### Energies database
 Downloading of the smallest file (`train-tiny` data split, 51 Mb):
