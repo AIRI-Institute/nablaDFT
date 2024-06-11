@@ -17,6 +17,7 @@ from schnetpack.data import (
     AtomsLoader,
     SplittingStrategy,
     AtomsDataModule,
+    BaseAtomsData
 )
 
 import nablaDFT
@@ -161,9 +162,15 @@ class ASENablaDFT(AtomsDataModule):
             self._val_dataset = self.dataset.subset(self.val_idx)
             if self.split == "predict":
                 self._predict_dataset = self.dataset.subset(self.test_idx)
+                self._test_dataset = self.dataset.subset([])
             else:
                 self._test_dataset = self.dataset.subset(self.test_idx)
+                self._predict_dataset = self.dataset.subset([])
             self._setup_transforms()
+
+    @property
+    def predict_dataset(self) -> BaseAtomsData:
+        return self._predict_dataset
 
     def predict_dataloader(self) -> AtomsLoader:
         """Describes predict dataloader, used for prediction task"""
