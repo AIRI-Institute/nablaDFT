@@ -45,10 +45,11 @@ git clone https://github.com/AIRI-Institute/nablaDFT && cd nablaDFT/
 pip install .
 ```
 
-## Documentation
+## Tutorials and examples
 
-- [Tutorials](./nablaDFT/docs)
-- [Examples](./nablaDFT/examples)
+- [Basic access tutorial](./nablaDFT/examples/0a_basic_access.ipynb)
+- [Meta-information tutorial](./nablaDFT/examples/1a_meta_information.ipynb)
+- [Examples](./nablaDFT/examples/)
 
 ## Dataset
 
