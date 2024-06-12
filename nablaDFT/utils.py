@@ -4,6 +4,7 @@ import json
 import random
 from typing import List
 from urllib import request as request
+from pathlib import Path
 import logging
 import warnings
 
@@ -11,14 +12,14 @@ from tqdm import tqdm
 import pytorch_lightning as pl
 from pytorch_lightning import LightningModule
 from pytorch_lightning.utilities import rank_zero_only
+from pytorch_lightning.strategies.ddp import DDPStrategy
 
 import hydra
 import numpy as np
 from dotenv import load_dotenv
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf, open_dict
 import wandb
 import torch
-import hydra
 
 
 import nablaDFT
@@ -135,3 +136,19 @@ def load_model(config: DictConfig, ckpt_path: str) -> LightningModule:
         logger.info(f"Restore model weights from {ckpt_path}")
     model.eval()
     return model
+
+
+def set_additional_params(config: DictConfig) -> DictConfig:
+    datamodule_cls = config.datamodule._target_
+    if datamodule_cls == "nablaDFT.dataset.ASENablaDFT":
+        config.root = os.path.join(config.root, "raw")
+    if config.name in ['SchNet', 'PaiNN', 'Dimenet++']:
+        with open_dict(config):
+            config.trainer.inference_mode = False
+    if len(config.devices) > 1:
+        with open_dict(config):
+            config.trainer.strategy = DDPStrategy()
+    if config.job_type == "train" and config.name == "QHNet":
+        with open_dict(config):
+            config.trainer.find_unused_parameters = True
+    return config

@@ -323,7 +323,7 @@ class HamiltonianDataset(torch.utils.data.Dataset):
         orbitals_number = 0
         sum_squares = 0
         for batch_num, data in enumerate(all_data):
-            Z_, R_, E_, F_, H_, S_, C_ = data
+            Z_, R_, E_, F_, H_, S_, C_, _, _ = data  # skip moses_id and conformation_id
             local_orbitals = []
             local_orbitals_number = 0
             for z in Z_:

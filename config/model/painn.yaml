@@ -10,10 +10,10 @@ model:
     radial_basis:
       _target_: schnetpack.nn.radial.GaussianRBF
       n_rbf: 100
-      cutoff: 5
+      cutoff: ${cutoff}
     cutoff_fn:
       _target_: schnetpack.nn.cutoff.CosineCutoff
-      cutoff: 5
+      cutoff: ${cutoff}
   input_modules:
     - _target_: schnetpack.atomistic.PairwiseDistances
   output_modules:

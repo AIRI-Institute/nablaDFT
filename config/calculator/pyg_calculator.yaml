@@ -1,4 +1,4 @@
 _target_: nablaDFT.optimization.PyGBatchwiseCalculator
 device: ${device}
-energy_unit: eV
+energy_unit: Hartree
 position_unit: Ang
