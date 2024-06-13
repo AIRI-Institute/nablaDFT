@@ -1,6 +1,6 @@
 """Module describes PyTorch Geometric interfaces for nablaDFT datasets"""
 
-import json
+# TODO: add file validation for downloaded dataset
 import os
 import logging
 from typing import List, Callable

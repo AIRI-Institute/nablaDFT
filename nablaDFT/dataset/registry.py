@@ -8,18 +8,16 @@ import nablaDFT
 class DatasetRegistry:
     """Source of dataset splits links."""
     def __init__(self):
-        self.energy_datasets = {}
+
         self.hamiltonian_datasets = {}
         with open(nablaDFT.__path__[0] + "/links/energy_databases.json", "r") as fin:
             content = json.load(fin)
-        for key in content.keys():
-            for split_name in content[key].keys():
-                self.energy_datasets[split_name] = content[key][split_name]
+        self.energy_datasets = content["databases"]
+        self.energy_datasets_etag = content["etag"]
         with open(nablaDFT.__path__[0] + "/links/hamiltonian_databases.json", "r") as fin:
             content = json.load(fin)
-        for key in content.keys():
-            for split_name in content[key].keys():
-                self.hamiltonian_datasets[split_name] = content[key][split_name]
+        self.hamiltonian_datasets = content["databases"]
+        self.hamiltonian_datasets_etag = content["etag"]
 
     def get_dataset_url(self, task_type: str, name: str):
         """Returns URL for given dataset split task and name.
