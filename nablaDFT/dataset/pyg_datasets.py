@@ -15,6 +15,7 @@ from torch_geometric.data import InMemoryDataset, Data, Dataset
 import nablaDFT
 from .hamiltonian_dataset import HamiltonianDatabase
 from nablaDFT.utils import tqdm_download_hook, get_file_size
+from nablaDFT.dataset.registry import dataset_registry
 
 logger = logging.getLogger(__name__)
 
@@ -92,9 +93,7 @@ class PyGNablaDFT(InMemoryDataset):
         return super(PyGNablaDFT, self).get(idx - self.offsets[data_idx])
 
     def download(self) -> None:
-        with open(nablaDFT.__path__[0] + "/links/energy_databases.json", "r") as f:
-            data = json.load(f)
-            url = data[f"{self.split}_databases"][self.dataset_name]
+        url = dataset_registry.get_dataset_url("energy", self.dataset_name)
         file_size = get_file_size(url)
         with tqdm(
             unit="B",
@@ -232,9 +231,7 @@ class PyGHamiltonianNablaDFT(Dataset):
         return data
 
     def download(self) -> None:
-        with open(nablaDFT.__path__[0] + "/links/hamiltonian_databases.json") as f:
-            data = json.load(f)
-            url = data[f"{self.split}_databases"][self.dataset_name]
+        url = dataset_registry.get_dataset_url("hamiltonian", self.dataset_name)
         file_size = get_file_size(url)
         with tqdm(
             unit="B",

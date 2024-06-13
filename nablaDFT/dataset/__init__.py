@@ -11,3 +11,4 @@ from .pyg_datasets import (
     PyGNablaDFT,
     PyGHamiltonianNablaDFT,
 )  # PyTorch Geometric interfaces for datasets
+from .registry import dataset_registry  # dataset splits registry

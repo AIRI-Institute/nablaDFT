@@ -14,11 +14,21 @@ from pytorch_lightning import (
     seed_everything,
 )
 
-from nablaDFT.utils import close_loggers, load_model, download_model, set_additional_params
+from nablaDFT.utils import close_loggers, load_model, set_additional_params
+from nablaDFT import download_pretrained_model
 from nablaDFT.optimization import BatchwiseOptimizeTask
 
 
 JOB_TYPES = ["train", "test", "predict", "optimize"]
+
+
+def check_cfg_parameters(cfg: DictConfig):
+    job_type = cfg.get("job_type")
+    if job_type not in JOB_TYPES:
+        raise ValueError(f"job_type must be one of {JOB_TYPES}, got {job_type}")
+    if cfg.pretrained and cfg.ckpt_path:
+        raise ValueError("Config parameters ckpt_path and pretrained are mutually exclusive. Consider set ckpt_path "
+                         "to null, if you plan to use pretrained checkpoints.")
 
 
 def predict(
@@ -81,11 +91,10 @@ def run(config: DictConfig):
     Args:
         config (DictConfig): config for task. see r'config/' for examples.
     """
+    check_cfg_parameters(config)
     if config.get("seed"):
         seed_everything(config.seed)
-    job_type = config.get("job_type")
-    if job_type not in JOB_TYPES:
-        raise ValueError(f"job_type must be one of {JOB_TYPES}, got {job_type}")
+    job_type = config.job_type
     if config.get("ckpt_path"):
         ckpt_path = os.path.join(
             hydra.utils.get_original_cwd(), config.get("ckpt_path")
@@ -95,14 +104,7 @@ def run(config: DictConfig):
     config = set_additional_params(config)
     # download checkpoint if pretrained=True
     if config.get("pretrained"):
-        if ckpt_path is None:
-            ckpt_path = download_model(config)
-        else:
-            if not os.path.exists(ckpt_path):
-                warnings.warn(
-                    """Checkpoint path was specified, but it not exists. Continue with randomly initialized weights."""
-                )
-            ckpt_path = None
+        ckpt_path = download_pretrained_model(config)
     if job_type == "optimize":
         return optimize(config, ckpt_path)
     model: LightningModule = hydra.utils.instantiate(config.model)
