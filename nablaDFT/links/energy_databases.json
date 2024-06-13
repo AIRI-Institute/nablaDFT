@@ -16,7 +16,8 @@
     "dataset_test_conformations_tiny": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/test_2k_conformers_v2_formation_energy_w_forces.db"
   },
   "trajectory_databases": {
-    "dataset_test_trajectories": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/test_2k_trajectories.db",
+    "dataset_test_trajectories_initial": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/test_trajectories_initial.db",
+    "dataset_test_trajectories": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/test_trajectories.db",
     "dataset_train_medium_trajectories": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/train_medium_v2_trajectories.db",
     "dataset_trajectories_additional": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/additional_trajectories.db"
   }
