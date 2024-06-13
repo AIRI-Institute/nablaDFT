@@ -17,12 +17,9 @@ from pytorch_lightning.strategies.ddp import DDPStrategy
 import hydra
 import numpy as np
 from dotenv import load_dotenv
-from omegaconf import DictConfig, OmegaConf, open_dict
+from omegaconf import DictConfig, open_dict
 import wandb
 import torch
-
-
-import nablaDFT
 
 
 logger = logging.getLogger()
@@ -91,31 +88,6 @@ def load_envs():
 @rank_zero_only
 def init_wandb():
     wandb.login()
-
-
-def download_model(config: DictConfig) -> str:
-    """Downloads best model checkpoint from vault.
-
-    Args:
-        config (DictConfig): config for task. see r'config/' for examples.
-    """
-    model_name = config.get("name")
-    ckpt_path = os.path.join(
-        hydra.utils.get_original_cwd(),
-        f"./checkpoints/{model_name}/{model_name}_100k.ckpt",
-    )
-    if os.path.exists(ckpt_path):
-        return ckpt_path
-    else:
-        os.makedirs(f"./checkpoints/{model_name}", exist_ok=True)
-    with open(nablaDFT.__path__[0] + "/links/models_checkpoints.json", "r") as f:
-        data = json.load(f)
-        url = data[f"{model_name}"]["dataset_train_large"]
-    file_size = get_file_size(url)
-    with tqdm(unit="B", unit_scale=True, unit_divisor=1024, miniters=1, total=file_size, desc=f"Downloading {model_name} checkpoint") as t:
-        request.urlretrieve(url, ckpt_path, reporthook=tqdm_download_hook(t))
-    logging.info(f"Downloaded {model_name} 100k checkpoint to {ckpt_path}")
-    return ckpt_path
 
 
 def load_model(config: DictConfig, ckpt_path: str) -> LightningModule:

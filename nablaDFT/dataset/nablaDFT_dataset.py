@@ -21,6 +21,7 @@ from schnetpack.data import (
 )
 
 import nablaDFT
+from nablaDFT.dataset.registry import dataset_registry
 from nablaDFT.utils import tqdm_download_hook, get_file_size
 from .pyg_datasets import PyGNablaDFT, PyGHamiltonianNablaDFT
 
@@ -115,9 +116,7 @@ class ASENablaDFT(AtomsDataModule):
             os.makedirs(datapath_with_no_suffix)
         self.datapath = datapath_with_no_suffix + "/" + self.dataset_name + suffix
         exists = os.path.exists(self.datapath)
-        if self.split == "predict" and not exists:
-            raise FileNotFoundError("Specified dataset not found")
-        elif self.split != "predict" and not exists:
+        if not exists:
             self._download()
         with connect(self.datapath) as ase_db:
             self._check_metadata(ase_db)
@@ -197,16 +196,11 @@ class ASENablaDFT(AtomsDataModule):
             self._predict_dataset.transforms = self.test_transforms
 
     def _download(self):
-        with open(nablaDFT.__path__[0] + "/links/energy_databases.json") as f:
-            data = json.load(f)
-            if self.train_ratio != 0:
-                url = data["train_databases"][self.dataset_name]
-            else:
-                url = data["test_databases"][self.dataset_name]
-            file_size = get_file_size(url)
-            with tqdm(unit="B", unit_scale=True, unit_divisor=1024, miniters=1, total=file_size,
-                      desc=f"Downloading split: {self.dataset_name}") as t:
-                request.urlretrieve(url, self.datapath, reporthook=tqdm_download_hook(t))
+        url = dataset_registry.get_dataset_url("energy", self.dataset_name)
+        file_size = get_file_size(url)
+        with tqdm(unit="B", unit_scale=True, unit_divisor=1024, miniters=1, total=file_size,
+                  desc=f"Downloading split: {self.dataset_name}") as t:
+            request.urlretrieve(url, self.datapath, reporthook=tqdm_download_hook(t))
 
     def _check_metadata(self, conn):
         if not conn.metadata:
