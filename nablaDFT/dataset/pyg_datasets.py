@@ -1,4 +1,4 @@
-"""Module describes PyTorch Geometric interfaces for various NablaDFT datasets"""
+"""Module describes PyTorch Geometric interfaces for nablaDFT datasets"""
 
 import json
 import os
@@ -21,14 +21,28 @@ logger = logging.getLogger(__name__)
 
 class PyGNablaDFT(InMemoryDataset):
     """Pytorch Geometric interface for nablaDFT datasets.
-    Based on https://github.com/atomicarchitects/equiformer/blob/master/datasets/pyg/md17.py
+
+    Based on `MD17 implementation <https://github.com/atomicarchitects/equiformer/blob/master/datasets/pyg/md17.py>`_.
+
+    .. code-block:: python
+        from nablaDFT.dataset import PyGNablaDFT
+        dataset = PyGNablaDFT(
+            datapath="./datasets/",
+            dataset_name="dataset_train_tiny",
+            split="train"
+        )
+        sample = dataset[0]
+
+    .. note::
+        If split parameter is 'train' or 'test' and dataset name are ones from nablaDFT splits
+        (see nablaDFT/links/energy_databases.json), dataset will be downloaded automatically.
 
     Args:
         datapath (str): path to existing dataset directory or location for download.
         dataset_name (str): split name from links .json or filename of existing file from datapath directory.
         split (str): type of split, must be one of ['train', 'test', 'predict'].
         transform (Callable): callable data transform, called on every access to element.
-        pre_transform (Callable): callable data transform, called on every access to element.
+        pre_transform (Callable): callable data transform, called on every element during process.
     """
 
     db_suffix = ".db"
@@ -118,6 +132,24 @@ class PyGNablaDFT(InMemoryDataset):
 class PyGHamiltonianNablaDFT(Dataset):
     """Pytorch Geometric interface for nablaDFT Hamiltonian datasets.
 
+    .. code-block:: python
+        from nablaDFT.dataset import PyGHamiltonianNablaDFT
+        dataset = PyGHamiltonianNablaDFT(
+            datapath="./datasets/",
+            dataset_name="dataset_train_tiny",
+            split="train"
+        )
+        sample = dataset[0]
+
+    .. note::
+        If split parameter is 'train' or 'test' and dataset name are ones from nablaDFT splits
+        (see nablaDFT/links/hamiltonian_databases.json), dataset will be downloaded automatically.
+
+    .. note::
+        Hamiltonian matrix for each molecule has different shape. PyTorch Geometric tries to concatenate
+        each torch.Tensor in batch, so in order to make batch from data we leave all hamiltonian matrices
+        in numpy array form. During train, these matrices will be yield as List[np.array].
+
     Args:
         datapath (str): path to existing dataset directory or location for download.
         dataset_name (str): split name from links .json or filename of existing file from datapath directory.
@@ -127,12 +159,7 @@ class PyGHamiltonianNablaDFT(Dataset):
         include_core (bool): if True, retrieves core Hamiltonian matrices from database.
         dtype (torch.dtype): defines torch.dtype for energy, positions and forces tensors.
         transform (Callable): callable data transform, called on every access to element.
-        pre_transform (Callable): callable data transform, called on every access to element.
-
-    Note:
-        Hamiltonian matrix for each molecule has different shape. PyTorch Geometric tries to concatenate
-        each torch.Tensor in batch, so in order to make batch from data we leave all hamiltonian matrices
-        in numpy array form. During train, these matrices will be yield as List[np.array].
+        pre_transform (Callable): callable data transform, called on every element during process.
     """
 
     db_suffix = ".db"

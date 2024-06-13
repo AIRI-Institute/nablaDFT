@@ -61,7 +61,7 @@ Links to energy databases including different train and test subsets are in file
 Links to tarballs: [wave functions](./nablaDFT/links/nablaDFT_psi4wfn_links.txt)
 
 #### Summary file
-The csv file with conformations index, SMILES, atomic DFT properties and wfn archive names: [summary.csv](http://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/summary.csv.gz)
+The csv file with conformations index, SMILES, atomic DFT properties and wfn archive names: [summary.csv](https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/summary.csv.gz)
 
 The csv file with conformations index, energies and forces for optimization trajectories: [trajectories_summary.csv](https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/summary_relaxation_trajectories.csv.gz)
 #### Conformations files
@@ -78,7 +78,9 @@ Minimal usage example:
 from nablaDFT.dataset import HamiltonianDatabase
 
 train = HamiltonianDatabase("train_2k.db")
-Z, R, E, F, H, S, C = train[0]  # atoms numbers, atoms positions, energy, forces, core hamiltonian, overlap matrix, coefficients matrix
+# atoms numbers, atoms positions, energy, forces, core hamiltonian, overlap matrix, coefficients matrix, 
+# moses_id, conformation_id
+Z, R, E, F, H, S, C, moses_id, conformation_id = train[0]  
 ```
 #### Energies database
 Downloading of the smallest file (`train-tiny` data split, 51 Mb):
@@ -144,7 +146,11 @@ For task start run this command from repository root directory:
 ```bash
 python run.py --config-name <config-name>.yaml
 ```
-For detailed run configuration please refer to [run configuration README](./nablaDFT/README.md).
+For the detailed run configuration please refer to [run configuration README](./nablaDFT/README.md).
+
+Currently, the optimization pipeline is under construction, please, 
+use [GOLF_schnetpack](https://github.com/AIRI-Institute/GOLF/blob/nabla2DFT-eval) 
+and [GOLF_PYG](https://github.com/AIRI-Institute/GOLF/blob/nabla2DFT-eval-dimenet) for the optimization metrics reproduction.
 
 ### Datamodules
 To create a dataset, we use interfaces from ASE and PyTorch Lightning.  
@@ -175,18 +181,22 @@ For more detailed list of datamodules parameters please refer to [datamodule exa
 ### Checkpoint
 Several checkpoints for each model are available here: [checkpoints links](./nablaDFT/links/models_checkpoints.json)
 
-### Examples
+### Tutorials and examples
 
-Models training and testing example: 
+* [Basic access tutorial](examples/0a_basic_access.ipynb)
+* [Meta-information tutorial](examples/1a_meta_information.ipynb)
+
+Models training and testing example:
 * [PAINN jupyter](examples/PAINN_example.ipynb)
 * [Collab](https://colab.research.google.com/drive/1VaiPa05pu-55XR6eR4DXv6cC6fy3lUwJ?usp=sharing)
-* [GemNet-OC jupyter](./examples/GemNet-OC_example.ipynb)
+* [GemNet-OC jupyter](examples/GemNet-OC_example.ipynb)
 
 Models inference example:
-* [GemNet-OC](./examples/Inference%20example.ipynb)
+* [GemNet-OC](examples/Inference%20example.ipynb)
 
 Molecular geometry optimization example:
-* [GemNet-OC](./examples/Geometry%20Optimization.ipynb)
+* [GemNet-OC](examples/Geometry%20Optimization.ipynb)
+* [Examples](examples/)
 
 ### Metrics
 In the tables below ST, SF, CF denote structures test set, scaffolds test set and conformations test set correspondingly.
