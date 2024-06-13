@@ -45,6 +45,12 @@ git clone https://github.com/AIRI-Institute/nablaDFT && cd nablaDFT/
 pip install .
 ```
 
+## Tutorials and examples
+
+- [Basic access tutorial](./nablaDFT/examples/0a_basic_access.ipynb)
+- [Meta-information tutorial](./nablaDFT/examples/1a_meta_information.ipynb)
+- [Examples](./nablaDFT/examples/)
+
 ## Dataset
 
 We propose a benchmarking dataset based on a subset of [Molecular Sets (MOSES) dataset](https://github.com/molecularsets/moses). Resulting dataset contains 1 936 931 molecules with atoms C, N, S, O, F, Cl, Br, H. It contains 226 424 unique Bemis-Murcko scaffolds and 34 572 unique BRICS fragments.<br/>
@@ -78,7 +84,9 @@ Minimal usage example:
 from nablaDFT.dataset import HamiltonianDatabase
 
 train = HamiltonianDatabase("train_2k.db")
-Z, R, E, F, H, S, C = train[0]  # atoms numbers, atoms positions, energy, forces, core hamiltonian, overlap matrix, coefficients matrix
+# atoms numbers, atoms positions, energy, forces, core hamiltonian, overlap matrix, coefficients matrix, 
+# moses_id, conformation_id
+Z, R, E, F, H, S, C, moses_id, conformation_id = train[0]  
 ```
 #### Energies database
 Downloading of the smallest file (`train-tiny` data split, 51 Mb):
