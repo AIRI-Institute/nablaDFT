@@ -45,12 +45,6 @@ git clone https://github.com/AIRI-Institute/nablaDFT && cd nablaDFT/
 pip install .
 ```
 
-## Tutorials and examples
-
-- [Basic access tutorial](./nablaDFT/examples/0a_basic_access.ipynb)
-- [Meta-information tutorial](./nablaDFT/examples/1a_meta_information.ipynb)
-- [Examples](./nablaDFT/examples/)
-
 ## Dataset
 
 We propose a benchmarking dataset based on a subset of [Molecular Sets (MOSES) dataset](https://github.com/molecularsets/moses). Resulting dataset contains 1 936 931 molecules with atoms C, N, S, O, F, Cl, Br, H. It contains 226 424 unique Bemis-Murcko scaffolds and 34 572 unique BRICS fragments.<br/>
@@ -67,7 +61,7 @@ Links to energy databases including different train and test subsets are in file
 Links to tarballs: [wave functions](./nablaDFT/links/nablaDFT_psi4wfn_links.txt)
 
 #### Summary file
-The csv file with conformations index, SMILES, atomic DFT properties and wfn archive names: [summary.csv](http://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/summary.csv.gz)
+The csv file with conformations index, SMILES, atomic DFT properties and wfn archive names: [summary.csv](https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/summary.csv.gz)
 
 The csv file with conformations index, energies and forces for optimization trajectories: [trajectories_summary.csv](https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/summary_relaxation_trajectories.csv.gz)
 #### Conformations files
@@ -183,18 +177,22 @@ For more detailed list of datamodules parameters please refer to [datamodule exa
 ### Checkpoint
 Several checkpoints for each model are available here: [checkpoints links](./nablaDFT/links/models_checkpoints.json)
 
-### Examples
+### Tutorials and examples
 
-Models training and testing example: 
+* [Basic access tutorial](examples/0a_basic_access.ipynb)
+* [Meta-information tutorial](examples/1a_meta_information.ipynb)
+
+Models training and testing example:
 * [PAINN jupyter](examples/PAINN_example.ipynb)
 * [Collab](https://colab.research.google.com/drive/1VaiPa05pu-55XR6eR4DXv6cC6fy3lUwJ?usp=sharing)
-* [GemNet-OC jupyter](./examples/GemNet-OC_example.ipynb)
+* [GemNet-OC jupyter](examples/GemNet-OC_example.ipynb)
 
 Models inference example:
-* [GemNet-OC](./examples/Inference%20example.ipynb)
+* [GemNet-OC](examples/Inference%20example.ipynb)
 
 Molecular geometry optimization example:
-* [GemNet-OC](./examples/Geometry%20Optimization.ipynb)
+* [GemNet-OC](examples/Geometry%20Optimization.ipynb)
+* [Examples](examples/)
 
 ### Metrics
 In the tables below ST, SF, CF denote structures test set, scaffolds test set and conformations test set correspondingly.
