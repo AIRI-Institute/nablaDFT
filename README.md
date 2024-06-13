@@ -146,7 +146,11 @@ For task start run this command from repository root directory:
 ```bash
 python run.py --config-name <config-name>.yaml
 ```
-For detailed run configuration please refer to [run configuration README](./nablaDFT/README.md).
+For the detailed run configuration please refer to [run configuration README](./nablaDFT/README.md).
+
+Currently, the optimization pipeline is under construction, please, 
+use [GOLF_schnetpack](https://github.com/AIRI-Institute/GOLF/blob/nabla2DFT-eval) 
+and [GOLF_PYG](https://github.com/AIRI-Institute/GOLF/blob/nabla2DFT-eval-dimenet) for the optimization metrics reproduction.
 
 ### Datamodules
 To create a dataset, we use interfaces from ASE and PyTorch Lightning.  
