@@ -192,7 +192,7 @@ Models inference example:
 
 Molecular geometry optimization example:
 * [GemNet-OC](examples/Geometry%20Optimization.ipynb)
-* [Examples](nablaDFT/examples/)
+* [Examples](examples/)
 
 ### Metrics
 In the tables below ST, SF, CF denote structures test set, scaffolds test set and conformations test set correspondingly.
