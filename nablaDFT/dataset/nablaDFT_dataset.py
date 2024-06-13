@@ -1,6 +1,6 @@
 """Module defines Pytorch Lightning DataModule interfaces for nablaDFT datasets"""
+# TODO: add file validation for downloaded dataset
 from typing import List, Dict, Optional, Union
-import json
 import os
 from urllib import request as request
 
