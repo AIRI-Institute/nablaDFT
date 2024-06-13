@@ -70,7 +70,7 @@ def test_hamiltonian_dataset_items(dataset_hamiltonian_pyg_params):
 def test_hamiltonian_torch_dataset(dataset_hamiltonian_torch_params):
     dataset = HamiltonianDataset(**dataset_hamiltonian_torch_params)
     dataloader = DataLoader(dataset, batch_size=2, collate_fn=dataset.collate_fn, shuffle=False)
-    database = dataset.database
+    database = dataset._database
     shape_gt = sum([database[idx][4].shape[0] for idx in [0, 1]])
     batch = next(iter(dataloader))
     assert batch['full_hamiltonian'].shape == torch.Size([shape_gt, shape_gt])
