@@ -17,7 +17,7 @@ model:
   regress_forces: true
   otf_graph: true
   use_pbc: false
-  cutoff: ${cutoff}
+  cutoff: 8.0
   max_neighbors: 40
   basis_width_scalar: 1.0
   distance_resolution: 0.02
