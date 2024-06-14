@@ -133,6 +133,7 @@ class QHNet(nn.Module):
         self.output_ij = Linear(self.hidden_irrep, self.hidden_bottle_irrep)
 
     def set(self):
+        # TODO: FIX: outside of lightning module, orbbital_mask remains on CPU.
         for key in self.orbital_mask.keys():
             self.orbital_mask[key] = self.orbital_mask[key].to(self.device)
 
