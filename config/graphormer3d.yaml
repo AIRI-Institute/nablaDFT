@@ -25,7 +25,7 @@ gradient_clip_val: 5.0
 defaults:
   - _self_
   - datamodule: nablaDFT_pyg.yaml  # dataset config
-  - model: graphormer3d-half.yaml  # model config
+  - model: graphormer3d-small.yaml  # model config
   - callbacks: default.yaml  # pl callbacks config
   - loggers: wandb.yaml  # pl loggers config
   - trainer: train.yaml  # trainer config
