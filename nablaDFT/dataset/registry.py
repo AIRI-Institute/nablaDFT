@@ -33,7 +33,7 @@ class DatasetRegistry:
         else:
             raise NotImplementedError("Currently only two tasks supported: ['energy', 'hamiltonian']")
         if url is None:
-            raise KeyError("Wrong name split or database file not found")
+            raise KeyError(f"Wrong name split: {name} or database file not found")
         return url
 
     def get_dataset_etag(self, task_type: str, name: str) -> Optional[str]:

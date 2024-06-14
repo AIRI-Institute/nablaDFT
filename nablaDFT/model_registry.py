@@ -15,13 +15,10 @@ from nablaDFT.utils import tqdm_download_hook, get_file_size
 class ModelRegistry:
     """Source of pretrained model checkpoint links."""
     def __init__(self):
-        self.model_ckpt = {}
         with open(nablaDFT.__path__[0] + "/links/models_checkpoints.json", "r") as fin:
             content = json.load(fin)
-        for key in content.keys():
-            for split_name in content[key].keys():
-                ckpt_name = key + "_" + split_name.split("_")[-1]
-                self.model_ckpt[ckpt_name] = content[key][split_name]
+        self.model_checkpoints = content['checkpoints']
+        self.model_checkpoints_etag = content['etag']
 
     def get_pretrained_model_url(self, model_name: str) -> str:
         """Returns URL for given pretrained model name.
@@ -29,7 +26,11 @@ class ModelRegistry:
         Args:
             model_name (str): pretrained model name. Available models can be listed with :meth:nablaDFT.registry.ModelRegistry.list_models
         """
-        return self.model_ckpt[model_name]
+        url = self.model_checkpoints.get(model_name, None)
+        if url:
+            return self.model_checkpoints[model_name]
+        else:
+            raise KeyError(f"Wrong checkpoint name: {model_name}")
 
     def get_pretrained_model_etag(self, model_name: str) -> str:
         """Returns reference ETag for given pretrained model name.
@@ -37,11 +38,11 @@ class ModelRegistry:
         Args:
             model_name (str): pretrained model name. Available models can be listed with :meth:nablaDFT.registry.ModelRegistry.list_models
         """
-        raise NotImplementedError
+        return self.model_checkpoints_etag[model_name]
 
     def list_models(self) -> List[str]:
         """Returns all available pretrained on nablaDFT model checkpoints."""
-        return list(self.model_ckpt.keys())
+        return list(self.model_checkpoints.keys())
 
 
 model_registry = ModelRegistry()
