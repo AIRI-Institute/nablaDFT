@@ -25,7 +25,9 @@ def test_energy_dataset_availability(tmp_path, split):
     save_path = os.path.join(tmp_path, split)
     url = dataset_registry.get_dataset_url("energy", split)
     request.urlretrieve(url, save_path)
-    assert file_validation(save_path, dataset_registry.get_dataset_etag("energy", split))
+    assert file_validation(
+        save_path, dataset_registry.get_dataset_etag("energy", split)
+    )
 
 
 # currently test only file size match
