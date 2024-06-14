@@ -1412,7 +1412,7 @@ class GemNetOCLightning(pl.LightningModule):
     def __init__(
         self,
         model_name: str,
-        net: nn.Module,
+        model: nn.Module,
         optimizer: Optimizer,
         lr_scheduler: LRScheduler,
         losses: Dict,
@@ -1420,15 +1420,15 @@ class GemNetOCLightning(pl.LightningModule):
         loss_coefs,
     ) -> None:
         super(GemNetOCLightning, self).__init__()
-        self.net = net
+        self.model = model
         self.save_hyperparameters(logger=True, ignore=["net"])
 
     def forward(self, data: Data):
-        energy, forces = self.net(data)
+        energy, forces = self.model(data)
         return energy, forces
 
     def step(self, batch, calculate_metrics: bool = False):
-        energy_out, forces_out = self.net(batch)
+        energy_out, forces_out = self.model(batch)
         forces = batch.forces
         preds = {"energy": energy_out, "forces": forces_out}
         target = {"energy": batch.y, "forces": forces}
