@@ -1,5 +1,4 @@
 """Module defines Pytorch Lightning DataModule interfaces for nablaDFT datasets"""
-# TODO: add file validation for downloaded dataset
 from typing import List, Dict, Optional, Union
 import os
 from urllib import request as request
@@ -22,7 +21,7 @@ from schnetpack.data import (
 
 import nablaDFT
 from nablaDFT.dataset.registry import dataset_registry
-from nablaDFT.utils import tqdm_download_hook, get_file_size
+from nablaDFT.utils import tqdm_download_hook, get_file_size, file_validation
 from .pyg_datasets import PyGNablaDFT, PyGHamiltonianNablaDFT
 
 
@@ -201,6 +200,8 @@ class ASENablaDFT(AtomsDataModule):
         with tqdm(unit="B", unit_scale=True, unit_divisor=1024, miniters=1, total=file_size,
                   desc=f"Downloading split: {self.dataset_name}") as t:
             request.urlretrieve(url, self.datapath, reporthook=tqdm_download_hook(t))
+        dataset_etag = dataset_registry.get_dataset_etag("energy", self.dataset_name)
+        file_validation(self.datapath, dataset_etag)
 
     def _check_metadata(self, conn):
         if not conn.metadata:

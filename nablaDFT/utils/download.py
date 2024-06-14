@@ -19,12 +19,12 @@ def get_file_md5(filepath: str, chunk_size=8 * 1024 * 1024):
     return md5.hexdigest()
 
 
-def file_validation(downloaded_file, gt_hash):
+def file_validation(downloaded_file, gt_hash) -> bool:
     if '-' in gt_hash and gt_hash == get_file_etag_checksum(downloaded_file):
         return True
     if '-' not in gt_hash and gt_hash == get_file_md5(downloaded_file):
         return True
-    return False
+    raise RuntimeError("Downloaded file hash doesn't match reference.")
 
 
 def get_file_size(url: str) -> int:
