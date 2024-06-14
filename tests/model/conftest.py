@@ -18,3 +18,9 @@ def dataset_pyg():
     }
     dataset = PyGNablaDFT(**params)
     return dataset
+
+
+@pytest.fixture()
+def dataset_spk():
+    # TODO: write me!!!111
+    pass
