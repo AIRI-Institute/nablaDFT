@@ -14,7 +14,7 @@ NUM_WORKERS = 4
 
 @pytest.fixture()
 def hamiltonian_orbitals():
-    path = Path(nablaDFT.__path__[0]) / ".." / "tests/data/orbitals.pkl"
+    path = Path(nablaDFT.__path__[0]) / "../tests/data/orbitals.pkl"
     with open(path, "rb") as fin:
         orbitals = pickle.loads(fin.read())
     return orbitals
@@ -22,7 +22,7 @@ def hamiltonian_orbitals():
 
 @pytest.fixture()
 def dataset_pyg_params():
-    datapath = Path(nablaDFT.__path__[0]) / ".." / "tests/data"
+    datapath = Path(nablaDFT.__path__[0]) / "../tests/data"
     dataset_name = "test_database"
     params = {
         "datapath": str(datapath),
@@ -35,7 +35,7 @@ def dataset_pyg_params():
 
 @pytest.fixture()
 def dataset_hamiltonian_pyg_params():
-    datapath = Path(nablaDFT.__path__[0]) / ".." / "tests/data"
+    datapath = Path(nablaDFT.__path__[0]) / "../tests/data"
     dataset_name = "test_hamiltonian_database"
     params = {
         "datapath": str(datapath),
@@ -77,7 +77,7 @@ def dataset_hamiltonian_torch_params():
 
 @pytest.fixture()
 def dataset_spk_params():
-    datapath = Path(nablaDFT.__path__[0]) / ".." / "tests/data/raw"
+    datapath = Path(nablaDFT.__path__[0]) / "../tests/data/raw"
     dataset_name = "test_database"
     params = {
         "root": str(datapath),
@@ -117,7 +117,7 @@ def dataset_spk_params_predict(dataset_spk_params_test):
 def dataset_lightning_params():
     train_size = 0.9
     val_size = 0.1
-    datapath = Path(nablaDFT.__path__[0]) / ".." / "tests/data"
+    datapath = Path(nablaDFT.__path__[0]) / "../tests/data"
     dataset_name = "test_database"
     params = {
         "root": str(datapath),
