@@ -113,7 +113,7 @@ class DimeNetPlusPlusPotential(nn.Module):
 class DimeNetPlusPlusLightning(pl.LightningModule):
     def __init__(
         self,
-        net: nn.Module,
+        model: nn.Module,
         loss,
         metric,
         energy_loss_coef: float,
@@ -128,7 +128,7 @@ class DimeNetPlusPlusLightning(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters(logger=True, ignore=["net", "loss"])
 
-        self.net = net
+        self.model = model
         self.scheduler_args = scheduler_args
         self.monitor_loss = monitor_loss
         self.loss = loss
@@ -137,7 +137,7 @@ class DimeNetPlusPlusLightning(pl.LightningModule):
         self.loss_forces_coef = forces_loss_coef
 
     def forward(self, data: Data):
-        return self.net(data)
+        return self.model(data)
 
     def step(
         self, batch, calculate_metrics: bool = False

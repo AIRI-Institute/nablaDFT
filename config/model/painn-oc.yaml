@@ -1,7 +1,7 @@
 _target_: nablaDFT.painn_pyg.PaiNNLightning
 
 model_name: "PAINN-OC"
-net:
+model:
   _target_: nablaDFT.painn_pyg.PaiNN
   hidden_channels: 128
   num_layers: 6

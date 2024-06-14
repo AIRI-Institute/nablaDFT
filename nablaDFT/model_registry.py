@@ -4,6 +4,7 @@ import json
 from urllib import request as request
 import logging
 
+import yaml
 import hydra
 from omegaconf import DictConfig
 from tqdm import tqdm
