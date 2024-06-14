@@ -51,13 +51,21 @@ def dataset_hamiltonian_pyg_params():
 
 @pytest.fixture()
 def dataset_hamiltonian_db_params():
-    db_path = Path(nablaDFT.__path__[0]) / ".." / "tests/data/raw/test_hamiltonian_database.db"
+    db_path = (
+        Path(nablaDFT.__path__[0])
+        / ".."
+        / "tests/data/raw/test_hamiltonian_database.db"
+    )
     return str(db_path)
 
 
 @pytest.fixture()
 def dataset_hamiltonian_torch_params():
-    db_path = Path(nablaDFT.__path__[0]) / ".." / "tests/data/raw/test_hamiltonian_database.db"
+    db_path = (
+        Path(nablaDFT.__path__[0])
+        / ".."
+        / "tests/data/raw/test_hamiltonian_database.db"
+    )
     params = {
         "filepath": str(db_path),
         "max_batch_orbitals": 1200,

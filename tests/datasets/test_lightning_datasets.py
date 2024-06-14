@@ -11,9 +11,16 @@ from .assertions import assert_shapes_hamiltonian
 def test_lightning_energy_datamodule_fit_dataloader(dataset_lightning_params):
     dataset = PyGNablaDFTDataModule(**dataset_lightning_params)
     dataset.setup("fit")
-    dataloader_train, dataloader_val = dataset.train_dataloader(), dataset.val_dataloader()
-    assert len(dataloader_train) == ceil(len(dataset.dataset_train) / dataset.dataloader_kwargs["batch_size"])
-    assert len(dataloader_val) == ceil(len(dataset.dataset_val) / dataset.dataloader_kwargs["batch_size"])
+    dataloader_train, dataloader_val = (
+        dataset.train_dataloader(),
+        dataset.val_dataloader(),
+    )
+    assert len(dataloader_train) == ceil(
+        len(dataset.dataset_train) / dataset.dataloader_kwargs["batch_size"]
+    )
+    assert len(dataloader_val) == ceil(
+        len(dataset.dataset_val) / dataset.dataloader_kwargs["batch_size"]
+    )
     train_batch = next(iter(dataloader_train))
     val_batch = next(iter(dataloader_train))
     for batch in [train_batch, val_batch]:
@@ -46,10 +53,15 @@ def test_lightning_energy_datamodule_predict_dataloader(dataset_lightning_params
 
 
 @pytest.mark.dataset
-def test_lightning_hamiltonian_datamodule_fit_dataloader(dataset_hamiltonian_lightning_params):
+def test_lightning_hamiltonian_datamodule_fit_dataloader(
+    dataset_hamiltonian_lightning_params,
+):
     dataset = PyGHamiltonianDataModule(**dataset_hamiltonian_lightning_params)
     dataset.setup("fit")
-    dataloader_train, dataloader_val = dataset.train_dataloader(), dataset.val_dataloader()
+    dataloader_train, dataloader_val = (
+        dataset.train_dataloader(),
+        dataset.val_dataloader(),
+    )
     train_batch = next(iter(dataloader_train))
     val_batch = next(iter(dataloader_train))
     for batch in [train_batch, val_batch]:
@@ -57,7 +69,9 @@ def test_lightning_hamiltonian_datamodule_fit_dataloader(dataset_hamiltonian_lig
 
 
 @pytest.mark.dataset
-def test_lightning_hamiltonian_datamodule_test_dataloader(dataset_hamiltonian_lightning_params):
+def test_lightning_hamiltonian_datamodule_test_dataloader(
+    dataset_hamiltonian_lightning_params,
+):
     dataset = PyGHamiltonianDataModule(**dataset_hamiltonian_lightning_params)
     dataset.setup("test")
     dataloader = dataset.test_dataloader()
@@ -66,7 +80,9 @@ def test_lightning_hamiltonian_datamodule_test_dataloader(dataset_hamiltonian_li
 
 
 @pytest.mark.dataset
-def test_lightning_hamiltonian_datamodule_predict_dataloader(dataset_hamiltonian_lightning_params):
+def test_lightning_hamiltonian_datamodule_predict_dataloader(
+    dataset_hamiltonian_lightning_params,
+):
     dataset = PyGHamiltonianDataModule(**dataset_hamiltonian_lightning_params)
     dataset.setup("predict")
     dataloader = dataset.predict_dataloader()
