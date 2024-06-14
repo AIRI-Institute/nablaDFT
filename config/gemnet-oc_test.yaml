@@ -7,8 +7,6 @@ job_type: test
 pretrained: True # if True downloads checkpoint trained on the largest split
 ckpt_path: null # path to checkpoint for training resume or test run
 
-cutoff: 12.0
-
 # Datamodule parameters
 root: ./datasets/nablaDFT/${.job_type}
 batch_size: 32

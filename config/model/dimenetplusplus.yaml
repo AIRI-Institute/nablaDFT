@@ -16,7 +16,7 @@ model:
     dimenet_num_before_skip: 1
     dimenet_num_after_skip: 2
     dimenet_num_output_layers: 3
-    cutoff: ${cutoff}
+    cutoff: 5.0
 
     scaler:
         scale_: 0.870582896669776

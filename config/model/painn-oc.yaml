@@ -6,7 +6,7 @@ model:
   hidden_channels: 128
   num_layers: 6
   num_rbf: 100
-  cutoff: ${cutoff}
+  cutoff: 5.0
   max_neighbors: 100
   rbf: 
       name: 'gaussian'
