@@ -38,7 +38,7 @@ def test_energy_dataset_availability(tmp_path, split):
         ("dataset_test_structures", 5274320896),
         ("dataset_test_scaffolds", 5172527104),
         ("dataset_test_conformations_full", 3732295680),
-        ("dataset_train_medium_trajectories", 6522843136),
+        ("dataset_train_medium_trajectories", 6523641856),
         ("dataset_trajectories_additional", 6297280512),
     ],
 )
