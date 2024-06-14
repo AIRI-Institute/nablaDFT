@@ -27,9 +27,17 @@ class ModelRegistry:
         """Returns URL for given pretrained model name.
 
         Args:
-            model_name (str): split name. Available splits can be listed with :meth:nablaDFT.registry.ModelRegistry.list_models
+            model_name (str): pretrained model name. Available models can be listed with :meth:nablaDFT.registry.ModelRegistry.list_models
         """
         return self.model_ckpt[model_name]
+
+    def get_pretrained_model_etag(self, model_name: str) -> str:
+        """Returns reference ETag for given pretrained model name.
+
+        Args:
+            model_name (str): pretrained model name. Available models can be listed with :meth:nablaDFT.registry.ModelRegistry.list_models
+        """
+        raise NotImplementedError
 
     def list_models(self) -> List[str]:
         """Returns all available pretrained on nablaDFT model checkpoints."""

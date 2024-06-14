@@ -1,6 +1,5 @@
 """Module describes PyTorch Geometric interfaces for nablaDFT datasets"""
 
-# TODO: add file validation for downloaded dataset
 import os
 import logging
 from typing import List, Callable
@@ -12,9 +11,8 @@ import torch
 from ase.db import connect
 from torch_geometric.data import InMemoryDataset, Data, Dataset
 
-import nablaDFT
 from .hamiltonian_dataset import HamiltonianDatabase
-from nablaDFT.utils import tqdm_download_hook, get_file_size
+from nablaDFT.utils import tqdm_download_hook, get_file_size, file_validation
 from nablaDFT.dataset.registry import dataset_registry
 
 logger = logging.getLogger(__name__)
@@ -106,6 +104,8 @@ class PyGNablaDFT(InMemoryDataset):
             request.urlretrieve(
                 url, self.raw_paths[0], reporthook=tqdm_download_hook(t)
             )
+        dataset_etag = dataset_registry.get_dataset_etag("energy", self.dataset_name)
+        file_validation(self.raw_paths[0], dataset_etag)
 
     def process(self) -> None:
         db = connect(self.raw_paths[0])
@@ -244,6 +244,8 @@ class PyGHamiltonianNablaDFT(Dataset):
             request.urlretrieve(
                 url, self.raw_paths[0], reporthook=tqdm_download_hook(t)
             )
+        dataset_etag = dataset_registry.get_dataset_etag("hamiltonian", self.dataset_name)
+        file_validation(self.raw_paths[0], dataset_etag)
 
     def _get_max_orbitals(self, datapath, dataset_name):
         db_path = os.path.join(datapath, "raw/" + dataset_name + self.db_suffix)
