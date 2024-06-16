@@ -1060,18 +1060,18 @@ class eSCNLightning(pl.LightningModule):
         loss_coefs,
     ) -> None:
         super(eSCNLightning, self).__init__()
-        self.model = net
+        self.net = net
         self.save_hyperparameters(logger=True, ignore=["net"])
 
     def forward(self, data: Data):
-        energy, forces = self.model(data)
+        energy, forces = self.net(data)
         return energy, forces
 
     def step(self, batch, calculate_metrics: bool = False):
         bsz = batch.batch.max().detach().item() + 1  # get batch size
         y = batch.y
         # make dense batch from PyG batch
-        energy_out, forces_out = self.model(batch)
+        energy_out, forces_out = self.net(batch)
         forces = batch.forces
         preds = {"energy": energy_out, "forces": forces_out}
         target = {"energy": y, "forces": forces}
