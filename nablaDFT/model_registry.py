@@ -62,6 +62,8 @@ class ModelRegistry:
         """Instantiates model and restores model's state from checkpoint.
 
         Downloads model checkpoint if necessary.
+        .. note::
+            Not supported for SchNorb and PhiSNet models.
 
         Args:
             model_type (str): model framework, must be one of ["torch", "lightning"]
