@@ -24,4 +24,3 @@ def test_model_checkpoints(tmp_path, checkpoint_name):
     url = model_registry.get_pretrained_model_url(checkpoint_name)
     request.urlretrieve(url, save_path)
     assert file_validation(save_path, model_registry.get_pretrained_model_etag(checkpoint_name))
-    
