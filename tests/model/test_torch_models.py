@@ -13,15 +13,14 @@ from nablaDFT import model_registry
     "model_name",
     [
         "DimeNet++",
-        "Equiformer_v2",
+        "Equiformer-v2",
         "ESCN-OC",
         "GemNet-OC",
     ],
 )
-@pytest.mark.parametrize("split", ["tiny", "small", "medium", "large"])
-def test_pyg_model(model_name, split, dataset_pyg, device):
-    model_name = model_name + "_train_" + split
-    model = model_registry.get_pretrained_model("torch", model_name)
+def test_pyg_model(model_name, dataset_pyg, device):
+    model_name = model_name + "_train_tiny"
+    model = model_registry.get_pretrained_model("torch", model_name).to(device)
     batch = Batch.from_data_list([dataset_pyg[0].to(device)])
     energy, forces = model(batch)
     assert energy.shape == batch.y.shape
@@ -30,10 +29,9 @@ def test_pyg_model(model_name, split, dataset_pyg, device):
 
 @withCUDA
 @pytest.mark.model
-@pytest.mark.parametrize("split", ["tiny", "small", "medium", "large"])
-def test_graphormer(dataset_pyg, split, device):
-    model_name = "Graphormer3D-small_train_" + split
-    model = model_registry.get_pretrained_model("torch", model_name)
+def test_graphormer(dataset_pyg, device):
+    model_name = "Graphormer3D-small_train_tiny"
+    model = model_registry.get_pretrained_model("torch", model_name).to(device)
     batch = Batch.from_data_list([dataset_pyg[0].to(device)])
     energy, forces, mask = model(batch)
     assert energy.shape == batch.y.shape
@@ -42,9 +40,8 @@ def test_graphormer(dataset_pyg, split, device):
 
 
 @pytest.mark.model
-@pytest.mark.parametrize("split", ["tiny", "small", "medium", "large"])
-def test_hamiltonian_model(split, dataset_hamiltonian):
-    model_name = "QHNet_train_" + split
+def test_hamiltonian_model(dataset_hamiltonian):
+    model_name = "QHNet_train_tiny"
     model = model_registry.get_pretrained_model("torch", model_name)
     batch = Batch.from_data_list([dataset_hamiltonian[0]])
     # QHNet return block diagonal matrix

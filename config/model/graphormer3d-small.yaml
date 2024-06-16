@@ -1,6 +1,6 @@
 _target_: nablaDFT.graphormer.Graphormer3DLightning
 
-model_name: "Graphormer3D-half"
+model_name: "Graphormer3D-small"
 net:
   _target_: nablaDFT.graphormer.Graphormer3D
   blocks: 4

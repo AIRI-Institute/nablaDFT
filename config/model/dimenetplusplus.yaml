@@ -1,6 +1,6 @@
 _target_: nablaDFT.dimenetplusplus.DimeNetPlusPlusLightning
 
-model_name: "DimeNetPlusPlus"
+model_name: "DimeNet++"
 net:
     _target_: nablaDFT.dimenetplusplus.DimeNetPlusPlusPotential
     node_latent_dim: 50

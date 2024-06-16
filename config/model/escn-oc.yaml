@@ -1,6 +1,6 @@
 _target_: nablaDFT.escn.eSCNLightning
 
-model_name: "eSCN-OC"
+model_name: "ESCN-OC"
 net:
   _target_: nablaDFT.escn.eSCN
   num_targets: 1

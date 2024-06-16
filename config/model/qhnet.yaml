@@ -1,7 +1,7 @@
 _target_: nablaDFT.qhnet.QHNetLightning
 
 model_name: "QHNet"
-model:
+net:
   _target_: nablaDFT.qhnet.QHNet
   _convert_: partial
   sh_lmax: 4

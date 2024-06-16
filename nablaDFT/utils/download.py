@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Optional
 import hashlib
 from urllib import request as request
@@ -62,7 +63,9 @@ def tqdm_download_hook(t):
     return update_to
 
 
-def download_file(url: str, savepath: str, true_hash: Optional[str], desc: str = None):
+def download_file(url: str, savepath: Path, true_hash: Optional[str], desc: str = None):
+    if not savepath.parent.exists():
+        savepath.parent.mkdir(parents=True, exist_ok=True)
     file_size = get_file_size(url)
     with tqdm(
             unit="B",

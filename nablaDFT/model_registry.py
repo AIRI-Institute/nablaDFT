@@ -25,10 +25,7 @@ class ModelRegistry:
         self._model_checkpoints = content['checkpoints']
         self._model_checkpoints_etag = content['etag']
 
-        self._pretrained_model_cfg = {
-            "lightning": {},
-            "torch": {}
-        }
+        self._pretrained_model_cfg = {}
         cfg_paths = (Path(nablaDFT.__path__[0]) / "../config/model/").glob("*")
         for cfg_path in cfg_paths:
             cfg = OmegaConf.load(cfg_path)
@@ -71,7 +68,7 @@ class ModelRegistry:
         """
         backbone_name = model_name.split("_")[0]
         model_cfg = self._pretrained_model_cfg[backbone_name]
-        ckpt_path = self.default_ckpt_dir / model_cfg.model_name / backbone_name
+        ckpt_path = self.default_ckpt_dir / model_cfg.model_name / f"{model_name}.ckpt"
         if not ckpt_path.exists():
             download_file(
                 self.get_pretrained_model_url(model_name),

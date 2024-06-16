@@ -1,6 +1,6 @@
 _target_: nablaDFT.equiformer_v2.EquiformerV2_OC20_Lightning
 
-model_name: "EquiformerV2_OC20"
+model_name: "Equiformer-v2"
 net:
   _target_: nablaDFT.equiformer_v2.EquiformerV2_OC20
   otf_graph: true
