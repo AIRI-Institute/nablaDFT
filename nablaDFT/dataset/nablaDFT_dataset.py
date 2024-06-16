@@ -21,7 +21,7 @@ from schnetpack.data import (
 
 import nablaDFT
 from nablaDFT.dataset.registry import dataset_registry
-from nablaDFT.utils import tqdm_download_hook, get_file_size, file_validation
+from nablaDFT.utils import download_file
 from .pyg_datasets import PyGNablaDFT, PyGHamiltonianNablaDFT
 
 
@@ -196,12 +196,8 @@ class ASENablaDFT(AtomsDataModule):
 
     def _download(self):
         url = dataset_registry.get_dataset_url("energy", self.dataset_name)
-        file_size = get_file_size(url)
-        with tqdm(unit="B", unit_scale=True, unit_divisor=1024, miniters=1, total=file_size,
-                  desc=f"Downloading split: {self.dataset_name}") as t:
-            request.urlretrieve(url, self.datapath, reporthook=tqdm_download_hook(t))
         dataset_etag = dataset_registry.get_dataset_etag("energy", self.dataset_name)
-        file_validation(self.datapath, dataset_etag)
+        download_file(url, self.datapath, dataset_etag, desc=f"Downloading split: {self.dataset_name}")
 
     def _check_metadata(self, conn):
         if not conn.metadata:
