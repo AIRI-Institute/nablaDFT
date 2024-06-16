@@ -15,7 +15,7 @@ from nablaDFT.utils import download_file
 
 
 class ModelRegistry:
-    """Source of pretrained model checkpoint links."""
+    """Source of pretrained model."""
 
     default_ckpt_dir = Path("./checkpoints")
 
