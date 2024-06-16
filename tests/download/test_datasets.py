@@ -3,7 +3,7 @@ import pytest
 from urllib import request as request
 
 from nablaDFT.dataset import dataset_registry
-from nablaDFT.utils import file_validation, get_file_size
+from nablaDFT.utils.download import file_validation, get_file_size
 
 
 @pytest.mark.download

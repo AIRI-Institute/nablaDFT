@@ -2,31 +2,26 @@ import pytest
 import torch
 from torch_geometric.data import Batch
 
-from tests.configs import read_model_cfg
 from tests.decorators import withCUDA
 
 from nablaDFT import model_registry
 
 
-def models_list():
-    ckpts_list = model_registry.list_models()
-
 @withCUDA
 @pytest.mark.model
 @pytest.mark.parametrize(
-    "model_cfg_name",
+    "model_name",
     [
-        "dimenetplusplus",
-        "equiformer_v2_oc20",
-        "escn-oc",
-        "gemnet-oc",
-        "painn-oc",
+        "DimeNet++",
+        "Equiformer_v2",
+        "ESCN-OC",
+        "GemNet-OC",
     ],
 )
-def test_pyg_model(model_cfg_name, dataset_pyg, device):
-    model_cfg = read_model_cfg(model_cfg_name)
-    torch_model_cfg = model_cfg["model"]
-    model = instantiate(torch_model_cfg).to(device)
+@pytest.mark.parametrize("split", ["tiny", "small", "medium", "large"])
+def test_pyg_model(model_name, split, dataset_pyg, device):
+    model_name = model_name + "_train_" + split
+    model = model_registry.get_pretrained_model("torch", model_name)
     batch = Batch.from_data_list([dataset_pyg[0].to(device)])
     energy, forces = model(batch)
     assert energy.shape == batch.y.shape
@@ -35,10 +30,10 @@ def test_pyg_model(model_cfg_name, dataset_pyg, device):
 
 @withCUDA
 @pytest.mark.model
-def test_graphormer(dataset_pyg, device):
-    model_cfg = read_model_cfg("graphormer3d-small")
-    torch_model_cfg = model_cfg["model"]
-    model = instantiate(torch_model_cfg).to(device)
+@pytest.mark.parametrize("split", ["tiny", "small", "medium", "large"])
+def test_graphormer(dataset_pyg, split, device):
+    model_name = "Graphormer3D-small_train_" + split
+    model = model_registry.get_pretrained_model("torch", model_name)
     batch = Batch.from_data_list([dataset_pyg[0].to(device)])
     energy, forces, mask = model(batch)
     assert energy.shape == batch.y.shape
@@ -47,11 +42,10 @@ def test_graphormer(dataset_pyg, device):
 
 
 @pytest.mark.model
-@pytest.mark.parametrize("model_cfg_name", ["qhnet"])
-def test_hamiltonian_model(model_cfg_name, dataset_hamiltonian):
-    model_cfg = read_model_cfg(model_cfg_name)
-    torch_model_cfg = model_cfg["model"]
-    model = instantiate(torch_model_cfg)
+@pytest.mark.parametrize("split", ["tiny", "small", "medium", "large"])
+def test_hamiltonian_model(split, dataset_hamiltonian):
+    model_name = "QHNet_train_" + split
+    model = model_registry.get_pretrained_model("torch", model_name)
     batch = Batch.from_data_list([dataset_hamiltonian[0]])
     # QHNet return block diagonal matrix
     output = model(batch)
