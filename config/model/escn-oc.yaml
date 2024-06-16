@@ -1,7 +1,7 @@
 _target_: nablaDFT.escn.eSCNLightning
 
 model_name: "eSCN-OC"
-model:
+net:
   _target_: nablaDFT.escn.eSCN
   num_targets: 1
   max_num_elements: 65

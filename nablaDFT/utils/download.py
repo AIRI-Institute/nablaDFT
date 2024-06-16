@@ -1,5 +1,8 @@
+from typing import Optional
 import hashlib
 from urllib import request as request
+
+from tqdm import tqdm
 
 
 def get_file_etag_checksum(filename: int, chunk_size=8 * 1024 * 1024):
@@ -57,3 +60,20 @@ def tqdm_download_hook(t):
         return displayed
 
     return update_to
+
+
+def download_file(url: str, savepath: str, true_hash: Optional[str], desc: str = None):
+    file_size = get_file_size(url)
+    with tqdm(
+            unit="B",
+            unit_scale=True,
+            unit_divisor=1024,
+            miniters=1,
+            total=file_size,
+            desc=desc,
+    ) as t:
+        request.urlretrieve(
+            url, savepath, reporthook=tqdm_download_hook(t)
+        )
+    if true_hash:
+        file_validation(savepath, true_hash)

@@ -3,7 +3,6 @@
 import os
 import logging
 from typing import List, Callable
-from urllib import request as request
 
 from tqdm import tqdm
 import numpy as np
@@ -12,7 +11,7 @@ from ase.db import connect
 from torch_geometric.data import InMemoryDataset, Data, Dataset
 
 from .hamiltonian_dataset import HamiltonianDatabase
-from nablaDFT.utils import tqdm_download_hook, get_file_size, file_validation
+from nablaDFT.utils import download_file
 from nablaDFT.dataset.registry import dataset_registry
 
 logger = logging.getLogger(__name__)
@@ -92,20 +91,8 @@ class PyGNablaDFT(InMemoryDataset):
 
     def download(self) -> None:
         url = dataset_registry.get_dataset_url("energy", self.dataset_name)
-        file_size = get_file_size(url)
-        with tqdm(
-            unit="B",
-            unit_scale=True,
-            unit_divisor=1024,
-            miniters=1,
-            total=file_size,
-            desc=f"Downloading split: {self.dataset_name}",
-        ) as t:
-            request.urlretrieve(
-                url, self.raw_paths[0], reporthook=tqdm_download_hook(t)
-            )
         dataset_etag = dataset_registry.get_dataset_etag("energy", self.dataset_name)
-        file_validation(self.raw_paths[0], dataset_etag)
+        download_file(url, self.raw_paths[0], dataset_etag, desc=f"Downloading split: {self.dataset_name}")
 
     def process(self) -> None:
         db = connect(self.raw_paths[0])
@@ -232,20 +219,8 @@ class PyGHamiltonianNablaDFT(Dataset):
 
     def download(self) -> None:
         url = dataset_registry.get_dataset_url("hamiltonian", self.dataset_name)
-        file_size = get_file_size(url)
-        with tqdm(
-            unit="B",
-            unit_scale=True,
-            unit_divisor=1024,
-            miniters=1,
-            total=file_size,
-            desc=f"Downloading split: {self.dataset_name}",
-        ) as t:
-            request.urlretrieve(
-                url, self.raw_paths[0], reporthook=tqdm_download_hook(t)
-            )
         dataset_etag = dataset_registry.get_dataset_etag("hamiltonian", self.dataset_name)
-        file_validation(self.raw_paths[0], dataset_etag)
+        download_file(url, self.raw_paths[0], dataset_etag, desc=f"Downloading split: {self.dataset_name}")
 
     def _get_max_orbitals(self, datapath, dataset_name):
         db_path = os.path.join(datapath, "raw/" + dataset_name + self.db_suffix)

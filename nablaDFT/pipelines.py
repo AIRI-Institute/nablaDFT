@@ -3,7 +3,6 @@ from typing import List
 
 import hydra
 from omegaconf import DictConfig
-import torch
 from pytorch_lightning.loggers import Logger
 from pytorch_lightning import (
     LightningDataModule,
@@ -13,9 +12,9 @@ from pytorch_lightning import (
     seed_everything,
 )
 
-from nablaDFT.utils import close_loggers, load_model, set_additional_params
-from nablaDFT import download_pretrained_model
+from nablaDFT.utils import close_loggers, write_predictions_to_db, set_additional_params
 from nablaDFT.optimization import BatchwiseOptimizeTask
+from nablaDFT import model_registry
 
 
 JOB_TYPES = ["train", "test", "predict", "optimize"]
@@ -34,14 +33,12 @@ def predict(
     trainer: Trainer,
     model: LightningModule,
     datamodule: LightningDataModule,
-    ckpt_path: str,
     config: DictConfig,
 ):
     """Function for prediction loop execution.
     Saves model prediction to "predictions" directory.
 
     Args:
-        ckpt_path (str): path to model checkpoint.
         config (DictConfig): config for task. see r'config/' for examples.
     """
     trainer.logger = False  # need this to disable save_hyperparameters during predict,
@@ -49,29 +46,29 @@ def predict(
     pred_path = os.path.join(os.getcwd(), "predictions")
     os.makedirs(pred_path, exist_ok=True)
     predictions = trainer.predict(
-        model=model, datamodule=datamodule, ckpt_path=ckpt_path
+        model=model, datamodule=datamodule
     )
-    torch.save(predictions, f"{pred_path}/{config.name}_{config.dataset_name}.pt")
+    write_predictions_to_db()
 
 
-def optimize(config: DictConfig, ckpt_path: str):
+def optimize(config: DictConfig):
+    # TODO: refactor me
     """Function for batched molecules optimization.
     Uses model defined in config.
 
     Args:
-        ckpt_path (str): path to model checkpoint.
         config (DictConfig): config for task. see r'config/' for examples.
     """
+    raise NotImplementedError
     output_dir = config.get("output_dir")
     if not os.path.exists(output_dir):
         os.makedirs(output_dir, exist_ok=True)
     output_datapath = os.path.join(
         output_dir, f"{config.name}_{config.dataset_name}.db"
     )
-    # append to existing database not supported
+    # update existing database not supported
     if os.path.exists(output_datapath):
         os.remove(output_datapath)
-    model = load_model(config, ckpt_path)
     calculator = hydra.utils.instantiate(config.calculator, model)
     optimizer = hydra.utils.instantiate(config.optimizer, calculator)
     task = BatchwiseOptimizeTask(
@@ -102,11 +99,12 @@ def run(config: DictConfig):
         ckpt_path = None
     config = set_additional_params(config)
     # download checkpoint if pretrained=True
-    if config.get("pretrained"):
-        ckpt_path = download_pretrained_model(config)
     if job_type == "optimize":
-        return optimize(config, ckpt_path)
-    model: LightningModule = hydra.utils.instantiate(config.model)
+        return optimize(config)
+    if config.get("pretrained"):
+        model: LightningModule = model_registry.get_pretrained_model("lightning", config.pretrained)
+    else:
+        model: LightningModule = hydra.utils.instantiate(config.model)
     # Callbacks
     callbacks: List[Callback] = []
     for _, callback_cfg in config.callbacks.items():
@@ -126,7 +124,7 @@ def run(config: DictConfig):
     elif job_type == "test":
         trainer.test(model=model, datamodule=datamodule, ckpt_path=ckpt_path)
     elif job_type == "predict":
-        predict(trainer, model, datamodule, ckpt_path, config)
+        predict(trainer, model, datamodule, config)
     # Finalize
     close_loggers(
         logger=loggers,

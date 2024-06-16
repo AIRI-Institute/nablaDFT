@@ -351,7 +351,7 @@ class Graphormer3DLightning(pl.LightningModule):
     def __init__(
         self,
         model_name: str,
-        model: nn.Module,
+        net: nn.Module,
         optimizer: Optimizer,
         lr_scheduler: LRScheduler,
         loss,
@@ -362,14 +362,14 @@ class Graphormer3DLightning(pl.LightningModule):
     ) -> None:
         super(Graphormer3DLightning, self).__init__()
         self.save_hyperparameters(logger=True, ignore=["net", "loss"])
-        self.model = model
+        self.net = net
         self.loss = loss
 
         self.loss_energy_coef = energy_loss_coef
         self.loss_forces_coef = forces_loss_coef
 
     def forward(self, data):
-        energy_out, forces_out, mask_out = self.model(data)
+        energy_out, forces_out, mask_out = self.net(data)
         forces_out *= mask_out
         return energy_out, forces_out, mask_out
 

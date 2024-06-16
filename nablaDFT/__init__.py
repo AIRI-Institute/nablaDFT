@@ -9,4 +9,4 @@ from . import ase_model
 from . import painn_pyg
 
 from . import schedulers
-from .model_registry import model_registry, download_pretrained_model
+from .model_registry import model_registry

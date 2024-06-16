@@ -1,7 +1,7 @@
 _target_: nablaDFT.graphormer.Graphormer3DLightning
 
 model_name: "Graphormer3D-half"
-model:
+net:
   _target_: nablaDFT.graphormer.Graphormer3D
   blocks: 4
   layers: 6

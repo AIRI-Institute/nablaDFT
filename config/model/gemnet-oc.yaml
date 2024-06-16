@@ -1,7 +1,7 @@
 _target_: nablaDFT.gemnet_oc.GemNetOCLightning
 
 model_name: "GemNet-OC"
-model:
+net:
   _target_: nablaDFT.gemnet_oc.GemNetOC
   num_targets: 1
   num_spherical: 7
