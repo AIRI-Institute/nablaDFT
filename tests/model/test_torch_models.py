@@ -1,11 +1,15 @@
 import pytest
 import torch
 from torch_geometric.data import Batch
-from hydra.utils import instantiate
 
 from tests.configs import read_model_cfg
 from tests.decorators import withCUDA
 
+from nablaDFT import model_registry
+
+
+def models_list():
+    ckpts_list = model_registry.list_models()
 
 @withCUDA
 @pytest.mark.model
