@@ -1,0 +1,37 @@
+[tool.ruff]
+src = ["nablaDFT"]
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".ipynb_checkpoints",
+    ".ruff_cache",
+    ".venv",
+    ".vscode",
+    "build",
+    "dist",
+    "site-packages",
+    "venv",
+    "nablaDFT/phisnet"
+]
+extend-include = ["*.ipynb"]
+line-length = 120
+indent-width = 4
+
+[tool.ruff.lint]
+select = ["E"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["E402"]
+"**/{tests,docs,tools}/*" = ["E402"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+docstring-code-format = true
+docstring-code-line-length = 40
