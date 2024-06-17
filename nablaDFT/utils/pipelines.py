@@ -4,7 +4,7 @@ import os
 import random
 from copy import deepcopy
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 import numpy as np
 import pytorch_lightning as pl
@@ -81,9 +81,11 @@ def check_cfg_parameters(cfg: DictConfig):
 
 
 def write_predictions_to_db(input_db_path: Path, output_db_path: Path, predictions: List[torch.Tensor]):
+    if not output_db_path.parent.exists():
+        output_db_path.parent.mkdir(parents=True, exist_ok=True)
     if output_db_path.exists():
         output_db_path.unlink()
-    if isinstance(predictions[0], List):
+    if isinstance(predictions[0], Tuple):
         energy = torch.cat([x[0].detach() for x in predictions], dim=0)
         forces = torch.cat([x[1].detach() for x in predictions], dim=0)
     elif isinstance(predictions[0], Dict):
@@ -98,9 +100,9 @@ def write_predictions_to_db(input_db_path: Path, output_db_path: Path, predictio
                 row = in_db.get(idx)
                 natoms = row.natoms
                 data = row.data
-                if data:
-                    new_data = deepcopy(data)
-                new_data["energy_pred"] = [float(energy[idx - 1])]
-                new_data["forces_pred"] = forces[force_idx : (force_idx + natoms)]
-                out_db.write(row, data=new_data)
+                if not data:
+                    data = {}
+                data["energy_pred"] = [float(energy[idx - 1])]
+                data["forces_pred"] = forces[force_idx : (force_idx + natoms)]
+                out_db.write(row, data=data)
     logger.info(f"Write predictions to {output_db_path}")

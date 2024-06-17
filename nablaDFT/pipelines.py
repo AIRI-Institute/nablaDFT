@@ -21,23 +21,16 @@ from nablaDFT.utils import (
 )
 
 
-def predict(
-    trainer: Trainer,
-    model: LightningModule,
-    datamodule: LightningDataModule,
-    config: DictConfig,
-):
+def predict(trainer: Trainer, model: LightningModule, datamodule: LightningDataModule, model_name: str):
     """Function for prediction loop execution.
-    Saves model prediction to "predictions" directory.
 
-    Args:
-        config (DictConfig): config for task. see r'config/' for examples.
+    Saves model prediction to "predictions" directory.
     """
     trainer.logger = False  # need this to disable save_hyperparameters during predict,
     # otherwise OmegaConf DictConf can't be dumped to YAML
+    output_db_path = Path("./predictions") / f"{model_name}_{datamodule.dataset_name}.db"
+    input_db_path = Path(datamodule.root) / f"raw/{datamodule.dataset_name}.db"
     predictions = trainer.predict(model=model, datamodule=datamodule)
-    output_db_path = Path("./predictions") / f"{config.name}_{config.dataset_name}.db"
-    input_db_path = Path(config.root) / f"{config.dataset_name}.db"
     write_predictions_to_db(input_db_path, output_db_path, predictions)
 
 
@@ -108,7 +101,7 @@ def run(config: DictConfig):
     elif job_type == "test":
         trainer.test(model=model, datamodule=datamodule, ckpt_path=ckpt_path)
     elif job_type == "predict":
-        predict(trainer, model, datamodule, config)
+        predict(trainer, model, datamodule, config.model.model_name)
     # Finalize
     close_loggers(
         logger=loggers,

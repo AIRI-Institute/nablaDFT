@@ -2,6 +2,7 @@
 
 import logging
 import os
+from pathlib import Path
 from typing import Callable, List
 
 import numpy as np
@@ -92,7 +93,7 @@ class PyGNablaDFT(InMemoryDataset):
         dataset_etag = dataset_registry.get_dataset_etag("energy", self.dataset_name)
         download_file(
             url,
-            self.raw_paths[0],
+            Path(self.raw_paths[0]),
             dataset_etag,
             desc=f"Downloading split: {self.dataset_name}",
         )
@@ -228,7 +229,7 @@ class PyGHamiltonianNablaDFT(Dataset):
         dataset_etag = dataset_registry.get_dataset_etag("hamiltonian", self.dataset_name)
         download_file(
             url,
-            self.raw_paths[0],
+            Path(self.raw_paths[0]),
             dataset_etag,
             desc=f"Downloading split: {self.dataset_name}",
         )
