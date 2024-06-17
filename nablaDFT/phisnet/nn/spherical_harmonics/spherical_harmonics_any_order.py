@@ -1,8 +1,9 @@
 # coding: utf-8
 
 import math
-import torch
+
 import numpy as np
+import torch
 from scipy.special import binom
 
 

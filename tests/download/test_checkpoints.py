@@ -1,10 +1,9 @@
-import os
 import json
+import os
 from urllib import request as request
 
-import pytest
-
 import nablaDFT
+import pytest
 from nablaDFT import model_registry
 from nablaDFT.utils.download import file_validation
 

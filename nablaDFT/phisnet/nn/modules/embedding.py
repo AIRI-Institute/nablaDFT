@@ -1,12 +1,12 @@
-import math
+
 import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
+
 from .electron_configurations import *
 
 """
-Embedding layer which takes scalar nuclear charges Z and transforms 
+Embedding layer which takes scalar nuclear charges Z and transforms
 them to vectors of size num_features
 """
 
@@ -21,9 +21,7 @@ class Embedding(nn.Module):
             "element_embedding",
             nn.Parameter(torch.Tensor(self.Zmax, self.num_features)),
         )
-        self.config_linear = nn.Linear(
-            self.electron_config.size(1), self.num_features, bias=False
-        )
+        self.config_linear = nn.Linear(self.electron_config.size(1), self.num_features, bias=False)
         self.reset_parameters()
 
     def reset_parameters(self):
@@ -32,7 +30,5 @@ class Embedding(nn.Module):
 
     def forward(self, Z):
         Z = Z.unsqueeze(-1).repeat(*(1,) * len(Z.shape), self.num_features)
-        embedding = (
-            self.element_embedding + self.config_linear(self.electron_config)
-        ).repeat(Z.size(0), 1, 1)
+        embedding = (self.element_embedding + self.config_linear(self.electron_config)).repeat(Z.size(0), 1, 1)
         return torch.gather(embedding, -2, Z)

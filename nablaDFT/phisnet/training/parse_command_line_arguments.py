@@ -1,12 +1,13 @@
 # coding: utf-8
 
-import sys
 import argparse
+import sys
+
 import torch
 
 
 def str2bool(s):
-    """helper function used in order to support boolean command line arguments"""
+    """Helper function used in order to support boolean command line arguments"""
     if s.lower() in ("true", "t", "1"):
         return True
     elif s.lower() in ("false", "f", "0"):
@@ -34,9 +35,7 @@ def parse_command_line_arguments():
     )
 
     # arguments for neural network architecture hyperparameters
-    args_hyperparams = parser.add_argument_group(
-        "neural network architecture hyperparameters"
-    )
+    args_hyperparams = parser.add_argument_group("neural network architecture hyperparameters")
     args_hyperparams.add_argument(
         "--load_from",
         metavar="STR",
@@ -211,27 +210,13 @@ def parse_command_line_arguments():
 
     # arguments for training
     args_training = parser.add_argument_group("training hyperparameters")
-    args_training.add_argument(
-        "--max_steps", metavar="INT", type=int, help="maximum number of training steps"
-    )
-    args_training.add_argument(
-        "--datapath", metavar="STR", type=str, help="filepath to dataset"
-    )
-    args_training.add_argument(
-        "--dataset_name", metavar="STR", type=str, help="name of the dataset"
-    )
-    args_training.add_argument(
-        "--splits_file", metavar="STR", type=str, help="filepath to splitfile"
-    )
-    args_training.add_argument(
-        "--subset", metavar="STR", type=str, default="", help="filepath to subset file"
-    )
-    args_training.add_argument(
-        "--num_train", metavar="INT", type=int, help="size of training set"
-    )
-    args_training.add_argument(
-        "--num_valid", metavar="INT", type=int, help="size of validation set"
-    )
+    args_training.add_argument("--max_steps", metavar="INT", type=int, help="maximum number of training steps")
+    args_training.add_argument("--datapath", metavar="STR", type=str, help="filepath to dataset")
+    args_training.add_argument("--dataset_name", metavar="STR", type=str, help="name of the dataset")
+    args_training.add_argument("--splits_file", metavar="STR", type=str, help="filepath to splitfile")
+    args_training.add_argument("--subset", metavar="STR", type=str, default="", help="filepath to subset file")
+    args_training.add_argument("--num_train", metavar="INT", type=int, help="size of training set")
+    args_training.add_argument("--num_valid", metavar="INT", type=int, help="size of validation set")
     args_training.add_argument(
         "--train_batch_size",
         metavar="INT",

@@ -1,10 +1,10 @@
 from pathlib import Path
 
-import pytest
-
-
 import nablaDFT
-from nablaDFT.dataset import PyGNablaDFT, PyGHamiltonianNablaDFT
+import pytest
+from nablaDFT.dataset import PyGHamiltonianNablaDFT, PyGNablaDFT
+from schnetpack.data import ASEAtomsData
+from schnetpack.transform import ASENeighborList, CastTo32
 
 
 @pytest.fixture()
@@ -18,6 +18,17 @@ def dataset_pyg():
         "pre_transform": None,
     }
     dataset = PyGNablaDFT(**params)
+    return dataset
+
+
+@pytest.fixture()
+def dataset_spk():
+    datapath = Path(nablaDFT.__path__[0]) / "../tests/data/raw/test_database.db"
+    transforms = [
+        ASENeighborList(cutoff=5.0),
+        CastTo32(),
+    ]
+    dataset = ASEAtomsData(datapath, transforms=transforms)
     return dataset
 
 

@@ -9,10 +9,8 @@ import torch
 _sqrt2 = np.sqrt(2)
 
 
-def generate_id(
-    size=8, chars=string.ascii_uppercase + string.ascii_lowercase + string.digits
-):
-    """used for creating a "unique" id for a run (almost impossible to generate the same twice)"""
+def generate_id(size=8, chars=string.ascii_uppercase + string.ascii_lowercase + string.digits):
+    """Used for creating a "unique" id for a run (almost impossible to generate the same twice)"""
     return "".join(random.SystemRandom().choice(chars) for _ in range(size))
 
 
@@ -32,9 +30,7 @@ def compute_error_dict(predictions, data, loss_weights, max_errors, batch_size=1
                 "core_hamiltonian",
                 "overlap_matrix",
             ]:
-                mse *= (
-                    predictions[key].numel() / mask.sum()
-                )  # total number / nonzero elements
+                mse *= predictions[key].numel() / mask.sum()  # total number / nonzero elements
                 mae *= predictions[key].numel() / mask.sum()
 
             if mae > max_errors[key]:
@@ -50,8 +46,7 @@ def compute_error_dict(predictions, data, loss_weights, max_errors, batch_size=1
 
 
 def empty_error_dict(loss_weights, fill_value=0.0):
-    """returns an error dictionary filled with zeros"""
-
+    """Returns an error dictionary filled with zeros"""
     error_dict = {"loss": fill_value}
 
     for key in loss_weights.keys():

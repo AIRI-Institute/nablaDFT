@@ -25,7 +25,7 @@ net:
 
 
 monitor_loss: "val/loss"
-lr_scheduler: 
+lr_scheduler:
     _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
     _partial_: true
 
@@ -33,7 +33,7 @@ scheduler_args:
     factor: 0.8
     patience: 10
     min_lr: 1e-06
-    
+
 optimizer:
     _target_: torch.optim.Adam
     _partial_: true
@@ -52,4 +52,3 @@ metric:
             _target_: torchmetrics.MeanAbsoluteError
 energy_loss_coef: 1.
 forces_loss_coef: 1.
-

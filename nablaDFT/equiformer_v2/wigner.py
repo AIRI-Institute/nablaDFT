@@ -13,13 +13,9 @@ _Jd = torch.load(os.path.join(os.path.dirname(__file__), "Jd.pt"))
 #
 # In 0.5.0, e3nn shifted to torch.matrix_exp which is significantly slower:
 # https://github.com/e3nn/e3nn/blob/0.5.0/e3nn/o3/_wigner.py#L92
-def wigner_D(
-    lv: int, alpha: torch.Tensor, beta: torch.Tensor, gamma: torch.Tensor
-) -> torch.Tensor:
+def wigner_D(lv: int, alpha: torch.Tensor, beta: torch.Tensor, gamma: torch.Tensor) -> torch.Tensor:
     if not lv < len(_Jd):
-        raise NotImplementedError(
-            f"wigner D maximum l implemented is {len(_Jd) - 1}, send us an email to ask for more"
-        )
+        raise NotImplementedError(f"wigner D maximum l implemented is {len(_Jd) - 1}, send us an email to ask for more")
 
     alpha, beta, gamma = torch.broadcast_tensors(alpha, beta, gamma)
     J = _Jd[lv].to(dtype=alpha.dtype, device=alpha.device)

@@ -1,9 +1,7 @@
 import itertools
-import json
 import logging
 import math
 from contextlib import contextmanager
-from pathlib import Path
 from typing import Callable, Dict, Optional, TypedDict, Union
 
 import numpy as np
@@ -14,8 +12,7 @@ from torch_geometric.nn.models.schnet import GaussianSmearing
 
 
 class PolynomialEnvelope(torch.nn.Module):
-    """
-    Polynomial envelope function that ensures a smooth cutoff.
+    """Polynomial envelope function that ensures a smooth cutoff.
 
     Parameters
     ----------
@@ -32,18 +29,12 @@ class PolynomialEnvelope(torch.nn.Module):
         self.c: float = -self.p * (self.p + 1) / 2
 
     def forward(self, d_scaled: torch.Tensor) -> torch.Tensor:
-        env_val = (
-            1
-            + self.a * d_scaled**self.p
-            + self.b * d_scaled ** (self.p + 1)
-            + self.c * d_scaled ** (self.p + 2)
-        )
+        env_val = 1 + self.a * d_scaled**self.p + self.b * d_scaled ** (self.p + 1) + self.c * d_scaled ** (self.p + 2)
         return torch.where(d_scaled < 1, env_val, torch.zeros_like(d_scaled))
 
 
 class ExponentialEnvelope(torch.nn.Module):
-    """
-    Exponential envelope function that ensures a smooth cutoff,
+    """Exponential envelope function that ensures a smooth cutoff,
     as proposed in Unke, Chmiela, Gastegger, Schütt, Sauceda, Müller 2021.
     SpookyNet: Learning Force Fields with Electronic Degrees of Freedom
     and Nonlocal Effects
@@ -58,8 +49,7 @@ class ExponentialEnvelope(torch.nn.Module):
 
 
 class SphericalBesselBasis(torch.nn.Module):
-    """
-    1D spherical Bessel basis
+    """1D spherical Bessel basis
 
     Parameters
     ----------
@@ -86,15 +76,12 @@ class SphericalBesselBasis(torch.nn.Module):
 
     def forward(self, d_scaled: torch.Tensor) -> torch.Tensor:
         return (
-            self.norm_const
-            / d_scaled[:, None]
-            * torch.sin(self.frequencies * d_scaled[:, None])
+            self.norm_const / d_scaled[:, None] * torch.sin(self.frequencies * d_scaled[:, None])
         )  # (num_edges, num_radial)
 
 
 class BernsteinBasis(torch.nn.Module):
-    """
-    Bernstein polynomial basis,
+    """Bernstein polynomial basis,
     as proposed in Unke, Chmiela, Gastegger, Schütt, Sauceda, Müller 2021.
     SpookyNet: Learning Force Fields with Electronic Degrees of Freedom
     and Nonlocal Effects
@@ -140,9 +127,7 @@ class BernsteinBasis(torch.nn.Module):
 
 
 class RadialBasis(torch.nn.Module):
-    """
-
-    Parameters
+    """Parameters
     ----------
     num_radial: int
         Controls maximum frequency.
@@ -185,13 +170,9 @@ class RadialBasis(torch.nn.Module):
 
         # RBFs get distances scaled to be in [0, 1]
         if rbf_name == "gaussian":
-            self.rbf = GaussianSmearing(
-                start=0, stop=1, num_gaussians=num_radial, **rbf_hparams
-            )
+            self.rbf = GaussianSmearing(start=0, stop=1, num_gaussians=num_radial, **rbf_hparams)
         elif rbf_name == "spherical_bessel":
-            self.rbf = SphericalBesselBasis(
-                num_radial=num_radial, cutoff=cutoff, **rbf_hparams
-            )
+            self.rbf = SphericalBesselBasis(num_radial=num_radial, cutoff=cutoff, **rbf_hparams)
         elif rbf_name == "bernstein":
             self.rbf = BernsteinBasis(num_radial=num_radial, **rbf_hparams)
         else:
@@ -215,8 +196,7 @@ class ScaledSiLU(torch.nn.Module):
 
 
 class AtomEmbedding(torch.nn.Module):
-    """
-    Initial atom embeddings based on the atom type
+    """Initial atom embeddings based on the atom type
 
     Parameters
     ----------
@@ -233,8 +213,7 @@ class AtomEmbedding(torch.nn.Module):
         torch.nn.init.uniform_(self.embeddings.weight, a=-np.sqrt(3), b=np.sqrt(3))
 
     def forward(self, Z):
-        """
-        Returns
+        """Returns:
         -------
             h: torch.Tensor, shape=(nAtoms, emb_size)
                 Atom embeddings.
@@ -279,9 +258,7 @@ class ScaleFactor(nn.Module):
         self.index_fn = None
         self.stats = None
 
-        self.scale_factor = nn.parameter.Parameter(
-            torch.tensor(0.0), requires_grad=False
-        )
+        self.scale_factor = nn.parameter.Parameter(torch.tensor(0.0), requires_grad=False)
         if enforce_consistency:
             self._register_load_state_dict_pre_hook(self._enforce_consistency)
 
@@ -298,14 +275,8 @@ class ScaleFactor(nn.Module):
         if not self.fitted:
             return
 
-        persistent_buffers = {
-            k: v
-            for k, v in self._buffers.items()
-            if k not in self._non_persistent_buffers_set
-        }
-        local_name_params = itertools.chain(
-            self._parameters.items(), persistent_buffers.items()
-        )
+        persistent_buffers = {k: v for k, v in self._buffers.items() if k not in self._non_persistent_buffers_set}
+        local_name_params = itertools.chain(self._parameters.items(), persistent_buffers.items())
         local_state = {k: v for k, v in local_name_params if v is not None}
 
         for name, param in local_state.items():
@@ -353,9 +324,7 @@ class ScaleFactor(nn.Module):
             assert v > 0, f"{k} is {v}"
 
         self.stats["variance_in"] = self.stats["variance_in"] / self.stats["n_samples"]
-        self.stats["variance_out"] = (
-            self.stats["variance_out"] / self.stats["n_samples"]
-        )
+        self.stats["variance_out"] = self.stats["variance_out"] / self.stats["n_samples"]
 
         ratio = self.stats["variance_out"] / self.stats["variance_in"]
         value = math.sqrt(1 / ratio)
@@ -378,9 +347,7 @@ class ScaleFactor(nn.Module):
         if ref is None:
             self.stats["variance_in"] += n_samples
         else:
-            self.stats["variance_in"] += (
-                torch.mean(torch.var(ref, dim=0)).item() * n_samples
-            )
+            self.stats["variance_in"] += torch.mean(torch.var(ref, dim=0)).item() * n_samples
         self.stats["n_samples"] += n_samples
 
     def forward(

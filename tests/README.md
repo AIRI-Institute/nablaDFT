@@ -15,7 +15,7 @@ Run certain test category:
 ```bash
 pytest -v tests/ -m <category>
 ```
-where category could be:  
+where category could be:
 - dataset: runs tests for dataset classes.
 - model: runs tests for model creation.
 - pipeline: runs tests for full pipeline.

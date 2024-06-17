@@ -1,23 +1,15 @@
 import logging
-import math
 from typing import Dict, Optional, Tuple, Union
 
+import pytorch_lightning as pl
 import torch
 from torch import nn
-from torch_geometric.nn import MessagePassing, radius_graph
-from torch_scatter import scatter, segment_coo
 from torch.optim import Optimizer
 from torch.optim.lr_scheduler import LRScheduler
+from torch_geometric.nn import MessagePassing, radius_graph
+from torch_scatter import scatter, segment_coo
 
-import pytorch_lightning as pl
-
-
-from .layers import (
-    AtomEmbedding,
-    RadialBasis,
-    ScaledSiLU,
-)
-
+from .layers import AtomEmbedding, RadialBasis, ScaledSiLU
 from .utils import (
     compute_neighbors,
     get_edge_id,
@@ -81,9 +73,7 @@ class PaiNN(nn.Module):
         self.update_layers = nn.ModuleList()
 
         for i in range(num_layers):
-            self.message_layers.append(
-                PaiNNMessage(hidden_channels, num_rbf).jittable()
-            )
+            self.message_layers.append(PaiNNMessage(hidden_channels, num_rbf).jittable())
             self.update_layers.append(PaiNNUpdate(hidden_channels))
 
         self.out_energy = nn.Sequential(
@@ -95,7 +85,6 @@ class PaiNN(nn.Module):
         if self.regress_forces is True and self.direct_forces is True:
             self.out_forces = PaiNNOutput(hidden_channels)
         self.reset_parameters()
-
 
     @torch.enable_grad()
     def forward(self, data):
@@ -143,13 +132,16 @@ class PaiNN(nn.Module):
                 forces = self.out_forces(x, vec)
                 return energy, forces
             else:
-                forces = -1 * (
-                    torch.autograd.grad(
-                        energy,
-                        pos,
-                        grad_outputs=torch.ones_like(energy),
-                        create_graph=self.training,
-                    )[0]
+                forces = (
+                    -1
+                    * (
+                        torch.autograd.grad(
+                            energy,
+                            pos,
+                            grad_outputs=torch.ones_like(energy),
+                            create_graph=self.training,
+                        )[0]
+                    )
                 )
                 return energy, forces
         else:
@@ -162,9 +154,7 @@ class PaiNN(nn.Module):
         self.out_energy[2].bias.data.fill_(0)
 
     # Borrowed from GemNet.
-    def select_symmetric_edges(
-        self, tensor, mask, reorder_idx, inverse_neg
-    ) -> torch.Tensor:
+    def select_symmetric_edges(self, tensor, mask, reorder_idx, inverse_neg) -> torch.Tensor:
         # Mask out counter-edges
         tensor_directed = tensor[mask]
         # Concatenate counter-edges after normal edges
@@ -184,8 +174,7 @@ class PaiNN(nn.Module):
         reorder_tensors,
         reorder_tensors_invneg,
     ):
-        """
-        Symmetrize edges to ensure existence of counter-directional edges.
+        """Symmetrize edges to ensure existence of counter-directional edges.
 
         Some edges are only present in one direction in the data,
         since every atom has a maximum number of neighbors.
@@ -231,24 +220,16 @@ class PaiNN(nn.Module):
 
             # Subindex remaining tensors
             cell_offsets_new = cell_offsets_bothdir[unique_idx]
-            reorder_tensors = [
-                self.symmetrize_tensor(tensor, unique_idx, False)
-                for tensor in reorder_tensors
-            ]
+            reorder_tensors = [self.symmetrize_tensor(tensor, unique_idx, False) for tensor in reorder_tensors]
             reorder_tensors_invneg = [
-                self.symmetrize_tensor(tensor, unique_idx, True)
-                for tensor in reorder_tensors_invneg
+                self.symmetrize_tensor(tensor, unique_idx, True) for tensor in reorder_tensors_invneg
             ]
 
             # Count edges per image
             # segment_coo assumes sorted edge_index_new[1] and batch_idx
             ones = edge_index_new.new_ones(1).expand_as(edge_index_new[1])
-            neighbors_per_atom = segment_coo(
-                ones, edge_index_new[1], dim_size=num_atoms
-            )
-            neighbors_per_image = segment_coo(
-                neighbors_per_atom, batch_idx, dim_size=neighbors.shape[0]
-            )
+            neighbors_per_atom = segment_coo(ones, edge_index_new[1], dim_size=num_atoms)
+            neighbors_per_image = segment_coo(neighbors_per_atom, batch_idx, dim_size=neighbors.shape[0])
         else:
             # Generate mask
             mask_sep_atoms = edge_index[0] < edge_index[1]
@@ -256,11 +237,7 @@ class PaiNN(nn.Module):
             cell_earlier = (
                 (cell_offsets[:, 0] < 0)
                 | ((cell_offsets[:, 0] == 0) & (cell_offsets[:, 1] < 0))
-                | (
-                    (cell_offsets[:, 0] == 0)
-                    & (cell_offsets[:, 1] == 0)
-                    & (cell_offsets[:, 2] < 0)
-                )
+                | ((cell_offsets[:, 0] == 0) & (cell_offsets[:, 1] == 0) & (cell_offsets[:, 2] < 0))
             )
             mask_same_atoms = edge_index[0] == edge_index[1]
             mask_same_atoms &= cell_earlier
@@ -284,9 +261,7 @@ class PaiNN(nn.Module):
             # segment_coo assumes sorted batch_edge
             # Factor 2 since this is only one half of the edges
             ones = batch_edge.new_ones(1).expand_as(batch_edge)
-            neighbors_per_image = 2 * segment_coo(
-                ones, batch_edge, dim_size=neighbors.size(0)
-            )
+            neighbors_per_image = 2 * segment_coo(ones, batch_edge, dim_size=neighbors.size(0))
 
             # Create indexing array
             edge_reorder_idx = repeat_blocks(
@@ -298,16 +273,12 @@ class PaiNN(nn.Module):
 
             # Reorder everything so the edges of every image are consecutive
             edge_index_new = edge_index_cat[:, edge_reorder_idx]
-            cell_offsets_new = self.select_symmetric_edges(
-                cell_offsets, mask, edge_reorder_idx, True
-            )
+            cell_offsets_new = self.select_symmetric_edges(cell_offsets, mask, edge_reorder_idx, True)
             reorder_tensors = [
-                self.select_symmetric_edges(tensor, mask, edge_reorder_idx, False)
-                for tensor in reorder_tensors
+                self.select_symmetric_edges(tensor, mask, edge_reorder_idx, False) for tensor in reorder_tensors
             ]
             reorder_tensors_invneg = [
-                self.select_symmetric_edges(tensor, mask, edge_reorder_idx, True)
-                for tensor in reorder_tensors_invneg
+                self.select_symmetric_edges(tensor, mask, edge_reorder_idx, True) for tensor in reorder_tensors_invneg
             ]
 
         # Indices for swapping c->a and a->c (for symmetric MP)
@@ -319,9 +290,7 @@ class PaiNN(nn.Module):
         edge_ids = get_edge_id(edge_index_new, cell_offsets_new, num_atoms)
         order_edge_ids = torch.argsort(edge_ids)
         inv_order_edge_ids = torch.argsort(order_edge_ids)
-        edge_ids_counter = get_edge_id(
-            edge_index_new.flip(0), -cell_offsets_new, num_atoms
-        )
+        edge_ids_counter = get_edge_id(edge_index_new.flip(0), -cell_offsets_new, num_atoms)
         order_edge_ids_counter = torch.argsort(edge_ids_counter)
         id_swap = order_edge_ids_counter[inv_order_edge_ids]
 
@@ -347,9 +316,7 @@ class PaiNN(nn.Module):
         # Unit vectors pointing from edge_index[1] to edge_index[0],
         # i.e., edge_index[0] - edge_index[1] divided by the norm.
         # make sure that the distances are not close to zero before dividing
-        mask_zero = (
-            torch.isclose(edge_dist, torch.tensor(0.0), atol=1e-6).float() * 1e-6
-        )
+        mask_zero = torch.isclose(edge_dist, torch.tensor(0.0), atol=1e-6).float() * 1e-6
         # edge_dist[mask_zero] = 1.0e-6
         edge_vector = distance_vec / (edge_dist + mask_zero)[:, None]
 
@@ -413,9 +380,7 @@ class PaiNN(nn.Module):
                     neighbors = data.neighbors
 
             except AttributeError:
-                logging.warning(
-                    "Turning otf_graph=True as required attributes not present in data object"
-                )
+                logging.warning("Turning otf_graph=True as required attributes not present in data object")
                 otf_graph = True
 
         if use_pbc:
@@ -454,9 +419,7 @@ class PaiNN(nn.Module):
             distance_vec = data.pos[j] - data.pos[i]
             edge_dist = (data.pos[i] - data.pos[j]).pow(2).sum(dim=-1).sqrt()
             cell_offsets = torch.zeros(edge_index.shape[1], 3, device=data.pos.device)
-            cell_offset_distances = torch.zeros_like(
-                cell_offsets, device=data.pos.device
-            )
+            cell_offset_distances = torch.zeros_like(cell_offsets, device=data.pos.device)
             neighbors = compute_neighbors(data, edge_index)
 
         return (
@@ -545,9 +508,7 @@ class PaiNNMessage(MessagePassing):
         vec = scatter(vec, index, dim=self.node_dim, dim_size=dim_size)
         return x, vec
 
-    def update(
-        self, inputs: Tuple[torch.Tensor, torch.Tensor]
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+    def update(self, inputs: Tuple[torch.Tensor, torch.Tensor]) -> Tuple[torch.Tensor, torch.Tensor]:
         return inputs
 
 
@@ -577,9 +538,7 @@ class PaiNNUpdate(nn.Module):
 
         # NOTE: Can't use torch.norm because the gradient is NaN for input = 0.
         # Add an epsilon offset to make sure sqrt is always positive.
-        x_vec_h = self.xvec_proj(
-            torch.cat([x, torch.sqrt(torch.sum(vec2**2, dim=-2) + 1e-8)], dim=-1)
-        )
+        x_vec_h = self.xvec_proj(torch.cat([x, torch.sqrt(torch.sum(vec2**2, dim=-2) + 1e-8)], dim=-1))
         xvec1, xvec2, xvec3 = torch.split(x_vec_h, self.hidden_channels, dim=-1)
 
         dx = xvec1 + xvec2 * vec_dot
@@ -670,7 +629,7 @@ class PaiNNLightning(pl.LightningModule):
         lr_scheduler: LRScheduler,
         losses: Dict,
         metric,
-        loss_coefs
+        loss_coefs,
     ) -> None:
         super(PaiNNLightning, self).__init__()
         self.model = model
@@ -680,10 +639,7 @@ class PaiNNLightning(pl.LightningModule):
         energy, forces = self.model(data)
         return energy, forces
 
-    def step(
-        self, batch, calculate_metrics: bool = False
-    ):
-        bsz = batch.batch.max().detach().item() + 1  # get batch size
+    def step(self, batch, calculate_metrics: bool = False):
         y = batch.y
         # make dense batch from PyG batch
         energy_out, forces_out = self.model(batch)
@@ -813,7 +769,7 @@ class PaiNNLightning(pl.LightningModule):
 
     def _check_devices(self):
         self.hparams.metric = self.hparams.metric.to(self.device)
-        
+
     def _get_batch_size(self, batch):
         """Function for batch size infer."""
         bsz = batch.batch.max().detach().item() + 1  # get batch size

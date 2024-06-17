@@ -1,17 +1,16 @@
 # coding: utf-8
 
 import torch
-import numpy as np
-from .spherical_harmonics_any_order import Y0, Y1, Y2, Y3, Y4, Y5, Yl
 
+from .spherical_harmonics_any_order import Y0, Y1, Y2, Y3, Y4, Y5, Yl
 
 """
 This returns a list of all spherical harmonics (up to order L)
-derived from the input unit vectors u. For up to L=5, this 
+derived from the input unit vectors u. For up to L=5, this
 function is optimized to reduce the number of floating point
 operations. When L>5 is requested, a general formula is used,
 which is not as efficient.
-NOTE: All spherical harmonics lack the constant 1/sqrt(4*Pi) 
+NOTE: All spherical harmonics lack the constant 1/sqrt(4*Pi)
 for efficiency and work only for unit vectors (to
 remove unnecessary terms involving radius r)
 The m values are stored from -L (index 0), -L+1 (index 1), ..., L

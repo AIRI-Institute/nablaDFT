@@ -1,5 +1,5 @@
-import torch
 import torch.nn as nn
+
 from .self_mixing import SelfMixing
 
 """
@@ -28,19 +28,12 @@ class SphericalLinear(nn.Module):
         self.mix_orders = mix_orders
         self.zero_init = zero_init
         if self.mix_orders:
-            assert (
-                clebsch_gordan is not None
-            )  # Clebsch-Gordan coefficients are necessary for mixing
-            self.mixing = SelfMixing(
-                self.order_in, self.order_out, self.num_in, clebsch_gordan
-            )
+            assert clebsch_gordan is not None  # Clebsch-Gordan coefficients are necessary for mixing
+            self.mixing = SelfMixing(self.order_in, self.order_out, self.num_in, clebsch_gordan)
         else:  # order can only be changed if mixing is enabled
             assert order_in == order_out
         self.linear = nn.ModuleList(
-            [
-                nn.Linear(self.num_in, self.num_out, bias=(self.bias and L == 0))
-                for L in range(self.order_out + 1)
-            ]
+            [nn.Linear(self.num_in, self.num_out, bias=(self.bias and L == 0)) for L in range(self.order_out + 1)]
         )
         self.reset_parameters()
 

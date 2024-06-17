@@ -1,10 +1,10 @@
 import pytest
 import torch
+from nablaDFT import model_registry
+from schnetpack.data.loader import AtomsLoader
 from torch_geometric.data import Batch
 
 from tests.decorators import withCUDA
-
-from nablaDFT import model_registry
 
 
 @withCUDA
@@ -25,6 +25,19 @@ def test_pyg_model(model_name, dataset_pyg, device):
     energy, forces = model(batch)
     assert energy.shape == batch.y.shape
     assert forces.shape == batch.forces.shape
+
+
+@withCUDA
+@pytest.mark.parametrize("model_name", ["SchNet", "PaiNN"])
+def test_spk_models(model_name, dataset_spk, device):
+    model_name = model_name + "_train_tiny"
+    model = model_registry.get_pretrained_model("torch", model_name).to(device)
+    batch = next(iter(AtomsLoader(dataset_spk, batch_size=4)))
+    batch = {key: tensor.to(device) for key, tensor in batch.items()}
+    output = model(batch)
+    energy, forces = output["energy"], output["forces"]
+    assert energy.shape == batch["energy"].shape
+    assert forces.shape == batch["forces"].shape
 
 
 @withCUDA

@@ -44,9 +44,7 @@ class ScaleFactor(nn.Module):
         self.index_fn = None
         self.stats = None
 
-        self.scale_factor = nn.parameter.Parameter(
-            torch.tensor(0.0), requires_grad=False
-        )
+        self.scale_factor = nn.parameter.Parameter(torch.tensor(0.0), requires_grad=False)
         if enforce_consistency:
             self._register_load_state_dict_pre_hook(self._enforce_consistency)
 
@@ -63,14 +61,8 @@ class ScaleFactor(nn.Module):
         if not self.fitted:
             return
 
-        persistent_buffers = {
-            k: v
-            for k, v in self._buffers.items()
-            if k not in self._non_persistent_buffers_set
-        }
-        local_name_params = itertools.chain(
-            self._parameters.items(), persistent_buffers.items()
-        )
+        persistent_buffers = {k: v for k, v in self._buffers.items() if k not in self._non_persistent_buffers_set}
+        local_name_params = itertools.chain(self._parameters.items(), persistent_buffers.items())
         local_state = {k: v for k, v in local_name_params if v is not None}
 
         for name, param in local_state.items():
@@ -118,9 +110,7 @@ class ScaleFactor(nn.Module):
             assert v > 0, f"{k} is {v}"
 
         self.stats["variance_in"] = self.stats["variance_in"] / self.stats["n_samples"]
-        self.stats["variance_out"] = (
-            self.stats["variance_out"] / self.stats["n_samples"]
-        )
+        self.stats["variance_out"] = self.stats["variance_out"] / self.stats["n_samples"]
 
         ratio = self.stats["variance_out"] / self.stats["variance_in"]
         value = math.sqrt(1 / ratio)
@@ -143,9 +133,7 @@ class ScaleFactor(nn.Module):
         if ref is None:
             self.stats["variance_in"] += n_samples
         else:
-            self.stats["variance_in"] += (
-                torch.mean(torch.var(ref, dim=0)).item() * n_samples
-            )
+            self.stats["variance_in"] += torch.mean(torch.var(ref, dim=0)).item() * n_samples
         self.stats["n_samples"] += n_samples
 
     def forward(

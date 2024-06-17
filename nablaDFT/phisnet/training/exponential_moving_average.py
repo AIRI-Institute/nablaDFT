@@ -16,23 +16,21 @@ class ExponentialMovingAverage:
             self.ema[name] = param.clone()
 
     def swap(self):
-        """swaps model parameters with the stored averages"""
+        """Swaps model parameters with the stored averages"""
         for name, param in self.model.named_parameters():
             tmp = param.clone()
             param.data = self.ema[name]
             self.ema[name] = tmp
 
     def overwrite(self):
-        """overwrites model parameters with the stored averages (no backup copy is kept)"""
+        """Overwrites model parameters with the stored averages (no backup copy is kept)"""
         for name, param in self.model.named_parameters():
             param.data = self.ema[name]
 
     def __call__(self, epoch):
-        """
-        Applies exponential moving average to parameters
+        """Applies exponential moving average to parameters
         (should be called after every training step)
         """
-
         # this allows to only start after a certain number of epochs with the
         # averaging => in the first few epochs, parameters change a lot and
         # it is better to start averaging a little bit later

@@ -1,5 +1,4 @@
-"""
-Copyright (c) Facebook, Inc. and its affiliates.
+"""Copyright (c) Facebook, Inc. and its affiliates.
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
 """
@@ -13,10 +12,9 @@ from ..initializers import he_orthogonal_init
 
 
 class Dense(torch.nn.Module):
-    """
-    Combines dense layer with scaling for silu activation.
+    """Combines dense layer with scaling for silu activation.
 
-    Arguments
+    Arguments:
     ---------
     in_features: int
         Input embedding size.
@@ -47,9 +45,7 @@ class Dense(torch.nn.Module):
         elif activation is None:
             self._activation = torch.nn.Identity()
         else:
-            raise NotImplementedError(
-                "Activation function not implemented for GemNet (yet)."
-            )
+            raise NotImplementedError("Activation function not implemented for GemNet (yet).")
 
     def reset_parameters(self, initializer=he_orthogonal_init) -> None:
         initializer(self.linear.weight)
@@ -73,10 +69,9 @@ class ScaledSiLU(torch.nn.Module):
 
 
 class ResidualLayer(torch.nn.Module):
-    """
-    Residual block with output scaled by 1/sqrt(2).
+    """Residual block with output scaled by 1/sqrt(2).
 
-    Arguments
+    Arguments:
     ---------
     units: int
         Input and output embedding size.
@@ -88,15 +83,10 @@ class ResidualLayer(torch.nn.Module):
         Keyword arguments for initializing the layers.
     """
 
-    def __init__(
-        self, units: int, nLayers: int = 2, layer=Dense, **layer_kwargs
-    ) -> None:
+    def __init__(self, units: int, nLayers: int = 2, layer=Dense, **layer_kwargs) -> None:
         super().__init__()
         self.dense_mlp = torch.nn.Sequential(
-            *[
-                layer(in_features=units, out_features=units, bias=False, **layer_kwargs)
-                for _ in range(nLayers)
-            ]
+            *[layer(in_features=units, out_features=units, bias=False, **layer_kwargs) for _ in range(nLayers)]
         )
         self.inv_sqrt_2 = 1 / math.sqrt(2)
 

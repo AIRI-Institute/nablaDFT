@@ -1,6 +1,6 @@
+import hashlib
 from pathlib import Path
 from typing import Optional
-import hashlib
 from urllib import request as request
 
 from tqdm import tqdm
@@ -8,11 +8,11 @@ from tqdm import tqdm
 
 def get_file_etag_checksum(filename: int, chunk_size=8 * 1024 * 1024):
     md5s = []
-    with open(filename, 'rb') as f:
-        for data in iter(lambda: f.read(chunk_size), b''):
+    with open(filename, "rb") as f:
+        for data in iter(lambda: f.read(chunk_size), b""):
             md5s.append(hashlib.md5(data).digest())
     m = hashlib.md5(b"".join(md5s))
-    return '{}-{}'.format(m.hexdigest(), len(md5s))
+    return "{}-{}".format(m.hexdigest(), len(md5s))
 
 
 def get_file_md5(filepath: str, chunk_size=8 * 1024 * 1024):
@@ -24,9 +24,9 @@ def get_file_md5(filepath: str, chunk_size=8 * 1024 * 1024):
 
 
 def file_validation(downloaded_file, gt_hash) -> bool:
-    if '-' in gt_hash and gt_hash == get_file_etag_checksum(downloaded_file):
+    if "-" in gt_hash and gt_hash == get_file_etag_checksum(downloaded_file):
         return True
-    if '-' not in gt_hash and gt_hash == get_file_md5(downloaded_file):
+    if "-" not in gt_hash and gt_hash == get_file_md5(downloaded_file):
         return True
     raise RuntimeError("Downloaded file hash doesn't match reference.")
 
@@ -44,7 +44,7 @@ def get_file_size(url: str) -> int:
 
 
 def tqdm_download_hook(t):
-    """wraps TQDM progress bar instance"""
+    """Wraps TQDM progress bar instance"""
     last_block = [0]
 
     def update_to(blocks_count: int, block_size: int, total_size: int):
@@ -68,15 +68,13 @@ def download_file(url: str, savepath: Path, true_hash: Optional[str], desc: str 
         savepath.parent.mkdir(parents=True, exist_ok=True)
     file_size = get_file_size(url)
     with tqdm(
-            unit="B",
-            unit_scale=True,
-            unit_divisor=1024,
-            miniters=1,
-            total=file_size,
-            desc=desc,
+        unit="B",
+        unit_scale=True,
+        unit_divisor=1024,
+        miniters=1,
+        total=file_size,
+        desc=desc,
     ) as t:
-        request.urlretrieve(
-            url, savepath, reporthook=tqdm_download_hook(t)
-        )
+        request.urlretrieve(url, savepath, reporthook=tqdm_download_hook(t))
     if true_hash:
         file_validation(savepath, true_hash)

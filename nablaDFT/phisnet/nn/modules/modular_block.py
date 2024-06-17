@@ -1,8 +1,7 @@
-import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from .residual_stack import *
+
 from .interaction_block import *
+from .residual_stack import *
 
 """
 Basic building block of the neural network which refines atomic features in an iterative way

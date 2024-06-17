@@ -1,14 +1,13 @@
 # coding: utf-8
 import logging
-import os
 
 import numpy as np
 import torch
-from tqdm import tqdm
-
 from nn import NeuralNetwork
-from train import empty_error_dict, compute_error_dict
+from tqdm import tqdm
+from train import compute_error_dict, empty_error_dict
 from training import parse_command_line_arguments
+
 from nablaDFT.dataset import NablaDFT
 
 if __name__ == "__main__":
@@ -49,7 +48,7 @@ if __name__ == "__main__":
     # ---------------- DATA ----------------
     # loaded = np.load(os.path.join(os.path.dirname(args.load_from), 'datasplits.npz'))
 
-    logging.info("Loading " + str(args.dataset_name) + " from " +str(args.datapath) +  "...")
+    logging.info("Loading " + str(args.dataset_name) + " from " + str(args.datapath) + "...")
     dataset = NablaDFT("Hamiltonian", args.datapath, args.dataset_name)
     batch_size = args.valid_batch_size
 
@@ -70,9 +69,7 @@ if __name__ == "__main__":
     tmp = (loss_weights["energy"] > 0) or (loss_weights["forces"] > 0)
     model.calculate_full_hamiltonian = (loss_weights["full_hamiltonian"] > 0) or tmp
     model.calculate_core_hamiltonian = (loss_weights["core_hamiltonian"] > 0) or tmp
-    model.calculate_overlap_matrix = (
-        (loss_weights["overlap_matrix"] > 0) or tmp
-    ) and not args.orthonormal_basis
+    model.calculate_overlap_matrix = ((loss_weights["overlap_matrix"] > 0) or tmp) and not args.orthonormal_basis
 
     model.calculate_energy = loss_weights["energy"] > 0
     model.calculate_energy = False
@@ -112,15 +109,11 @@ if __name__ == "__main__":
             predictions = model(data)
 
             # compute error metrics
-            errors = compute_error_dict(
-                predictions, data, loss_weights, max_errors, batch_size=batch_size
-            )
+            errors = compute_error_dict(predictions, data, loss_weights, max_errors, batch_size=batch_size)
 
             # update valid_errors (running average)
             for key in test_errors.keys():
-                test_errors[key] += (errors[key].item() - test_errors[key]) / (
-                    test_batch_num + 1
-                )
+                test_errors[key] += (errors[key].item() - test_errors[key]) / (test_batch_num + 1)
 
         # construct message for logging
         message = ""

@@ -1,32 +1,24 @@
-import os
+from pathlib import Path
 from typing import List
 
 import hydra
 from omegaconf import DictConfig
-from pytorch_lightning.loggers import Logger
 from pytorch_lightning import (
+    Callback,
     LightningDataModule,
     LightningModule,
     Trainer,
-    Callback,
     seed_everything,
 )
+from pytorch_lightning.loggers import Logger
 
-from nablaDFT.utils import close_loggers, write_predictions_to_db, set_additional_params
-from nablaDFT.optimization import BatchwiseOptimizeTask
 from nablaDFT import model_registry
-
-
-JOB_TYPES = ["train", "test", "predict", "optimize"]
-
-
-def check_cfg_parameters(cfg: DictConfig):
-    job_type = cfg.get("job_type")
-    if job_type not in JOB_TYPES:
-        raise ValueError(f"job_type must be one of {JOB_TYPES}, got {job_type}")
-    if cfg.pretrained and cfg.ckpt_path:
-        raise ValueError("Config parameters ckpt_path and pretrained are mutually exclusive. Consider set ckpt_path "
-                         "to null, if you plan to use pretrained checkpoints.")
+from nablaDFT.utils import (
+    check_cfg_parameters,
+    close_loggers,
+    set_additional_params,
+    write_predictions_to_db,
+)
 
 
 def predict(
@@ -43,12 +35,10 @@ def predict(
     """
     trainer.logger = False  # need this to disable save_hyperparameters during predict,
     # otherwise OmegaConf DictConf can't be dumped to YAML
-    pred_path = os.path.join(os.getcwd(), "predictions")
-    os.makedirs(pred_path, exist_ok=True)
-    predictions = trainer.predict(
-        model=model, datamodule=datamodule
-    )
-    write_predictions_to_db()
+    predictions = trainer.predict(model=model, datamodule=datamodule)
+    output_db_path = Path("./predictions") / f"{config.name}_{config.dataset_name}.db"
+    input_db_path = Path(config.root) / f"{config.dataset_name}.db"
+    write_predictions_to_db(input_db_path, output_db_path, predictions)
 
 
 def optimize(config: DictConfig):
@@ -59,13 +49,11 @@ def optimize(config: DictConfig):
     Args:
         config (DictConfig): config for task. see r'config/' for examples.
     """
-    raise NotImplementedError
-    output_dir = config.get("output_dir")
+    raise NotImplementedError("Use optimizers from GOLF.")
+    """output_dir = config.get("output_dir")
     if not os.path.exists(output_dir):
         os.makedirs(output_dir, exist_ok=True)
-    output_datapath = os.path.join(
-        output_dir, f"{config.name}_{config.dataset_name}.db"
-    )
+    output_datapath = os.path.join(output_dir, f"{config.name}_{config.dataset_name}.db")
     # update existing database not supported
     if os.path.exists(output_datapath):
         os.remove(output_datapath)
@@ -77,7 +65,7 @@ def optimize(config: DictConfig):
         optimizer=optimizer,
         batch_size=config.batch_size,
     )
-    task.run()
+    task.run()"""
 
 
 def run(config: DictConfig):
@@ -92,9 +80,7 @@ def run(config: DictConfig):
         seed_everything(config.seed)
     job_type = config.job_type
     if config.get("ckpt_path"):
-        ckpt_path = os.path.join(
-            hydra.utils.get_original_cwd(), config.get("ckpt_path")
-        )
+        ckpt_path = Path(hydra.utils.get_original_cwd()) / config.get("ckpt_path")
     else:
         ckpt_path = None
     config = set_additional_params(config)
@@ -114,9 +100,7 @@ def run(config: DictConfig):
     for _, logger_cfg in config.loggers.items():
         loggers.append(hydra.utils.instantiate(logger_cfg))
     # Trainer
-    trainer: Trainer = hydra.utils.instantiate(
-        config.trainer, callbacks=callbacks, logger=loggers
-    )
+    trainer: Trainer = hydra.utils.instantiate(config.trainer, callbacks=callbacks, logger=loggers)
     # Datamodule
     datamodule: LightningDataModule = hydra.utils.instantiate(config.datamodule)
     if job_type == "train":

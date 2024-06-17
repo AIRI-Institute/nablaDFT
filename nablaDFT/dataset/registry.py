@@ -1,14 +1,13 @@
-from typing import List, Optional
-
 import json
+from typing import List, Optional
 
 import nablaDFT
 
 
 class DatasetRegistry:
     """Source of dataset splits links."""
-    def __init__(self) -> None:
 
+    def __init__(self) -> None:
         self.hamiltonian_datasets = {}
         with open(nablaDFT.__path__[0] + "/links/energy_databases.json", "r") as fin:
             content = json.load(fin)
@@ -24,7 +23,8 @@ class DatasetRegistry:
 
         Args:
             task_type (str): type of task, must be one of :obj:["energy", "hamiltonian"].
-            name (str): split name. Available splits can be listed with :meth:nablaDFT.registry.DatasetRegistry.list_datasets
+            name (str): split name. Available splits can be listed with
+                :meth:nablaDFT.registry.DatasetRegistry.list_datasets().
         """
         if task_type == "energy":
             url = self.energy_datasets.get(name, None)
@@ -41,7 +41,8 @@ class DatasetRegistry:
 
         Args:
             task_type (str): type of task, must be one of :obj:["energy", "hamiltonian"].
-            name (str): split name. Available splits can be listed with :meth:nablaDFT.registry.DatasetRegistry.list_datasets
+            name (str): split name. Available splits can be listed with
+                :meth:nablaDFT.registry.DatasetRegistry.list_datasets().
         """
         if task_type == "energy":
             etag = self.energy_datasets_etag.get(name, None)

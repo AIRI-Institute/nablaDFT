@@ -1,7 +1,7 @@
 import os
-import pytest
 from urllib import request as request
 
+import pytest
 from nablaDFT.dataset import dataset_registry
 from nablaDFT.utils.download import file_validation, get_file_size
 
@@ -25,9 +25,7 @@ def test_energy_dataset_availability(tmp_path, split):
     save_path = os.path.join(tmp_path, split)
     url = dataset_registry.get_dataset_url("energy", split)
     request.urlretrieve(url, save_path)
-    assert file_validation(
-        save_path, dataset_registry.get_dataset_etag("energy", split)
-    )
+    assert file_validation(save_path, dataset_registry.get_dataset_etag("energy", split))
 
 
 # currently test only file size match

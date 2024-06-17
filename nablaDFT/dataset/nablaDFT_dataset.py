@@ -1,28 +1,29 @@
 """Module defines Pytorch Lightning DataModule interfaces for nablaDFT datasets"""
-from typing import List, Dict, Optional, Union
-import os
-from urllib import request as request
 
-from tqdm import tqdm
+import os
+from pathlib import Path
+from typing import Dict, List, Optional, Union
+
 import numpy as np
-from ase.db import connect
 import torch
+from ase.db import connect
 from pytorch_lightning import LightningDataModule
-from torch.utils.data import random_split
-from torch_geometric.loader import DataLoader
 from schnetpack.data import (
     AtomsDataFormat,
-    load_dataset,
-    AtomsLoader,
-    SplittingStrategy,
     AtomsDataModule,
-    BaseAtomsData
+    AtomsLoader,
+    BaseAtomsData,
+    SplittingStrategy,
+    load_dataset,
 )
+from torch.utils.data import random_split
+from torch_geometric.loader import DataLoader
 
 import nablaDFT
 from nablaDFT.dataset.registry import dataset_registry
 from nablaDFT.utils import download_file
-from .pyg_datasets import PyGNablaDFT, PyGHamiltonianNablaDFT
+
+from .pyg_datasets import PyGHamiltonianNablaDFT, PyGNablaDFT
 
 
 class ASENablaDFT(AtomsDataModule):
@@ -197,13 +198,16 @@ class ASENablaDFT(AtomsDataModule):
     def _download(self):
         url = dataset_registry.get_dataset_url("energy", self.dataset_name)
         dataset_etag = dataset_registry.get_dataset_etag("energy", self.dataset_name)
-        download_file(url, self.datapath, dataset_etag, desc=f"Downloading split: {self.dataset_name}")
+        download_file(
+            url,
+            Path(self.datapath),
+            dataset_etag,
+            desc=f"Downloading split: {self.dataset_name}",
+        )
 
     def _check_metadata(self, conn):
         if not conn.metadata:
-            atomrefs = np.load(
-                nablaDFT.__path__[0] + "/data/atomization_energies.npy"
-            )
+            atomrefs = np.load(nablaDFT.__path__[0] + "/data/atomization_energies.npy")
             conn.metadata = {
                 "_distance_unit": "Ang",
                 "_property_unit_dict": {
@@ -248,8 +252,10 @@ class PyGDataModule(LightningDataModule):
         self.seed = seed
         self.sizes = [train_size, val_size]
         dataloader_keys = [
-            "batch_size", "num_workers",
-            "pin_memory", "persistent_workers"
+            "batch_size",
+            "num_workers",
+            "pin_memory",
+            "persistent_workers",
         ]
         self.dataloader_kwargs = {}
         for key in dataloader_keys:
@@ -304,30 +310,32 @@ class PyGHamiltonianDataModule(PyGDataModule):
         include_core: bool = False,
         **kwargs,
     ) -> None:
-        super().__init__(root, dataset_name, train_size, val_size, include_hamiltonian=include_hamiltonian,
-                         include_overlap=include_overlap, include_core=include_core, **kwargs)
+        super().__init__(
+            root,
+            dataset_name,
+            train_size,
+            val_size,
+            include_hamiltonian=include_hamiltonian,
+            include_overlap=include_overlap,
+            include_core=include_core,
+            **kwargs,
+        )
 
     def setup(self, stage: str) -> None:
         if stage == "fit":
-            dataset = PyGHamiltonianNablaDFT(
-                self.root, self.dataset_name, "train", **self.kwargs
-            )
+            dataset = PyGHamiltonianNablaDFT(self.root, self.dataset_name, "train", **self.kwargs)
             self.dataset_train, self.dataset_val = random_split(
                 dataset, self.sizes, generator=torch.Generator().manual_seed(self.seed)
             )
         elif stage == "test":
-            self.dataset_test = PyGHamiltonianNablaDFT(
-                self.root, self.dataset_name, "test", **self.kwargs
-            )
+            self.dataset_test = PyGHamiltonianNablaDFT(self.root, self.dataset_name, "test", **self.kwargs)
         elif stage == "predict":
-            self.dataset_predict = PyGHamiltonianNablaDFT(
-                self.root, self.dataset_name, "predict", **self.kwargs
-            )
+            self.dataset_predict = PyGHamiltonianNablaDFT(self.root, self.dataset_name, "predict", **self.kwargs)
 
 
 class PyGNablaDFTDataModule(PyGDataModule):
     """DataModule for nablaDFT dataset, subclass of PyGDataModule.
-    
+
     .. note::
         If split parameter is 'train' or 'test' and dataset name are ones from nablaDFT splits
         (see nablaDFT/links/energy_databases.json), dataset will be downloaded automatically.
@@ -352,10 +360,6 @@ class PyGNablaDFTDataModule(PyGDataModule):
                 dataset, self.sizes, generator=torch.Generator().manual_seed(self.seed)
             )
         elif stage == "test":
-            self.dataset_test = PyGNablaDFT(
-                self.root, self.dataset_name, "test", **self.kwargs
-            )
+            self.dataset_test = PyGNablaDFT(self.root, self.dataset_name, "test", **self.kwargs)
         elif stage == "predict":
-            self.dataset_predict = PyGNablaDFT(
-                self.root, self.dataset_name, "predict", **self.kwargs
-            )
+            self.dataset_predict = PyGNablaDFT(self.root, self.dataset_name, "predict", **self.kwargs)

@@ -1,13 +1,12 @@
-import json
 import importlib
+import json
 from copy import deepcopy
-from typing import Dict
 from pathlib import Path
-from typing import List
+from typing import Dict, List
 
 import hydra
-import torch
 import pytorch_lightning as pl
+import torch
 from omegaconf import DictConfig, OmegaConf
 
 import nablaDFT
@@ -22,8 +21,8 @@ class ModelRegistry:
     def __init__(self):
         with open(nablaDFT.__path__[0] + "/links/models_checkpoints.json", "r") as fin:
             content = json.load(fin)
-        self._model_checkpoints = content['checkpoints']
-        self._model_checkpoints_etag = content['etag']
+        self._model_checkpoints = content["checkpoints"]
+        self._model_checkpoints_etag = content["etag"]
 
         self._pretrained_model_cfg = {}
         cfg_paths = (Path(nablaDFT.__path__[0]) / "../config/model/").glob("*")
@@ -35,7 +34,8 @@ class ModelRegistry:
         """Returns URL for given pretrained model name.
 
         Args:
-            model_name (str): pretrained model name. Available models can be listed with :meth:nablaDFT.registry.ModelRegistry.list_models
+            model_name (str): pretrained model name. Available models can be listed with
+                :meth:nablaDFT.registry.ModelRegistry.list_models
         """
         url = self._model_checkpoints.get(model_name, None)
         if url:
@@ -47,7 +47,8 @@ class ModelRegistry:
         """Returns reference ETag for given pretrained model name.
 
         Args:
-            model_name (str): pretrained model name. Available models can be listed with :meth:nablaDFT.registry.ModelRegistry.list_models
+            model_name (str): pretrained model name. Available models can be listed with
+                :meth:nablaDFT.registry.ModelRegistry.list_models
         """
         return self._model_checkpoints_etag[model_name]
 
@@ -64,7 +65,8 @@ class ModelRegistry:
 
         Args:
             model_type (str): model framework, must be one of ["torch", "lightning"]
-            model_name (str): model checkpoint name. Available models can be listed with :meth:nablaDFT.registry.ModelRegistry.list_models
+            model_name (str): model checkpoint name. Available models can be listed with
+                :meth:nablaDFT.registry.ModelRegistry.list_models
         """
         backbone_name = model_name.split("_")[0]
         model_cfg = self._pretrained_model_cfg[backbone_name]
@@ -74,7 +76,7 @@ class ModelRegistry:
                 self.get_pretrained_model_url(model_name),
                 ckpt_path,
                 self.get_pretrained_model_etag(model_name),
-                desc=f"Downloading {model_name}"
+                desc=f"Downloading {model_name}",
             )
         if model_type == "torch":
             model = self._load_torch_model(model_cfg, ckpt_path)
@@ -85,16 +87,35 @@ class ModelRegistry:
         return model
 
     def _load_torch_model(self, cfg: DictConfig, ckpt_path: Path):
-        model: torch.nn.Module = hydra.utils.instantiate(cfg.net)
+        if "SchNet" in cfg.model_name or "PaiNN" in cfg.model_name:
+            model: torch.nn.Module = hydra.utils.instantiate(cfg.model)
+        else:
+            model: torch.nn.Module = hydra.utils.instantiate(cfg.net)
         state_dict = self._rebuild_state_dict(torch.load(ckpt_path)["state_dict"])
         model.load_state_dict(state_dict)
         return model
 
     def _load_lightning_model(self, cfg: DictConfig, ckpt_path: Path):
-        module, cls_name = ".".join(cfg._target_.split(".")[:-1]), cfg._target_.split(".")[-1]
+        module, cls_name = (
+            ".".join(cfg._target_.split(".")[:-1]),
+            cfg._target_.split(".")[-1],
+        )
         model_cls: pl.LightningModule = getattr(importlib.import_module(module), cls_name)
-        torch_model: torch.nn.Module = hydra.utils.instantiate(cfg.net)
-        model = model_cls.load_from_checkpoint(ckpt_path, net=torch_model)
+        if "SchNet" in cfg.model_name or "PaiNN" in cfg.model_name:
+            kwargs = {}
+            for key in ["model", "outputs", "optimizer_cls", "scheduler_cls"]:
+                kwargs[key] = hydra.utils.instantiate(cfg[key])
+            model = model_cls.load_from_checkpoint(
+                ckpt_path,
+                model_name=cfg.model_name,
+                optimizer_args=cfg.optimizer_args,
+                scheduler_args=cfg.scheduler_args,
+                scheduler_monitor=cfg.scheduler_monitor,
+                **kwargs,
+            )
+        else:
+            torch_model: torch.nn.Module = hydra.utils.instantiate(cfg.net)
+            model = model_cls.load_from_checkpoint(ckpt_path, net=torch_model)
         return model
 
     def _rebuild_state_dict(self, state_dict: Dict):

@@ -1,11 +1,9 @@
-import os
 import argparse
+import os
 
 import torch
 from hydra import compose, initialize
-
 from pyg_ase_interface import PYGAseInterface
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run PyG molecule optimization")

@@ -1,5 +1,4 @@
-"""
-Copyright (c) Facebook, Inc. and its affiliates.
+"""Copyright (c) Facebook, Inc. and its affiliates.
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
 """
@@ -8,18 +7,16 @@ import math
 from typing import Optional
 
 import torch
-
 from torch_scatter import scatter
-from .scale_factor import ScaleFactor
 
 from .base_layers import Dense, ResidualLayer
+from .scale_factor import ScaleFactor
 
 
 class AtomUpdateBlock(torch.nn.Module):
-    """
-    Aggregate the message embeddings of the atoms
+    """Aggregate the message embeddings of the atoms
 
-    Arguments
+    Arguments:
     ---------
     emb_size_atom: int
         Embedding size of the atoms.
@@ -54,16 +51,12 @@ class AtomUpdateBlock(torch.nn.Module):
             mlp = [dense1]
         else:
             mlp = []
-        res = [
-            ResidualLayer(units, nLayers=2, activation=activation)
-            for _ in range(nHidden)
-        ]
+        res = [ResidualLayer(units, nLayers=2, activation=activation) for _ in range(nHidden)]
         mlp += res
         return torch.nn.ModuleList(mlp)
 
     def forward(self, h: torch.Tensor, m, basis_rad, idx_atom):
-        """
-        Returns
+        """Returns:
         -------
         h: torch.Tensor, shape=(nAtoms, emb_size_atom)
             Atom embedding.
@@ -73,9 +66,7 @@ class AtomUpdateBlock(torch.nn.Module):
         bases_emb = self.dense_rbf(basis_rad)  # (nEdges, emb_size_edge)
         x = m * bases_emb
 
-        x2 = scatter(
-            x, idx_atom, dim=0, dim_size=nAtoms, reduce="sum"
-        )  # (nAtoms, emb_size_edge)
+        x2 = scatter(x, idx_atom, dim=0, dim_size=nAtoms, reduce="sum")  # (nAtoms, emb_size_edge)
         x = self.scale_sum(x2, ref=m)
 
         for layer in self.layers:
@@ -85,10 +76,9 @@ class AtomUpdateBlock(torch.nn.Module):
 
 
 class OutputBlock(AtomUpdateBlock):
-    """
-    Combines the atom update block and subsequent final dense layer.
+    """Combines the atom update block and subsequent final dense layer.
 
-    Arguments
+    Arguments:
     ---------
     emb_size_atom: int
         Embedding size of the atoms.
@@ -129,25 +119,18 @@ class OutputBlock(AtomUpdateBlock):
 
         self.seq_energy_pre = self.layers  # inherited from parent class
         if nHidden_afteratom >= 1:
-            self.seq_energy2 = self.get_mlp(
-                emb_size_atom, emb_size_atom, nHidden_afteratom, activation
-            )
+            self.seq_energy2 = self.get_mlp(emb_size_atom, emb_size_atom, nHidden_afteratom, activation)
             self.inv_sqrt_2 = 1 / math.sqrt(2.0)
         else:
             self.seq_energy2 = None
 
         if self.direct_forces:
             self.scale_rbf_F = ScaleFactor()
-            self.seq_forces = self.get_mlp(
-                emb_size_edge, emb_size_edge, nHidden, activation
-            )
-            self.dense_rbf_F = Dense(
-                emb_size_rbf, emb_size_edge, activation=None, bias=False
-            )
+            self.seq_forces = self.get_mlp(emb_size_edge, emb_size_edge, nHidden, activation)
+            self.dense_rbf_F = Dense(emb_size_rbf, emb_size_edge, activation=None, bias=False)
 
     def forward(self, h: torch.Tensor, m: torch.Tensor, basis_rad, idx_atom):
-        """
-        Returns
+        """Returns:
         -------
         torch.Tensor, shape=(nAtoms, emb_size_atom)
             Output atom embeddings.
@@ -160,9 +143,7 @@ class OutputBlock(AtomUpdateBlock):
         basis_emb_E = self.dense_rbf(basis_rad)  # (nEdges, emb_size_edge)
         x = m * basis_emb_E
 
-        x_E = scatter(
-            x, idx_atom, dim=0, dim_size=nAtoms, reduce="sum"
-        )  # (nAtoms, emb_size_edge)
+        x_E = scatter(x, idx_atom, dim=0, dim_size=nAtoms, reduce="sum")  # (nAtoms, emb_size_edge)
         x_E = self.scale_sum(x_E, ref=m)
 
         for layer in self.seq_energy_pre:

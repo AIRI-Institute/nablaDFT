@@ -1,9 +1,8 @@
-import pytest
 import numpy as np
+import pytest
 import torch
+from nablaDFT.dataset import HamiltonianDataset, PyGHamiltonianNablaDFT, PyGNablaDFT
 from torch.utils.data import DataLoader
-
-from nablaDFT.dataset import PyGHamiltonianNablaDFT, PyGNablaDFT, HamiltonianDataset
 
 
 @pytest.mark.dataset
@@ -69,15 +68,9 @@ def test_hamiltonian_dataset_items(dataset_hamiltonian_pyg_params):
 
 def test_hamiltonian_torch_dataset(dataset_hamiltonian_torch_params):
     dataset = HamiltonianDataset(**dataset_hamiltonian_torch_params)
-    dataloader = DataLoader(
-        dataset, batch_size=2, collate_fn=dataset.collate_fn, shuffle=False
-    )
+    dataloader = DataLoader(dataset, batch_size=2, collate_fn=dataset.collate_fn, shuffle=False)
     database = dataset._database
     shape_gt = sum([database[idx][4].shape[0] for idx in [0, 1]])
     batch = next(iter(dataloader))
     assert batch["full_hamiltonian"].shape == torch.Size([shape_gt, shape_gt])
-    assert (
-        batch["full_hamiltonian"].shape
-        == batch["overlap_matrix"].shape
-        == batch["core_hamiltonian"].shape
-    )
+    assert batch["full_hamiltonian"].shape == batch["overlap_matrix"].shape == batch["core_hamiltonian"].shape

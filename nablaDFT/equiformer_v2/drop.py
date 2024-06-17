@@ -1,6 +1,5 @@
-"""
-    Add `extra_repr` into DropPath implemented by timm
-    for displaying more info.
+"""Add `extra_repr` into DropPath implemented by timm
+for displaying more info.
 """
 
 import torch
@@ -9,9 +8,7 @@ import torch.nn.functional as F
 from e3nn import o3
 
 
-def drop_path(
-    x: torch.Tensor, drop_prob: float = 0.0, training: bool = False
-) -> torch.Tensor:
+def drop_path(x: torch.Tensor, drop_prob: float = 0.0, training: bool = False) -> torch.Tensor:
     """Drop paths (Stochastic Depth) per sample (when applied in main path of residual blocks).
     This is the same as the DropConnect impl I created for EfficientNet, etc networks, however,
     the original name is misleading as 'Drop Connect' is a different form of dropout in a separate paper...
@@ -22,9 +19,7 @@ def drop_path(
     if drop_prob == 0.0 or not training:
         return x
     keep_prob = 1 - drop_prob
-    shape = (x.shape[0],) + (1,) * (
-        x.ndim - 1
-    )  # work with diff dim tensors, not just 2D ConvNets
+    shape = (x.shape[0],) + (1,) * (x.ndim - 1)  # work with diff dim tensors, not just 2D ConvNets
     random_tensor = keep_prob + torch.rand(shape, dtype=x.dtype, device=x.device)
     random_tensor.floor_()  # binarize
     output = x.div(keep_prob) * random_tensor
@@ -46,9 +41,7 @@ class DropPath(nn.Module):
 
 
 class GraphDropPath(nn.Module):
-    """
-    Consider batch for graph data when dropping paths.
-    """
+    """Consider batch for graph data when dropping paths."""
 
     def __init__(self, drop_prob: float) -> None:
         super(GraphDropPath, self).__init__()
@@ -56,9 +49,7 @@ class GraphDropPath(nn.Module):
 
     def forward(self, x: torch.Tensor, batch) -> torch.Tensor:
         batch_size = batch.max() + 1
-        shape = (batch_size,) + (1,) * (
-            x.ndim - 1
-        )  # work with diff dim tensors, not just 2D ConvNets
+        shape = (batch_size,) + (1,) * (x.ndim - 1)  # work with diff dim tensors, not just 2D ConvNets
         ones = torch.ones(shape, dtype=x.dtype, device=x.device)
         drop = drop_path(ones, self.drop_prob, self.training)
         out = x * drop[batch]
@@ -75,9 +66,7 @@ class EquivariantDropout(nn.Module):
         self.num_irreps = irreps.num_irreps
         self.drop_prob = drop_prob
         self.drop = torch.nn.Dropout(drop_prob, True)
-        self.mul = o3.ElementwiseTensorProduct(
-            irreps, o3.Irreps("{}x0e".format(self.num_irreps))
-        )
+        self.mul = o3.ElementwiseTensorProduct(irreps, o3.Irreps("{}x0e".format(self.num_irreps)))
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         if not self.training or self.drop_prob == 0.0:

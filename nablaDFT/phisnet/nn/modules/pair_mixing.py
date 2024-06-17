@@ -31,9 +31,7 @@ class PairMixing(nn.Module):
                     name = "coeff_{}_{}_{}".format(l1, l2, L)
                     self.add_module(
                         name,
-                        nn.Linear(
-                            self.num_basis_functions, self.num_features, bias=False
-                        ),
+                        nn.Linear(self.num_basis_functions, self.num_features, bias=False),
                     )
         self.reset_parameters()
 
@@ -49,22 +47,16 @@ class PairMixing(nn.Module):
     def forward(self, x1s, x2s, rbf):
         # initialize output to zeros
         ys = [
-            torch.zeros_like(x1s[0]).repeat(
-                *(1,) * len(x1s[0].shape[:-2]), 2 * L + 1, 1
-            )
+            torch.zeros_like(x1s[0]).repeat(*(1,) * len(x1s[0].shape[:-2]), 2 * L + 1, 1)
             for L in range(self.order_out + 1)
         ]
         # loop over all combinations of orders
         for l1 in range(self.order_in1 + 1):
             # get view of x1s[l1] that enables broadcasting to compute the spherical tensor product
-            x1 = x1s[l1].view(
-                *x1s[l1].shape[:-2], x1s[l1].size(-2), 1, 1, self.num_features
-            )
+            x1 = x1s[l1].view(*x1s[l1].shape[:-2], x1s[l1].size(-2), 1, 1, self.num_features)
             for l2 in range(self.order_in2 + 1):
                 # get view of x2s[l2] that enables broadcasting to compute the spherical tensor product
-                x2 = x2s[l2].view(
-                    *x2s[l2].shape[:-2], 1, x2s[l2].size(-2), 1, self.num_features
-                )
+                x2 = x2s[l2].view(*x2s[l2].shape[:-2], 1, x2s[l2].size(-2), 1, self.num_features)
                 # compute spherical tensor product
                 tp = x1 * x2
                 # decompose tensor product into irreducible representations and collect contributions
@@ -73,7 +65,5 @@ class PairMixing(nn.Module):
                     cg = self.clebsch_gordan(l1, l2, L)
                     cg = cg.view((*(1,) * len(tp.shape[:-4]), *cg.shape, 1))
                     # contract and add
-                    ys[L] = ys[L] + self.coeff(l1, l2, L)(rbf) * (
-                        (cg * tp).sum(-3).sum(-3)
-                    )
+                    ys[L] = ys[L] + self.coeff(l1, l2, L)(rbf) * ((cg * tp).sum(-3).sum(-3))
         return ys

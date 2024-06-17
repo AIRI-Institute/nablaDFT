@@ -3,7 +3,6 @@ import numpy as np
 
 class LineSearch:
     def __init__(self, xtol=1e-14):
-
         self.xtol = xtol
         self.task = "START"
         self.fc = 0
@@ -284,9 +283,7 @@ class LineSearch:
             # else:
             #           Call step to update stx, sty, and to compute the new step.
 
-            stx, sty, stp, gx, fx, gy, fy = self.update(
-                stx, fx, gx, sty, fy, gy, stp, f, g, stmin, stmax, old_stp, pk
-            )
+            stx, sty, stp, gx, fx, gy, fy = self.update(stx, fx, gx, sty, fy, gy, stp, f, g, stmin, stmax, old_stp, pk)
 
             #           Decide if a bisection step is needed.
 
@@ -315,9 +312,7 @@ class LineSearch:
             #           If further progress is not possible, let stp be the best
             #           point obtained during the search.
 
-            if (self.bracket and stp < stmin or stp >= stmax) or (
-                self.bracket and stmax - stmin < self.xtol * stmax
-            ):
+            if (self.bracket and stp < stmin or stp >= stmax) or (self.bracket and stmax - stmin < self.xtol * stmax):
                 stp = stx
 
             #           Obtain another function and derivative.
@@ -344,9 +339,7 @@ class LineSearch:
             )
             return stp
 
-    def update(
-        self, stx, fx, gx, sty, fy, gy, stp, fp, gp, stpmin, stpmax, old_stp, pk
-    ):
+    def update(self, stx, fx, gx, sty, fy, gy, stp, fp, gp, stpmin, stpmax, old_stp, pk):
         sign = gp * (gx / abs(gx))
 
         #       First case: A higher function value. The minimum is bracketed.
@@ -426,7 +419,6 @@ class LineSearch:
             stpq = stp + (gp / (gp - gx)) * (stx - stp)
 
             if self.bracket:
-
                 #               A minimizer has been bracketed. If the cubic step is
                 #               closer to stp than the secant step, the cubic step is
                 #               taken, otherwise the secant step is taken.
@@ -440,7 +432,6 @@ class LineSearch:
                 else:
                     stpf = max(stp + 0.66 * (sty - stp), stpf)
             else:
-
                 #               A minimizer has not been bracketed. If the cubic step is
                 #               farther from stp than the secant step, the cubic step is
                 #               taken, otherwise the secant step is taken.

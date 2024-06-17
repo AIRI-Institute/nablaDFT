@@ -1,13 +1,15 @@
-import os
 import logging
+import os
+from typing import List, Optional, Union
 
 import ase
+import torch
 from ase import units
-from ase.constraints import FixAtoms
 from ase.calculators.calculator import Calculator, all_changes
-from ase.io import write, read
+from ase.constraints import FixAtoms
+from ase.io import read, write
 from ase.io.trajectory import Trajectory
-from ase.md import VelocityVerlet, Langevin, MDLogger
+from ase.md import Langevin, MDLogger, VelocityVerlet
 from ase.md.velocitydistribution import (
     MaxwellBoltzmannDistribution,
     Stationary,
@@ -15,14 +17,9 @@ from ase.md.velocitydistribution import (
 )
 from ase.optimize import QuasiNewton
 from ase.vibrations import Vibrations
-
-import torch
-from torch_geometric.data import Data, Batch
-
-from schnetpack.units import convert_units
-
-from typing import Optional, List, Union
 from omegaconf import DictConfig
+from schnetpack.units import convert_units
+from torch_geometric.data import Batch, Data
 
 from nablaDFT.utils import load_model
 
@@ -37,8 +34,7 @@ def atom_to_pyg_batch(ase_molecule):
 
 
 class PYGCalculator(Calculator):
-    """
-    ASE calculator for pytorch geometric machine learning models.
+    """ASE calculator for pytorch geometric machine learning models.
 
     Args:
         model_file (str): path to trained model
@@ -50,7 +46,7 @@ class PYGCalculator(Calculator):
         dtype (torch.dtype): select model precision (default=float32)
         converter (callable): converter used to set up input batches
         additional_inputs (dict): additional inputs required for some transforms in the converter.
-        **kwargs: Additional arguments for basic ASE calculator class. 
+        **kwargs: Additional arguments for basic ASE calculator class.
     """
 
     energy = "energy"
@@ -97,15 +93,12 @@ class PYGCalculator(Calculator):
         self.model_results = None
 
     def _load_model(self, config, ckpt_path):
-        """
-
-        Args:
+        """Args:
             model_file (str): path to model.
 
         Returns:
            AtomisticTask: loaded schnetpack model
         """
-
         log.info("Loading model from {:s}".format(ckpt_path))
         # load model and keep it on CPU, device can be changed afterwards
         model = load_model(config, ckpt_path)
@@ -119,11 +112,10 @@ class PYGCalculator(Calculator):
         properties: List[str] = ["energy"],
         system_changes: List[str] = all_changes,
     ):
-        """
-        Args:
-            atoms (ase.Atoms): ASE atoms object.
-            properties (List[str]): select properties computed and stored to results.
-            system_changes (List[str]): List of changes for ASE.
+        """Args:
+        atoms (ase.Atoms): ASE atoms object.
+        properties (List[str]): select properties computed and stored to results.
+        system_changes (List[str]): List of changes for ASE.
         """
         # First call original calculator to set atoms attribute
         # (see https://wiki.fysik.dtu.dk/ase/_modules/ase/calculators/calculator.html#Calculator)
@@ -135,20 +127,14 @@ class PYGCalculator(Calculator):
             model_results = self.model(model_inputs)
 
             results = dict()
-            results["energy"] = (
-                model_results[0].cpu().data.numpy().item()
-                * self.property_units["energy"]
-            )
-            results["forces"] = (
-                model_results[1].cpu().data.numpy() * self.property_units["forces"]
-            )
+            results["energy"] = model_results[0].cpu().data.numpy().item() * self.property_units["energy"]
+            results["forces"] = model_results[1].cpu().data.numpy() * self.property_units["forces"]
             self.results = results
             self.model_results = model_results
 
 
 class PYGAseInterface:
-    """
-    Interface for ASE calculations (optimization and molecular dynamics)
+    """Interface for ASE calculations (optimization and molecular dynamics)
 
     Args:
         molecule_path (str): Path to initial geometry
@@ -212,22 +198,18 @@ class PYGAseInterface:
         self.dynamics = None
 
     def save_molecule(self, name: str, file_format: str = "xyz", append: bool = False):
-        """
-        Save the current molecular geometry.
+        """Save the current molecular geometry.
 
         Args:
             name: Name of save-file.
             file_format: Format to store geometry (default xyz).
             append: If set to true, geometry is added to end of file (default False).
         """
-        molecule_path = os.path.join(
-            self.working_dir, "{:s}.{:s}".format(name, file_format)
-        )
+        molecule_path = os.path.join(self.working_dir, "{:s}.{:s}".format(name, file_format))
         write(molecule_path, self.molecule, format=file_format, append=append)
 
     def calculate_single_point(self):
-        """
-        Perform a single point computation of the energies and forces and
+        """Perform a single point computation of the energies and forces and
         store them to the working directory. The format used is the extended
         xyz format. This functionality is mainly intended to be used for
         interfaces.
@@ -248,8 +230,7 @@ class PYGAseInterface:
         reset: bool = False,
         interval: int = 1,
     ):
-        """
-        Initialize an ase molecular dynamics trajectory. The logfile needs to
+        """Initialize an ase molecular dynamics trajectory. The logfile needs to
         be specifies, so that old trajectories are not overwritten. This
         functionality can be used to subsequently carry out equilibration and
         production.
@@ -265,7 +246,6 @@ class PYGAseInterface:
                 conditions (default=False)
             interval: Data is stored every interval steps (default=1)
         """
-
         # If a previous dynamics run has been performed, don't reinitialize
         # velocities unless explicitly requested via restart=True
         if self.dynamics is None or reset:
@@ -305,8 +285,7 @@ class PYGAseInterface:
         remove_translation: bool = True,
         remove_rotation: bool = True,
     ):
-        """
-        Initialize velocities for molecular dynamics
+        """Initialize velocities for molecular dynamics
 
         Args:
             temp_init: Initial temperature in Kelvin (default 300)
@@ -320,23 +299,19 @@ class PYGAseInterface:
             ZeroRotation(self.molecule)
 
     def run_md(self, steps: int):
-        """
-        Perform a molecular dynamics simulation using the settings specified
+        """Perform a molecular dynamics simulation using the settings specified
         upon initializing the class.
 
         Args:
             steps: Number of simulation steps performed
         """
         if not self.dynamics:
-            raise AttributeError(
-                "Dynamics need to be initialized using the" " 'setup_md' function"
-            )
+            raise AttributeError("Dynamics need to be initialized using the" " 'setup_md' function")
 
         self.dynamics.run(steps)
 
     def optimize(self, fmax: float = 1.0e-2, steps: int = 1000):
-        """
-        Optimize a molecular geometry using the Quasi Newton optimizer in ase
+        """Optimize a molecular geometry using the Quasi Newton optimizer in ase
         (BFGS + line search)
 
         Args:
@@ -357,8 +332,7 @@ class PYGAseInterface:
         log.info(f"Save molecule in {name}")
 
     def compute_normal_modes(self, write_jmol: bool = True):
-        """
-        Use ase calculator to compute numerical frequencies for the molecule
+        """Use ase calculator to compute numerical frequencies for the molecule
 
         Args:
             write_jmol: Write frequencies to input file for visualization in jmol (default=True)

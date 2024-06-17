@@ -1,5 +1,4 @@
-"""
-Copyright (c) Facebook, Inc. and its affiliates.
+"""Copyright (c) Facebook, Inc. and its affiliates.
 
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
@@ -23,8 +22,7 @@ _Jd = torch.load(os.path.join(os.path.dirname(__file__), "Jd.pt"))
 
 
 class CoefficientMapping:
-    """
-    Helper functions for coefficients used to reshape l<-->m and to get coefficients of specific degree or order
+    """Helper functions for coefficients used to reshape l<-->m and to get coefficients of specific degree or order
 
     Args:
         lmax_list (list:int):   List of maximum degree of the spherical harmonics
@@ -59,19 +57,13 @@ class CoefficientMapping:
                 mmax = min(self.mmax_list[i], lval)
                 m = torch.arange(-mmax, mmax + 1, device=self.device).long()
                 self.m_complex = torch.cat([self.m_complex, m], dim=0)
-                self.m_harmonic = torch.cat(
-                    [self.m_harmonic, torch.abs(m).long()], dim=0
-                )
-                self.l_harmonic = torch.cat(
-                    [self.l_harmonic, m.fill_(lval).long()], dim=0
-                )
+                self.m_harmonic = torch.cat([self.m_harmonic, torch.abs(m).long()], dim=0)
+                self.l_harmonic = torch.cat([self.l_harmonic, m.fill_(lval).long()], dim=0)
             self.res_size[i] = len(self.l_harmonic) - offset
             offset = len(self.l_harmonic)
 
         num_coefficients = len(self.l_harmonic)
-        self.to_m = torch.zeros(
-            [num_coefficients, num_coefficients], device=self.device
-        )
+        self.to_m = torch.zeros([num_coefficients, num_coefficients], device=self.device)
         self.m_size = torch.zeros([max(self.mmax_list) + 1], device=self.device).long()
 
         # The following is implemented poorly - very slow. It only gets called
@@ -118,8 +110,7 @@ class CoefficientMapping:
 
 
 class SO3_Embedding(torch.nn.Module):
-    """
-    Helper functions for irreps embedding
+    """Helper functions for irreps embedding
 
     Args:
         length (int):           Batch size
@@ -250,9 +241,7 @@ class SO3_Embedding(torch.nn.Module):
             embedding_rotate = torch.cat(
                 [
                     embedding_rotate,
-                    SO3_rotation[i].rotate_inv(
-                        embedding_i, self.lmax_list[i], self.mmax_list[i]
-                    ),
+                    SO3_rotation[i].rotate_inv(embedding_i, self.lmax_list[i], self.mmax_list[i]),
                 ],
                 dim=1,
             )
@@ -273,12 +262,8 @@ class SO3_Embedding(torch.nn.Module):
             num_coefficients = mappingReduced.res_size[i]
 
             x_res = self.embedding[:, offset : offset + num_coefficients].contiguous()
-            to_grid_mat = SO3_grid[self.lmax_list[i]][
-                self.mmax_list[i]
-            ].get_to_grid_mat(self.device)
-            from_grid_mat = SO3_grid[self.lmax_list[i]][
-                self.mmax_list[i]
-            ].get_from_grid_mat(self.device)
+            to_grid_mat = SO3_grid[self.lmax_list[i]][self.mmax_list[i]].get_to_grid_mat(self.device)
+            from_grid_mat = SO3_grid[self.lmax_list[i]][self.mmax_list[i]].get_from_grid_mat(self.device)
 
             x_grid = torch.einsum("bai,zic->zbac", to_grid_mat, x_res)
             x_grid = act(x_grid)
@@ -347,8 +332,7 @@ class SO3_Embedding(torch.nn.Module):
 
 
 class SO3_Rotation(torch.nn.Module):
-    """
-    Helper functions for Wigner-D rotations
+    """Helper functions for Wigner-D rotations
 
     Args:
         rot_mat3x3 (tensor):    Rotation matrix
@@ -391,15 +375,10 @@ class SO3_Rotation(torch.nn.Module):
         return torch.bmm(wigner_inv, embedding)
 
     # Compute Wigner matrices from rotation matrix
-    def RotationToWignerDMatrix(
-        self, edge_rot_mat: torch.Tensor, start_lmax: int, end_lmax: int
-    ) -> torch.Tensor:
+    def RotationToWignerDMatrix(self, edge_rot_mat: torch.Tensor, start_lmax: int, end_lmax: int) -> torch.Tensor:
         x = edge_rot_mat @ edge_rot_mat.new_tensor([0.0, 1.0, 0.0])
         alpha, beta = o3.xyz_to_angles(x)
-        R = (
-            o3.angles_to_matrix(alpha, beta, torch.zeros_like(alpha)).transpose(-1, -2)
-            @ edge_rot_mat
-        )
+        R = o3.angles_to_matrix(alpha, beta, torch.zeros_like(alpha)).transpose(-1, -2) @ edge_rot_mat
         gamma = torch.atan2(R[..., 0, 2], R[..., 0, 0])
 
         size = (end_lmax + 1) ** 2 - (start_lmax) ** 2
@@ -443,8 +422,7 @@ class SO3_Rotation(torch.nn.Module):
 
 
 class SO3_Grid(torch.nn.Module):
-    """
-    Helper functions for grid representation of the irreps
+    """Helper functions for grid representation of the irreps
 
     Args:
         lmax (int):   Maximum degree of the spherical harmonics
@@ -479,12 +457,8 @@ class SO3_Grid(torch.nn.Module):
             device=device,
         )
 
-        self.to_grid_mat = torch.einsum(
-            "mbi,am->bai", to_grid.shb, to_grid.sha
-        ).detach()
-        self.to_grid_mat = self.to_grid_mat[
-            :, :, self.mapping.coefficient_idx(self.lmax, self.mmax)
-        ]
+        self.to_grid_mat = torch.einsum("mbi,am->bai", to_grid.shb, to_grid.sha).detach()
+        self.to_grid_mat = self.to_grid_mat[:, :, self.mapping.coefficient_idx(self.lmax, self.mmax)]
 
         from_grid = FromS2Grid(
             (self.lat_resolution, self.long_resolution),
@@ -493,12 +467,8 @@ class SO3_Grid(torch.nn.Module):
             device=device,
         )
 
-        self.from_grid_mat = torch.einsum(
-            "am,mbi->bai", from_grid.sha, from_grid.shb
-        ).detach()
-        self.from_grid_mat = self.from_grid_mat[
-            :, :, self.mapping.coefficient_idx(self.lmax, self.mmax)
-        ]
+        self.from_grid_mat = torch.einsum("am,mbi->bai", from_grid.sha, from_grid.shb).detach()
+        self.from_grid_mat = self.from_grid_mat[:, :, self.mapping.coefficient_idx(self.lmax, self.mmax)]
 
         self.initialized = True
 
@@ -522,8 +492,6 @@ class SO3_Grid(torch.nn.Module):
     # Compute irreps from grid representation
     def from_grid(self, grid: torch.Tensor, lmax: int, mmax: int) -> torch.Tensor:
         self._initialize(grid.device)
-        from_grid_mat = self.from_grid_mat[
-            :, :, self.mapping.coefficient_idx(lmax, mmax)
-        ]
+        from_grid_mat = self.from_grid_mat[:, :, self.mapping.coefficient_idx(lmax, mmax)]
         embedding = torch.einsum("bai,zbac->zic", from_grid_mat, grid)
         return embedding

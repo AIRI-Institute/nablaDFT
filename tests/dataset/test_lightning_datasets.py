@@ -2,8 +2,8 @@ from math import ceil
 
 import pytest
 import torch
-
 from nablaDFT.dataset import PyGHamiltonianDataModule, PyGNablaDFTDataModule
+
 from .assertions import assert_shapes_hamiltonian
 
 
@@ -15,12 +15,8 @@ def test_lightning_energy_datamodule_fit_dataloader(dataset_lightning_params):
         dataset.train_dataloader(),
         dataset.val_dataloader(),
     )
-    assert len(dataloader_train) == ceil(
-        len(dataset.dataset_train) / dataset.dataloader_kwargs["batch_size"]
-    )
-    assert len(dataloader_val) == ceil(
-        len(dataset.dataset_val) / dataset.dataloader_kwargs["batch_size"]
-    )
+    assert len(dataloader_train) == ceil(len(dataset.dataset_train) / dataset.dataloader_kwargs["batch_size"])
+    assert len(dataloader_val) == ceil(len(dataset.dataset_val) / dataset.dataloader_kwargs["batch_size"])
     train_batch = next(iter(dataloader_train))
     val_batch = next(iter(dataloader_train))
     for batch in [train_batch, val_batch]:

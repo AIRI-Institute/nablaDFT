@@ -1,5 +1,4 @@
-"""
-Copyright (c) Facebook, Inc. and its affiliates.
+"""Copyright (c) Facebook, Inc. and its affiliates.
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
 """
@@ -10,8 +9,7 @@ import torch
 
 
 class ForceScaler:
-    """
-    Scales up the energy and then scales down the forces
+    """Scales up the energy and then scales down the forces
     to prevent NaNs and infs in calculations using AMP.
     Inspired by torch.cuda.amp.GradScaler.
     """
@@ -67,10 +65,7 @@ class ForceScaler:
                     # Prevent infinite loop
                     force_iters += 1
                     if force_iters == self.max_force_iters:
-                        logging.warning(
-                            "Too many non-finite force results in a batch. "
-                            "Breaking scaling loop."
-                        )
+                        logging.warning("Too many non-finite force results in a batch. " "Breaking scaling loop.")
                         break
                     else:
                         # Delete graph to save memory

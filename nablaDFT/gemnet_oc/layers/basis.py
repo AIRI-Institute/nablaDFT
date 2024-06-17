@@ -1,5 +1,4 @@
-"""
-Copyright (c) Facebook, Inc. and its affiliates.
+"""Copyright (c) Facebook, Inc. and its affiliates.
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
 """
@@ -14,15 +13,12 @@ from scipy.optimize import brentq
 
 
 def Jn(r: float, n: int):
-    """
-    numerical spherical bessel functions of order n
-    """
+    """Numerical spherical bessel functions of order n"""
     return sp.spherical_jn(n, r)
 
 
 def Jn_zeros(n: int, k: int):
-    """
-    Compute the first k zeros of the spherical bessel functions
+    """Compute the first k zeros of the spherical bessel functions
     up to order n (excluded)
     """
     zerosj = np.zeros((n, k), dtype="float32")
@@ -39,8 +35,7 @@ def Jn_zeros(n: int, k: int):
 
 
 def spherical_bessel_formulas(n: int):
-    """
-    Computes the sympy formulas for the spherical bessel functions
+    """Computes the sympy formulas for the spherical bessel functions
     up to order n (excluded)
     """
     x = sym.symbols("x", real=True)
@@ -55,11 +50,10 @@ def spherical_bessel_formulas(n: int):
 
 
 def bessel_basis(n: int, k: int):
-    """
-    Compute the sympy formulas for the normalized and rescaled spherical bessel
+    """Compute the sympy formulas for the normalized and rescaled spherical bessel
     functions up to order n (excluded) and maximum frequency k (excluded).
 
-    Returns
+    Returns:
     -------
     bess_basis: list
         Bessel basis formulas taking in a single argument x.
@@ -82,28 +76,23 @@ def bessel_basis(n: int, k: int):
     for order in range(n):
         bess_basis_tmp = []
         for i in range(k):
-            bess_basis_tmp += [
-                sym.simplify(
-                    normalizer[order][i] * f[order].subs(x, zeros[order, i] * x)
-                )
-            ]
+            bess_basis_tmp += [sym.simplify(normalizer[order][i] * f[order].subs(x, zeros[order, i] * x))]
         bess_basis += [bess_basis_tmp]
     return bess_basis
 
 
 def sph_harm_prefactor(l_degree: int, m_order: int):
-    """
-    Computes the constant pre-factor for the spherical harmonic
+    """Computes the constant pre-factor for the spherical harmonic
     of degree l and order m.
 
-    Arguments
+    Arguments:
     ---------
     l_degree: int
         Degree of the spherical harmonic. l >= 0
     m_order: int
         Order of the spherical harmonic. -l <= m <= l
 
-    Returns
+    Returns:
     -------
     factor: float
 
@@ -117,14 +106,11 @@ def sph_harm_prefactor(l_degree: int, m_order: int):
     ) ** 0.5
 
 
-def associated_legendre_polynomials(
-    L_maxdegree: int, zero_m_only: bool = True, pos_m_only: bool = True
-):
-    """
-    Computes string formulas of the associated legendre polynomials
+def associated_legendre_polynomials(L_maxdegree: int, zero_m_only: bool = True, pos_m_only: bool = True):
+    """Computes string formulas of the associated legendre polynomials
     up to degree L (excluded).
 
-    Arguments
+    Arguments:
     ---------
     L_maxdegree: int
         Degree up to which to calculate the associated legendre polynomials
@@ -135,7 +121,7 @@ def associated_legendre_polynomials(
         If True only calculate the polynomials for the polynomials where m>=0.
         Overwritten by zero_m_only.
 
-    Returns
+    Returns:
     -------
     polynomials: list
         Contains the sympy functions of the polynomials
@@ -143,9 +129,7 @@ def associated_legendre_polynomials(
     """
     # calculations from http://web.cmb.usc.edu/people/alber/Software/tomominer/docs/cpp/group__legendre__polynomials.html
     z = sym.symbols("z", real=True)
-    P_l_m = [
-        [0] * (2 * l_degree + 1) for l_degree in range(L_maxdegree)
-    ]  # for order l: -l <= m <= l
+    P_l_m = [[0] * (2 * l_degree + 1) for l_degree in range(L_maxdegree)]  # for order l: -l <= m <= l
 
     P_l_m[0][0] = 1
     if L_maxdegree > 1:
@@ -154,10 +138,7 @@ def associated_legendre_polynomials(
             P_l_m[1][0] = z
             for l_degree in range(2, L_maxdegree):
                 P_l_m[l_degree][0] = sym.simplify(
-                    (
-                        (2 * l_degree - 1) * z * P_l_m[l_degree - 1][0]
-                        - (l_degree - 1) * P_l_m[l_degree - 2][0]
-                    )
+                    ((2 * l_degree - 1) * z * P_l_m[l_degree - 1][0] - (l_degree - 1) * P_l_m[l_degree - 2][0])
                     / l_degree
                 )
             return P_l_m
@@ -165,9 +146,7 @@ def associated_legendre_polynomials(
             # for m >= 0
             for l_degree in range(1, L_maxdegree):
                 P_l_m[l_degree][l_degree] = sym.simplify(
-                    (1 - 2 * l_degree)
-                    * (1 - z**2) ** 0.5
-                    * P_l_m[l_degree - 1][l_degree - 1]
+                    (1 - 2 * l_degree) * (1 - z**2) ** 0.5 * P_l_m[l_degree - 1][l_degree - 1]
                 )  # P_00, P_11, P_22, P_33
 
             for m_order in range(0, L_maxdegree - 1):
@@ -205,12 +184,11 @@ def real_sph_harm(
     use_phi: bool = True,
     zero_m_only: bool = True,
 ) -> None:
-    """
-    Computes formula strings of the the real part of the spherical harmonics
+    """Computes formula strings of the the real part of the spherical harmonics
     up to degree L (excluded). Variables are either spherical coordinates phi
     and theta (or cartesian coordinates x,y,z) on the UNIT SPHERE.
 
-    Arguments
+    Arguments:
     ---------
     L_maxdegree: int
         Degree up to which to calculate the spherical harmonics
@@ -225,7 +203,7 @@ def real_sph_harm(
     zero_m_only: bool
         If True only calculate the harmonics where m=0.
 
-    Returns
+    Returns:
     -------
     Y_lm_real: list
         Computes formula strings of the the real part of the spherical
@@ -240,9 +218,7 @@ def real_sph_harm(
         # for all m != 0: Y_lm = 0
         Y_l_m = [[0] for l_degree in range(L_maxdegree)]
     else:
-        Y_l_m = [
-            [0] * (2 * l_degree + 1) for l_degree in range(L_maxdegree)
-        ]  # for order l: -l <= m <= l
+        Y_l_m = [[0] * (2 * l_degree + 1) for l_degree in range(L_maxdegree)]  # for order l: -l <= m <= l
 
     # convert expressions to spherical coordiantes
     if use_theta:
@@ -251,9 +227,7 @@ def real_sph_harm(
         for l_degree in range(L_maxdegree):
             for m_order in range(len(P_l_m[l_degree])):
                 if not isinstance(P_l_m[l_degree][m_order], int):
-                    P_l_m[l_degree][m_order] = P_l_m[l_degree][m_order].subs(
-                        z, sym.cos(theta)
-                    )
+                    P_l_m[l_degree][m_order] = P_l_m[l_degree][m_order].subs(z, sym.cos(theta))
 
     ## calculate Y_lm
     # Y_lm = N * P_lm(cos(theta)) * exp(i*m*phi)
@@ -262,9 +236,7 @@ def real_sph_harm(
     #             { sqrt(2) * (-1)^m * N * P_lm * cos(m*phi)       if m > 0
 
     for l_degree in range(L_maxdegree):
-        Y_l_m[l_degree][0] = sym.simplify(
-            sph_harm_prefactor(l_degree, 0) * P_l_m[l_degree][0]
-        )  # Y_l0
+        Y_l_m[l_degree][0] = sym.simplify(sph_harm_prefactor(l_degree, 0) * P_l_m[l_degree][0])  # Y_l0
 
     if not zero_m_only:
         phi = sym.symbols("phi", real=True)
@@ -294,18 +266,14 @@ def real_sph_harm(
             x, y = sym.symbols("x y", real=True)
             for l_degree in range(L_maxdegree):
                 for m_order in range(len(Y_l_m[l_degree])):
-                    Y_l_m[l_degree][m_order] = sym.simplify(
-                        Y_l_m[l_degree][m_order].subs(phi, sym.atan2(y, x))
-                    )
+                    Y_l_m[l_degree][m_order] = sym.simplify(Y_l_m[l_degree][m_order].subs(phi, sym.atan2(y, x)))
     return Y_l_m
 
 
 def get_sph_harm_basis(L_maxdegree: int, zero_m_only: bool = True):
     """Get a function calculating the spherical harmonics basis from z and phi."""
     # retrieve equations
-    Y_lm = real_sph_harm(
-        L_maxdegree, use_theta=False, use_phi=True, zero_m_only=zero_m_only
-    )
+    Y_lm = real_sph_harm(L_maxdegree, use_theta=False, use_phi=True, zero_m_only=zero_m_only)
     Y_lm_flat = [Y for Y_l in Y_lm for Y in Y_l]
 
     # convert to pytorch functions

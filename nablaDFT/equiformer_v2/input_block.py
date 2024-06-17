@@ -9,23 +9,23 @@ from .so3 import SO3_Embedding
 
 
 class EdgeDegreeEmbedding(torch.nn.Module):
-    """
+    """Args:
+    sphere_channels (int):      Number of spherical channels
 
-    Args:
-        sphere_channels (int):      Number of spherical channels
+    lmax_list (list:int):       List of degrees (l) for each resolution
+    mmax_list (list:int):       List of orders (m) for each resolution
 
-        lmax_list (list:int):       List of degrees (l) for each resolution
-        mmax_list (list:int):       List of orders (m) for each resolution
+    SO3_rotation (list:SO3_Rotation): Class to calculate Wigner-D matrices and rotate embeddings
+    mappingReduced (CoefficientMappingModule): Class to convert l and m indices once node embedding is rotated
 
-        SO3_rotation (list:SO3_Rotation): Class to calculate Wigner-D matrices and rotate embeddings
-        mappingReduced (CoefficientMappingModule): Class to convert l and m indices once node embedding is rotated
+    max_num_elements (int):     Maximum number of atomic numbers
+    edge_channels_list (list:int):  List of sizes of invariant edge embedding.
+        For example, [input_channels, hidden_channels, hidden_channels].
+        The last one will be used as hidden size when `use_atom_edge_embedding` is `True`.
+    use_atom_edge_embedding (bool): Whether to use atomic embedding along with relative
+        distance for edge scalar features
 
-        max_num_elements (int):     Maximum number of atomic numbers
-        edge_channels_list (list:int):  List of sizes of invariant edge embedding. For example, [input_channels, hidden_channels, hidden_channels].
-                                        The last one will be used as hidden size when `use_atom_edge_embedding` is `True`.
-        use_atom_edge_embedding (bool): Whether to use atomic embedding along with relative distance for edge scalar features
-
-        rescale_factor (float):     Rescale the sum aggregation
+    rescale_factor (float):     Rescale the sum aggregation
     """
 
     def __init__(
@@ -58,17 +58,11 @@ class EdgeDegreeEmbedding(torch.nn.Module):
         self.use_atom_edge_embedding = use_atom_edge_embedding
 
         if self.use_atom_edge_embedding:
-            self.source_embedding = nn.Embedding(
-                self.max_num_elements, self.edge_channels_list[-1]
-            )
-            self.target_embedding = nn.Embedding(
-                self.max_num_elements, self.edge_channels_list[-1]
-            )
+            self.source_embedding = nn.Embedding(self.max_num_elements, self.edge_channels_list[-1])
+            self.target_embedding = nn.Embedding(self.max_num_elements, self.edge_channels_list[-1])
             nn.init.uniform_(self.source_embedding.weight.data, -0.001, 0.001)
             nn.init.uniform_(self.target_embedding.weight.data, -0.001, 0.001)
-            self.edge_channels_list[0] = (
-                self.edge_channels_list[0] + 2 * self.edge_channels_list[-1]
-            )
+            self.edge_channels_list[0] = self.edge_channels_list[0] + 2 * self.edge_channels_list[-1]
         else:
             self.source_embedding, self.target_embedding = None, None
 
@@ -79,22 +73,17 @@ class EdgeDegreeEmbedding(torch.nn.Module):
         self.rescale_factor = rescale_factor
 
     def forward(self, atomic_numbers, edge_distance, edge_index):
-
         if self.use_atom_edge_embedding:
             source_element = atomic_numbers[edge_index[0]]  # Source atom atomic number
             target_element = atomic_numbers[edge_index[1]]  # Target atom atomic number
             source_embedding = self.source_embedding(source_element)
             target_embedding = self.target_embedding(target_element)
-            x_edge = torch.cat(
-                (edge_distance, source_embedding, target_embedding), dim=1
-            )
+            x_edge = torch.cat((edge_distance, source_embedding, target_embedding), dim=1)
         else:
             x_edge = edge_distance
 
         x_edge_m_0 = self.rad_func(x_edge)
-        x_edge_m_0 = x_edge_m_0.reshape(
-            -1, self.m_0_num_coefficients, self.sphere_channels
-        )
+        x_edge_m_0 = x_edge_m_0.reshape(-1, self.m_0_num_coefficients, self.sphere_channels)
         x_edge_m_pad = torch.zeros(
             (
                 x_edge_m_0.shape[0],

@@ -1,10 +1,10 @@
-from typing import Dict, Union, Tuple, Any, Optional, Type
+from typing import Any, Dict, Optional, Tuple, Type, Union
 
+import pytorch_lightning as pl
 import torch
 from torch import nn
-import pytorch_lightning as pl
-from torch_geometric.nn.models import DimeNetPlusPlus
 from torch_geometric.data import Data
+from torch_geometric.nn.models import DimeNetPlusPlus
 
 
 def swish(x):
@@ -40,7 +40,7 @@ class DimeNetPlusPlusPotential(nn.Module):
         do_postprocessing=False,
     ):
         super().__init__()
-        self.scaler=scaler
+        self.scaler = scaler
 
         self.node_latent_dim = node_latent_dim
         self.dimenet_hidden_channels = dimenet_hidden_channels
@@ -96,13 +96,16 @@ class DimeNetPlusPlusPotential(nn.Module):
         pos = pos.requires_grad_(True)
         graph_embeddings = self.net(pos=pos, z=atom_z, batch=batch_mapping)
         predictions = torch.flatten(self.regr_or_cls_nn(graph_embeddings).contiguous())
-        forces = -1 * (
-            torch.autograd.grad(
-                predictions,
-                pos,
-                grad_outputs=torch.ones_like(predictions),
-                create_graph=self.training,
-            )[0]
+        forces = (
+            -1
+            * (
+                torch.autograd.grad(
+                    predictions,
+                    pos,
+                    grad_outputs=torch.ones_like(predictions),
+                    create_graph=self.training,
+                )[0]
+            )
         )
 
         if self.scaler and self.do_postprocessing:
@@ -124,7 +127,6 @@ class DimeNetPlusPlusLightning(pl.LightningModule):
         scheduler_args: Optional[Dict[str, Any]] = None,
         optimizer: Optional[Type] = None,
     ):
-
         super().__init__()
         self.save_hyperparameters(logger=True, ignore=["net", "loss"])
 
@@ -139,9 +141,7 @@ class DimeNetPlusPlusLightning(pl.LightningModule):
     def forward(self, data: Data):
         return self.net(data)
 
-    def step(
-        self, batch, calculate_metrics: bool = False
-    ) -> Union[Tuple[Any, Dict], Any]:
+    def step(self, batch, calculate_metrics: bool = False) -> Union[Tuple[Any, Dict], Any]:
         predictions_energy, predictions_forces = self.forward(batch)
         loss_energy = self.loss(predictions_energy, batch.y)
         loss_forces = self.loss(predictions_forces, batch.forces)

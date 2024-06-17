@@ -1,18 +1,19 @@
 """Module describes PyTorch Geometric interfaces for nablaDFT datasets"""
 
-import os
 import logging
-from typing import List, Callable
+import os
+from typing import Callable, List
 
-from tqdm import tqdm
 import numpy as np
 import torch
 from ase.db import connect
-from torch_geometric.data import InMemoryDataset, Data, Dataset
+from torch_geometric.data import Data, Dataset, InMemoryDataset
+from tqdm import tqdm
+
+from nablaDFT.dataset.registry import dataset_registry
+from nablaDFT.utils import download_file
 
 from .hamiltonian_dataset import HamiltonianDatabase
-from nablaDFT.utils import download_file
-from nablaDFT.dataset.registry import dataset_registry
 
 logger = logging.getLogger(__name__)
 
@@ -24,10 +25,11 @@ class PyGNablaDFT(InMemoryDataset):
 
     .. code-block:: python
         from nablaDFT.dataset import PyGNablaDFT
+
         dataset = PyGNablaDFT(
             datapath="./datasets/",
             dataset_name="dataset_train_tiny",
-            split="train"
+            split="train",
         )
         sample = dataset[0]
 
@@ -72,14 +74,10 @@ class PyGNablaDFT(InMemoryDataset):
             data, slices = torch.load(path)
             self.data_all.append(data)
             self.slices_all.append(slices)
-            self.offsets.append(
-                len(slices[list(slices.keys())[0]]) - 1 + self.offsets[-1]
-            )
+            self.offsets.append(len(slices[list(slices.keys())[0]]) - 1 + self.offsets[-1])
 
     def len(self) -> int:
-        return sum(
-            len(slices[list(slices.keys())[0]]) - 1 for slices in self.slices_all
-        )
+        return sum(len(slices[list(slices.keys())[0]]) - 1 for slices in self.slices_all)
 
     def get(self, idx):
         data_idx = 0
@@ -92,7 +90,12 @@ class PyGNablaDFT(InMemoryDataset):
     def download(self) -> None:
         url = dataset_registry.get_dataset_url("energy", self.dataset_name)
         dataset_etag = dataset_registry.get_dataset_etag("energy", self.dataset_name)
-        download_file(url, self.raw_paths[0], dataset_etag, desc=f"Downloading split: {self.dataset_name}")
+        download_file(
+            url,
+            self.raw_paths[0],
+            dataset_etag,
+            desc=f"Downloading split: {self.dataset_name}",
+        )
 
     def process(self) -> None:
         db = connect(self.raw_paths[0])
@@ -119,11 +122,14 @@ class PyGHamiltonianNablaDFT(Dataset):
     """Pytorch Geometric interface for nablaDFT Hamiltonian datasets.
 
     .. code-block:: python
-        from nablaDFT.dataset import PyGHamiltonianNablaDFT
+        from nablaDFT.dataset import (
+            PyGHamiltonianNablaDFT,
+        )
+
         dataset = PyGHamiltonianNablaDFT(
             datapath="./datasets/",
             dataset_name="dataset_train_tiny",
-            split="train"
+            split="train",
         )
         sample = dataset[0]
 
@@ -220,7 +226,12 @@ class PyGHamiltonianNablaDFT(Dataset):
     def download(self) -> None:
         url = dataset_registry.get_dataset_url("hamiltonian", self.dataset_name)
         dataset_etag = dataset_registry.get_dataset_etag("hamiltonian", self.dataset_name)
-        download_file(url, self.raw_paths[0], dataset_etag, desc=f"Downloading split: {self.dataset_name}")
+        download_file(
+            url,
+            self.raw_paths[0],
+            dataset_etag,
+            desc=f"Downloading split: {self.dataset_name}",
+        )
 
     def _get_max_orbitals(self, datapath, dataset_name):
         db_path = os.path.join(datapath, "raw/" + dataset_name + self.db_suffix)
@@ -229,8 +240,6 @@ class PyGHamiltonianNablaDFT(Dataset):
         database = HamiltonianDatabase(db_path)
         max_orbitals = []
         for z in database.Z:
-            max_orbitals.append(
-                tuple((int(z), int(l)) for l in database.get_orbitals(z))
-            )
+            max_orbitals.append(tuple((int(z), int(orb_num)) for orb_num in database.get_orbitals(z)))
         max_orbitals = tuple(max_orbitals)
         return max_orbitals

@@ -51,7 +51,7 @@ optimizer:
 lr_scheduler:
   _target_: torch.optim.lr_scheduler.LambdaLR
   _partial_: true
-  lr_lambda: 
+  lr_lambda:
       _target_: nablaDFT.equiformer_v2.lr_scheduler.CosineLRLambda
       scheduler_params:
         warmup_factor: 0.2

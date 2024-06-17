@@ -1,5 +1,4 @@
-"""
-Copyright (c) Meta, Inc. and its affiliates.
+"""Copyright (c) Meta, Inc. and its affiliates.
 
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
@@ -9,21 +8,14 @@ import logging
 import time
 from typing import Dict, List
 
+import pytorch_lightning as pl
 import torch
 import torch.nn as nn
 from torch.optim import Optimizer
 from torch.optim.lr_scheduler import LRScheduler
-from torch_geometric.nn import radius_graph
 from torch_geometric.data import Data
+from torch_geometric.nn import radius_graph
 
-import pytorch_lightning as pl
-
-from .so3 import (
-    CoefficientMapping,
-    SO3_Embedding,
-    SO3_Grid,
-    SO3_Rotation,
-)
 from .sampling import CalcSpherePoints
 from .smearing import (
     GaussianSmearing,
@@ -31,13 +23,14 @@ from .smearing import (
     SigmoidSmearing,
     SiLUSmearing,
 )
+from .so3 import CoefficientMapping, SO3_Embedding, SO3_Grid, SO3_Rotation
 
 try:
     from e3nn import o3
 except ImportError:
     pass
 
-from nablaDFT.gemnet_oc.utils import radius_graph_pbc, compute_neighbors
+from nablaDFT.gemnet_oc.utils import compute_neighbors, get_pbc_distances, radius_graph_pbc
 
 
 class eSCN(nn.Module):
@@ -58,7 +51,8 @@ class eSCN(nn.Module):
         mmax_list (int):              List of maximum order of the spherical harmonics (0 to lmax)
         sphere_channels (int):        Number of spherical channels (one set per resolution)
         hidden_channels (int):        Number of hidden units in message passing
-        num_sphere_samples (int):     Number of samples used to approximate the integration of the sphere in the output blocks
+        num_sphere_samples (int):     Number of samples used to approximate
+            the integration of the sphere in the output blocks
         edge_channels (int):          Number of channels for the edge invariant features
         distance_function ("gaussian", "sigmoid", "linearsigmoid", "silu"):  Basis function used for distances
         basis_width_scalar (float):   Width of distance basis function
@@ -125,9 +119,7 @@ class eSCN(nn.Module):
         self.act = nn.SiLU()
 
         # Weights for message initialization
-        self.sphere_embedding = nn.Embedding(
-            self.max_num_elements, self.sphere_channels_all
-        )
+        self.sphere_embedding = nn.Embedding(self.max_num_elements, self.sphere_channels_all)
 
         # Initialize the function used to measure the distances between atoms
         assert self.distance_function in [
@@ -193,18 +185,12 @@ class eSCN(nn.Module):
             self.layer_blocks.append(block)
 
         # Output blocks for energy and forces
-        self.energy_block = EnergyBlock(
-            self.sphere_channels_all, self.num_sphere_samples, self.act
-        )
+        self.energy_block = EnergyBlock(self.sphere_channels_all, self.num_sphere_samples, self.act)
         if self.regress_forces:
-            self.force_block = ForceBlock(
-                self.sphere_channels_all, self.num_sphere_samples, self.act
-            )
+            self.force_block = ForceBlock(self.sphere_channels_all, self.num_sphere_samples, self.act)
 
         # Create a roughly evenly distributed point sampling of the sphere for the output blocks
-        self.sphere_points = nn.Parameter(
-            CalcSpherePoints(self.num_sphere_samples), requires_grad=False
-        )
+        self.sphere_points = nn.Parameter(CalcSpherePoints(self.num_sphere_samples), requires_grad=False)
 
         # For each spherical point, compute the spherical harmonic coefficient weights
         sphharm_weights: List[nn.Parameter] = []
@@ -253,9 +239,7 @@ class eSCN(nn.Module):
                     neighbors = data.neighbors
 
             except AttributeError:
-                logging.warning(
-                    "Turning otf_graph=True as required attributes not present in data object"
-                )
+                logging.warning("Turning otf_graph=True as required attributes not present in data object")
                 otf_graph = True
 
         if use_pbc:
@@ -295,9 +279,7 @@ class eSCN(nn.Module):
 
             edge_dist = distance_vec.norm(dim=-1)
             cell_offsets = torch.zeros(edge_index.shape[1], 3, device=data.pos.device)
-            cell_offset_distances = torch.zeros_like(
-                cell_offsets, device=data.pos.device
-            )
+            cell_offset_distances = torch.zeros_like(cell_offsets, device=data.pos.device)
             neighbors = compute_neighbors(data, edge_index)
 
         return (
@@ -365,7 +347,8 @@ class eSCN(nn.Module):
             offset = offset + self.sphere_channels
             offset_res = offset_res + int((self.lmax_list[i] + 1) ** 2)
 
-        # This can be expensive to compute (not implemented efficiently), so only do it once and pass it along to each layer
+        # This can be expensive to compute (not implemented efficiently),
+        # so only do it once and pass it along to each layer
         mappingReduced = CoefficientMapping(self.lmax_list, self.mmax_list, device)
 
         ###############################################################
@@ -459,9 +442,7 @@ class eSCN(nn.Module):
 
         # Make sure the atoms are far enough apart
         if torch.min(edge_vec_0_distance) < 0.0001:
-            logging.error(
-                "Error edge_vec_0_distance: {}".format(torch.min(edge_vec_0_distance))
-            )
+            logging.error("Error edge_vec_0_distance: {}".format(torch.min(edge_vec_0_distance)))
             (minval, minidx) = torch.min(edge_vec_0_distance, 0)
             logging.error(
                 "Error edge_vec_0_distance: {} {} {} {} {}".format(
@@ -476,9 +457,7 @@ class eSCN(nn.Module):
         norm_x = edge_vec_0 / (edge_vec_0_distance.view(-1, 1))
 
         edge_vec_2 = torch.rand_like(edge_vec_0) - 0.5
-        edge_vec_2 = edge_vec_2 / (
-            torch.sqrt(torch.sum(edge_vec_2**2, dim=1)).view(-1, 1)
-        )
+        edge_vec_2 = edge_vec_2 / (torch.sqrt(torch.sum(edge_vec_2**2, dim=1)).view(-1, 1))
         # Create two rotated copys of the random vectors in case the random vector is aligned with norm_x
         # With two 90 degree rotated vectors, at least one should not be aligned with norm_x
         edge_vec_2b = edge_vec_2.clone()
@@ -521,8 +500,7 @@ class eSCN(nn.Module):
 
 
 class LayerBlock(torch.nn.Module):
-    """
-    Layer block: Perform one layer (message passing and aggregation) of the GNN
+    """Layer block: Perform one layer (message passing and aggregation) of the GNN
 
     Args:
         layer_idx (int):            Layer number
@@ -575,17 +553,11 @@ class LayerBlock(torch.nn.Module):
         )
 
         # Non-linear point-wise comvolution for the aggregated messages
-        self.fc1_sphere = nn.Linear(
-            2 * self.sphere_channels_all, self.sphere_channels_all, bias=False
-        )
+        self.fc1_sphere = nn.Linear(2 * self.sphere_channels_all, self.sphere_channels_all, bias=False)
 
-        self.fc2_sphere = nn.Linear(
-            self.sphere_channels_all, self.sphere_channels_all, bias=False
-        )
+        self.fc2_sphere = nn.Linear(self.sphere_channels_all, self.sphere_channels_all, bias=False)
 
-        self.fc3_sphere = nn.Linear(
-            self.sphere_channels_all, self.sphere_channels_all, bias=False
-        )
+        self.fc3_sphere = nn.Linear(self.sphere_channels_all, self.sphere_channels_all, bias=False)
 
     def forward(
         self,
@@ -627,8 +599,7 @@ class LayerBlock(torch.nn.Module):
 
 
 class MessageBlock(torch.nn.Module):
-    """
-    Message block: Perform message passing
+    """Message block: Perform message passing
 
     Args:
         layer_idx (int):            Layer number
@@ -744,8 +715,7 @@ class MessageBlock(torch.nn.Module):
 
 
 class SO2Block(torch.nn.Module):
-    """
-    SO(2) Block: Perform SO(2) convolutions for all m (orders)
+    """SO(2) Block: Perform SO(2) convolutions for all m (orders)
 
     Args:
         sphere_channels (int):      Number of spherical channels
@@ -828,9 +798,7 @@ class SO2Block(torch.nn.Module):
         offset = mappingReduced.m_size[0]
         for m in range(1, max(self.mmax_list) + 1):
             # Get the m order coefficients
-            x_m = x.embedding[
-                :, offset : offset + 2 * mappingReduced.m_size[m]
-            ].contiguous()
+            x_m = x.embedding[:, offset : offset + 2 * mappingReduced.m_size[m]].contiguous()
             x_m = x_m.view(num_edges, 2, -1)
             # Perform SO(2) convolution
             x_m = self.so2_conv[m - 1](x_m, x_edge)
@@ -846,8 +814,7 @@ class SO2Block(torch.nn.Module):
 
 
 class SO2Conv(torch.nn.Module):
-    """
-    SO(2) Conv: Perform an SO(2) convolution
+    """SO(2) Conv: Perform an SO(2) convolution
 
     Args:
         m (int):                    Order of the spherical harmonic coefficients
@@ -920,8 +887,7 @@ class SO2Conv(torch.nn.Module):
 
 
 class EdgeBlock(torch.nn.Module):
-    """
-    Edge Block: Compute invariant edge representation from edge diatances and atomic numbers
+    """Edge Block: Compute invariant edge representation from edge diatances and atomic numbers
 
     Args:
         edge_channels (int):        Size of invariant edge embedding
@@ -976,8 +942,7 @@ class EdgeBlock(torch.nn.Module):
 
 
 class EnergyBlock(torch.nn.Module):
-    """
-    Energy Block: Output block computing the energy
+    """Energy Block: Output block computing the energy
 
     Args:
         num_channels (int):         Number of channels
@@ -1012,8 +977,7 @@ class EnergyBlock(torch.nn.Module):
 
 
 class ForceBlock(torch.nn.Module):
-    """
-    Force Block: Output block computing the per atom forces
+    """Force Block: Output block computing the per atom forces
 
     Args:
         num_channels (int):         Number of channels
@@ -1068,7 +1032,6 @@ class eSCNLightning(pl.LightningModule):
         return energy, forces
 
     def step(self, batch, calculate_metrics: bool = False):
-        bsz = batch.batch.max().detach().item() + 1  # get batch size
         y = batch.y
         # make dense batch from PyG batch
         energy_out, forces_out = self.net(batch)
@@ -1166,13 +1129,11 @@ class eSCNLightning(pl.LightningModule):
 
     def on_test_epoch_end(self) -> None:
         self._reduce_metrics(step_type="test")
-    
+
     def _calculate_loss(self, y_pred, y_true) -> float:
         total_loss = 0.0
         for name, loss in self.hparams.losses.items():
-            total_loss += self.hparams.loss_coefs[name] * loss(
-                y_pred[name], y_true[name]
-            )
+            total_loss += self.hparams.loss_coefs[name] * loss(y_pred[name], y_true[name])
         return total_loss
 
     def _calculate_metrics(self, y_pred, y_true) -> Dict:

@@ -1,9 +1,9 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from .spherical_linear import *
-from .residual_stack import *
+
 from .pair_mixing import *
+from .residual_stack import *
+from .spherical_linear import *
 
 """
 Refines atomic features by interacting with its neighbors
@@ -61,10 +61,7 @@ class InteractionBlock(nn.Module):
             mix_orders=False,
         )
         self.radial_fn = nn.ModuleList(
-            [
-                nn.Linear(self.num_basis_functions, self.num_features, bias=False)
-                for L in range(self.order + 1)
-            ]
+            [nn.Linear(self.num_basis_functions, self.num_features, bias=False) for L in range(self.order + 1)]
         )
         self.mixing = PairMixing(
             self.order,
@@ -140,16 +137,12 @@ class InteractionBlock(nn.Module):
         yj = self.linear_j(yj)
         # interaction function
         for L in range(self.order + 1):
-            idx = idx_j.view(*(1,) * len(yj[L].shape[:-3]), -1, 1, 1).repeat(
-                *yj[L].shape[:-3], 1, *yj[L].shape[-2:]
-            )
+            idx = idx_j.view(*(1,) * len(yj[L].shape[:-3]), -1, 1, 1).repeat(*yj[L].shape[:-3], 1, *yj[L].shape[-2:])
             yj[L] = torch.gather(yj[L], 1, idx)
         vs = self.mixing(yj, self.angular_fn1(sph), rbf)
         a = self.angular_fn2(sph)
         for L in range(self.order + 1):
-            vs[L] = yi[L].index_add(
-                1, idx_i, vs[L] + self.radial_fn[L](rbf) * a[L] * yj[0]
-            )
+            vs[L] = yi[L].index_add(1, idx_i, vs[L] + self.radial_fn[L](rbf) * a[L] * yj[0])
         # interaction refinement
         vs = self.residual_post_v(vs)
         vs[0] = self.activation_v(vs[0])

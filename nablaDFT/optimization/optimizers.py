@@ -1,18 +1,18 @@
-from typing import Dict, Optional, List, Tuple
-from os.path import isfile
 import pickle
 import time
 from math import sqrt
+from os.path import isfile
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
-from ase.optimize.optimize import Dynamics
-from ase.parallel import world, barrier
-from ase.io import write
 from ase import Atoms
+from ase.io import write
+from ase.optimize.optimize import Dynamics
+from ase.parallel import barrier, world
 
+from .calculator import BatchwiseCalculator
 from .line_search import LineSearch
 from .opt_utils import np_scatter_add
-from .calculator import BatchwiseCalculator
 
 
 class BatchwiseDynamics(Dynamics):
@@ -92,7 +92,6 @@ class BatchwiseDynamics(Dynamics):
 
         # run the algorithm until converged or max_steps reached
         while not self.converged() and self.nsteps < self.max_steps:
-
             # compute the next step
             self.step()
             self.nsteps += 1
@@ -116,8 +115,8 @@ class BatchwiseDynamics(Dynamics):
 
         This method will return when the forces on all individual
         atoms are less than *fmax* or when the number of steps exceeds
-        *steps*."""
-
+        *steps*.
+        """
         for converged in BatchwiseDynamics.irun(self):
             pass
         return converged
@@ -209,7 +208,7 @@ class BatchwiseOptimizer(BatchwiseDynamics):
         pass
 
     def irun(self, atoms, fmax: float = 0.05, steps: Optional[int] = None):
-        """call Dynamics.irun and keep track of fmax"""
+        """Call Dynamics.irun and keep track of fmax"""
         self.atoms = atoms
         self.n_configs = len(atoms)
         self.n_ats = sum([len(at.numbers) for at in self.atoms])
@@ -219,7 +218,7 @@ class BatchwiseOptimizer(BatchwiseDynamics):
         return BatchwiseDynamics.irun(self)
 
     def run(self, atoms, fmax: float = 0.05, steps: Optional[int] = None):
-        """call Dynamics.run and keep track of fmax"""
+        """Call Dynamics.run and keep track of fmax"""
         self.atoms = atoms
         self.n_configs = len(atoms)
         self.n_ats = sum([len(at.numbers) for at in self.atoms])
@@ -227,10 +226,7 @@ class BatchwiseOptimizer(BatchwiseDynamics):
         self.ats_mask = np.zeros((self.n_configs, self.n_ats), dtype=bool)
         self.batch = np.array(
             sum(
-                [
-                    [i for _ in range(len(self.atoms[i].numbers))]
-                    for i in range(self.n_configs)
-                ],
+                [[i for _ in range(len(self.atoms[i].numbers))] for i in range(self.n_configs)],
                 [],
             )
         )
@@ -248,17 +244,13 @@ class BatchwiseOptimizer(BatchwiseDynamics):
     def converged(self, forces: Optional[np.array] = None) -> bool:
         """Did the optimization converge?"""
         if forces is None:
-            forces = self.calculator.get_forces(
-                self.atoms, fixed_atoms_mask=self.fixed_atoms_mask
-            )
+            forces = self.calculator.get_forces(self.atoms, fixed_atoms_mask=self.fixed_atoms_mask)
         # todo: maybe np.linalg.norm?
         return (forces**2).sum(axis=1).max() < self.fmax**2
 
     def log(self, forces: Optional[np.array] = None) -> None:
         if forces is None:
-            forces = self.calculator.get_forces(
-                self.atoms, fixed_atoms_mask=self.fixed_atoms_mask
-            )
+            forces = self.calculator.get_forces(self.atoms, fixed_atoms_mask=self.fixed_atoms_mask)
         fmax = sqrt((forces**2).sum(axis=1).max())
         T = time.localtime()
         if self.logfile is not None:
@@ -378,7 +370,6 @@ class ASEBatchwiseLBFGS(BatchwiseOptimizer):
         fixed_atoms:
             list of indices corresponding to atoms with positions fixed in space.
         """
-
         BatchwiseOptimizer.__init__(
             self,
             calculator=calculator,
@@ -397,8 +388,7 @@ class ASEBatchwiseLBFGS(BatchwiseOptimizer):
 
         if self.maxstep > 1.0:
             raise ValueError(
-                "You are using a much too large value for "
-                + "the maximum step size: %.1f Angstrom" % maxstep
+                "You are using a much too large value for " + "the maximum step size: %.1f Angstrom" % maxstep
             )
 
         self.memory = memory
@@ -448,12 +438,10 @@ class ASEBatchwiseLBFGS(BatchwiseOptimizer):
         """Take a single step
 
         Use the given forces, update the history and calculate the next step --
-        then take it"""
-
+        then take it
+        """
         if f is None:
-            f = self.calculator.get_forces(
-                self.atoms, fixed_atoms_mask=self.fixed_atoms_mask
-            )
+            f = self.calculator.get_forces(self.atoms, fixed_atoms_mask=self.fixed_atoms_mask)
         r = np.zeros((self.n_ats, 3), dtype=np.float64)
         current_pos = 0
         mask = []
@@ -465,9 +453,7 @@ class ASEBatchwiseLBFGS(BatchwiseOptimizer):
             q_euclidean = -f[first_idx:last_idx].reshape(-1, 3)
             squared_max_forces = (q_euclidean**2).sum(axis=-1).max(axis=-1)
             mask.append(
-                np.array([squared_max_forces < self.fmax**2])[:, None]
-                .repeat(3, 1)
-                .repeat(last_idx - first_idx, 0)
+                np.array([squared_max_forces < self.fmax**2])[:, None].repeat(3, 1).repeat(last_idx - first_idx, 0)
             )
         # check if updates for respective structures are required
         # q_euclidean = -f.reshape(self.n_configs, -1, 3)
@@ -505,10 +491,6 @@ class ASEBatchwiseLBFGS(BatchwiseOptimizer):
         # ## The algorithm itself:
         q = -f
         for i in range(loopmax - 1, -1, -1):
-            # for at_idx in range(self.n_configs):
-            # print (rho[i].shape)
-            #    a[i][self.ats_mask[at_idx]] = rho[i][at_idx] * s[i][self.ats_mask[at_idx]].reshape(-1).dot(q[self.ats_mask[at_idx]].reshape(-1))
-
             per_atom_ai = rho[i] * np_scatter_add(
                 (s[i].reshape(-1, 1) * q.reshape(-1, 1)).reshape(-1, 3),
                 self.batch,
@@ -526,8 +508,6 @@ class ASEBatchwiseLBFGS(BatchwiseOptimizer):
                 (self.n_configs, 3),
             ).sum(axis=1)
             b = np.repeat(b, self.n_ats_per_config, axis=0).reshape(-1, 1)
-            # for at_idx in range(self.n_configs):
-            #   b[self.ats_mask[at_idx]] = rho[i][at_idx] * y[i][self.ats_mask[at_idx]].reshape(-1).dot(z[self.ats_mask[at_idx]].reshape(-1))
 
             z += s[i] * (a[i] - b)
 

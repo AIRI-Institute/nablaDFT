@@ -1,16 +1,16 @@
 import logging
 import math
-from typing import List, Dict, Optional, Union
-
-import torch
-import torch.nn as nn
-from torch.optim.lr_scheduler import LRScheduler
-from torch.optim import Optimizer
-from torch_geometric.data import Data
-
-from torch_geometric.nn import radius_graph
+from typing import Dict, List, Optional
 
 import pytorch_lightning as pl
+import torch
+import torch.nn as nn
+from torch.optim import Optimizer
+from torch.optim.lr_scheduler import LRScheduler
+from torch_geometric.data import Data
+from torch_geometric.nn import radius_graph
+
+from nablaDFT.gemnet_oc.utils import compute_neighbors, get_pbc_distances, radius_graph_pbc
 
 from .edge_rot_mat import init_edge_rot_mat
 from .gaussian_rbf import GaussianRadialBasisLayer
@@ -42,12 +42,10 @@ from .transformer_block import (
 _AVG_NUM_NODES = 39.65745326960467
 _AVG_DEGREE = 19.16009564536883
 
-from nablaDFT.gemnet_oc.utils import radius_graph_pbc, compute_neighbors
-
 
 class EquiformerV2_OC20(nn.Module):
-    """
-    Equiformer with graph attention built upon SO(2) convolution and feedforward network built upon S2 activation
+    """Equiformer with graph attention built upon SO(2) convolution and
+    feedforward network built upon S2 activation.
 
     Args:
         use_pbc (bool):         Use periodic boundary conditions
@@ -70,16 +68,20 @@ class EquiformerV2_OC20(nn.Module):
         mmax_list (int):              List of maximum order of the spherical harmonics (0 to lmax)
         grid_resolution (int):        Resolution of SO3_Grid
 
-        num_sphere_samples (int):     Number of samples used to approximate the integration of the sphere in the output blocks
+        num_sphere_samples (int): Number of samples used to approximate the integration of
+            the sphere in the output blocks
 
         edge_channels (int):                Number of channels for the edge invariant features
-        use_atom_edge_embedding (bool):     Whether to use atomic embedding along with relative distance for edge scalar features
+        use_atom_edge_embedding (bool):     Whether to use atomic embedding along with relative
+            distance for edge scalar features
         share_atom_edge_embedding (bool):   Whether to share `atom_edge_embedding` across all blocks
-        use_m_share_rad (bool):             Whether all m components within a type-L vector of one channel share radial function weights
+        use_m_share_rad (bool):             Whether all m components within a type-L vector of one channel
+            share radial function weights
         distance_function ("gaussian", "sigmoid", "linearsigmoid", "silu"):  Basis function used for distances
 
         attn_activation (str):      Type of activation function for SO(2) graph attention
-        use_s2_act_attn (bool):     Whether to use attention after S2 activation. Otherwise, use the same attention as Equiformer
+        use_s2_act_attn (bool):     Whether to use attention after S2 activation. Otherwise,
+            use the same attention as Equiformer
         use_attn_renorm (bool):     Whether to re-normalize attention weights
         ffn_activation (str):       Type of activation function for feedforward network
         use_gate_act (bool):        If `True`, use gate activation. Otherwise, use S2 activation
@@ -90,17 +92,26 @@ class EquiformerV2_OC20(nn.Module):
         drop_path_rate (float):     Drop path rate
         proj_drop (float):          Dropout rate for outputs of attention and FFN in Transformer blocks
 
-        weight_init (str):          ['normal', 'uniform'] initialization of weights of linear layers except those in radial functions
-        enforce_max_neighbors_strictly (bool):      When edges are subselected based on the `max_neighbors` arg, arbitrarily select amongst equidistant / degenerate edges to have exactly the correct number.
+        weight_init (str):          ['normal', 'uniform'] initialization of weights of linear
+            layers except those in radial functions
+        enforce_max_neighbors_strictly (bool):      When edges are subselected based on the `max_neighbors` arg,
+            arbitrarily select amongst equidistant / degenerate edges to have exactly the correct number.
         avg_num_nodes (float):      Average number of nodes per graph
         avg_degree (float):         Average degree of nodes in the graph
 
         use_energy_lin_ref (bool):  Whether to add the per-atom energy references during prediction.
-                                    During training and validation, this should be kept `False` since we use the `lin_ref` parameter in the OC22 dataloader to subtract the per-atom linear references from the energy targets.
-                                    During prediction (where we don't have energy targets), this can be set to `True` to add the per-atom linear references to the predicted energies.
+                                    During training and validation, this should be kept `False'
+                                    since we use the `lin_ref` parameter in the OC22 dataloader to subtract
+                                    the per-atom linear references from the energy targets.
+                                    During prediction (where we don't have energy targets), this can be set to `True`
+                                    to add the per-atom linear references to the predicted energies.
         load_energy_lin_ref (bool): Whether to add nn.Parameters for the per-element energy references.
-                                    This additional flag is there to ensure compatibility when strict-loading checkpoints, since the `use_energy_lin_ref` flag can be either True or False even if the model is trained with linear references.
-                                    You can't have use_energy_lin_ref = True and load_energy_lin_ref = False, since the model will not have the parameters for the linear references. All other combinations are fine.
+                                    This additional flag is there to ensure compatibility when
+                                    strict-loading checkpoints, since the `use_energy_lin_ref` flag can be either
+                                    True or False even if the model is trained with linear references.
+                                    You can't have use_energy_lin_ref = True and load_energy_lin_ref = False,
+                                    since the model will not have the parameters for the linear references.
+                                    All other combinations are fine.
     """
 
     def __init__(
@@ -206,9 +217,10 @@ class EquiformerV2_OC20(nn.Module):
 
         self.use_energy_lin_ref = use_energy_lin_ref
         self.load_energy_lin_ref = load_energy_lin_ref
-        assert not (
-            self.use_energy_lin_ref and not self.load_energy_lin_ref
-        ), "You can't have use_energy_lin_ref = True and load_energy_lin_ref = False, since the model will not have the parameters for the linear references. All other combinations are fine."
+        assert not (self.use_energy_lin_ref and not self.load_energy_lin_ref), (
+            "You can't have use_energy_lin_ref = True and load_energy_lin_ref = False, since the model will not have "
+            "the parameters for the linear references. All other combinations are fine."
+        )
 
         self.weight_init = weight_init
         assert self.weight_init in ["normal", "uniform"]
@@ -222,9 +234,7 @@ class EquiformerV2_OC20(nn.Module):
         self.sphere_channels_all: int = self.num_resolutions * self.sphere_channels
 
         # Weights for message initialization
-        self.sphere_embedding = nn.Embedding(
-            self.max_num_elements, self.sphere_channels_all
-        )
+        self.sphere_embedding = nn.Embedding(self.max_num_elements, self.sphere_channels_all)
 
         # Initialize the function used to measure the distances between atoms
         assert self.distance_function in [
@@ -237,26 +247,17 @@ class EquiformerV2_OC20(nn.Module):
                 600,
                 2.0,
             )
-            # self.distance_expansion = GaussianRadialBasisLayer(num_basis=self.num_distance_basis, cutoff=self.max_radius)
         else:
             raise ValueError
 
         # Initialize the sizes of radial functions (input channels and 2 hidden channels)
-        self.edge_channels_list = [int(self.distance_expansion.num_output)] + [
-            self.edge_channels
-        ] * 2
+        self.edge_channels_list = [int(self.distance_expansion.num_output)] + [self.edge_channels] * 2
 
         # Initialize atom edge embedding
         if self.share_atom_edge_embedding and self.use_atom_edge_embedding:
-            self.source_embedding = nn.Embedding(
-                self.max_num_elements, self.edge_channels_list[-1]
-            )
-            self.target_embedding = nn.Embedding(
-                self.max_num_elements, self.edge_channels_list[-1]
-            )
-            self.edge_channels_list[0] = (
-                self.edge_channels_list[0] + 2 * self.edge_channels_list[-1]
-            )
+            self.source_embedding = nn.Embedding(self.max_num_elements, self.edge_channels_list[-1])
+            self.target_embedding = nn.Embedding(self.max_num_elements, self.edge_channels_list[-1])
+            self.edge_channels_list[0] = self.edge_channels_list[0] + 2 * self.edge_channels_list[-1]
         else:
             self.source_embedding, self.target_embedding = None, None
 
@@ -269,9 +270,7 @@ class EquiformerV2_OC20(nn.Module):
         self.mappingReduced = CoefficientMappingModule(self.lmax_list, self.mmax_list)
 
         # Initialize the transformations between spherical and grid representations
-        self.SO3_grid = ModuleListInfo(
-            "({}, {})".format(max(self.lmax_list), max(self.lmax_list))
-        )
+        self.SO3_grid = ModuleListInfo("({}, {})".format(max(self.lmax_list), max(self.lmax_list)))
         for lval in range(max(self.lmax_list) + 1):
             SO3_m_grid = nn.ModuleList()
             for m in range(max(self.lmax_list) + 1):
@@ -416,9 +415,7 @@ class EquiformerV2_OC20(nn.Module):
                     neighbors = data.neighbors
 
             except AttributeError:
-                logging.warning(
-                    "Turning otf_graph=True as required attributes not present in data object"
-                )
+                logging.warning("Turning otf_graph=True as required attributes not present in data object")
                 otf_graph = True
 
         if use_pbc:
@@ -458,9 +455,7 @@ class EquiformerV2_OC20(nn.Module):
 
             edge_dist = distance_vec.norm(dim=-1)
             cell_offsets = torch.zeros(edge_index.shape[1], 3, device=data.pos.device)
-            cell_offset_distances = torch.zeros_like(
-                cell_offsets, device=data.pos.device
-            )
+            cell_offset_distances = torch.zeros_like(cell_offsets, device=data.pos.device)
             neighbors = compute_neighbors(data, edge_index)
 
         return (
@@ -476,9 +471,9 @@ class EquiformerV2_OC20(nn.Module):
     def forward(self, data: Data):
         self.dtype = data.pos.dtype
         self.device = data.pos.device
-        
+
         bsz = data.batch.max().detach().item() + 1
-        
+
         atomic_numbers = data.z.long()
         num_atoms = len(atomic_numbers)
 
@@ -539,14 +534,10 @@ class EquiformerV2_OC20(nn.Module):
             target_element = atomic_numbers[edge_index[1]]  # Target atom atomic number
             source_embedding = self.source_embedding(source_element)
             target_embedding = self.target_embedding(target_element)
-            edge_distance = torch.cat(
-                (edge_distance, source_embedding, target_embedding), dim=1
-            )
+            edge_distance = torch.cat((edge_distance, source_embedding, target_embedding), dim=1)
 
         # Edge-degree embedding
-        edge_degree = self.edge_degree_embedding(
-            atomic_numbers, edge_distance, edge_index
-        )
+        edge_degree = self.edge_degree_embedding(atomic_numbers, edge_distance, edge_index)
         x.embedding = x.embedding + edge_degree.embedding
 
         ###############################################################
@@ -661,9 +652,7 @@ class EquiformerV2_OC20(nn.Module):
                 or isinstance(module, GaussianRadialBasisLayer)
             ):
                 for parameter_name, _ in module.named_parameters():
-                    if isinstance(module, torch.nn.Linear) or isinstance(
-                        module, SO3_LinearV2
-                    ):
+                    if isinstance(module, torch.nn.Linear) or isinstance(module, SO3_LinearV2):
                         if "weight" in parameter_name:
                             continue
                     global_parameter_name = module_name + "." + parameter_name
@@ -692,7 +681,6 @@ class EquiformerV2_OC20_Lightning(pl.LightningModule):
         return energy, forces
 
     def step(self, batch, calculate_metrics: bool = False):
-        bsz = batch.batch.max().detach().item() + 1  # get batch size
         y = batch.y
         # make dense batch from PyG batch
         energy_out, forces_out = self.net(batch)
@@ -790,13 +778,11 @@ class EquiformerV2_OC20_Lightning(pl.LightningModule):
 
     def on_test_epoch_end(self) -> None:
         self._reduce_metrics(step_type="test")
-    
+
     def _calculate_loss(self, y_pred, y_true) -> float:
         total_loss = 0.0
         for name, loss in self.hparams.losses.items():
-            total_loss += self.hparams.loss_coefs[name] * loss(
-                y_pred[name], y_true[name]
-            )
+            total_loss += self.hparams.loss_coefs[name] * loss(y_pred[name], y_true[name])
         return total_loss
 
     def _calculate_metrics(self, y_pred, y_true) -> Dict:

@@ -2,14 +2,15 @@
 
 from typing import List
 
-from schnetpack.data.splitting import SplittingStrategy
 from schnetpack.data import ASEAtomsData
+from schnetpack.data.splitting import SplittingStrategy
 
 
 class TestSplit(SplittingStrategy):
     """Splitting strategy that allows to put all dataset elements in test split without index permutations.
     Used for schnetpack datasets to overcome limitation when train and val split are empty.
     """
+
     def split(self, dataset: ASEAtomsData, *split_sizes: List):
         """Returns test split indexes, leaves train and val indices empty.
 

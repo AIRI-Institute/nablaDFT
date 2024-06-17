@@ -10,7 +10,7 @@ class HamiltonianLoss(nn.Module):
         diff = pred - target
         mse = torch.mean(diff**2)
         mae = torch.mean(torch.abs(diff))
-        mse *= (pred.numel() / mask.sum())
-        mae *= (pred.numel() / mask.sum())
+        mse *= pred.numel() / mask.sum()
+        mae *= pred.numel() / mask.sum()
         rmse = torch.sqrt(mse)
         return rmse + mae

@@ -1,4 +1,4 @@
-# SchNetPack models 
+# SchNetPack models
 
 The code for training [SchNetPack](https://schnetpack.readthedocs.io/en/latest/api/representation.html) models from papers:
 * SchNet: A continuous-filter convolutional neural network for modeling quantum interactions (SchNet)
@@ -7,7 +7,7 @@ The code for training [SchNetPack](https://schnetpack.readthedocs.io/en/latest/a
 For the training, run the following command from the root of the repository:
 
 ```bash
-python run.py --config-name schnet.yaml 
+python run.py --config-name schnet.yaml
 ```
 or
 ```bash

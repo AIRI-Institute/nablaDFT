@@ -1,14 +1,13 @@
-from typing import Callable, Dict, Union, Tuple, Any
+from typing import Any, Callable, Dict, Tuple, Union
 
+import pytorch_lightning as pl
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch import Tensor
 from torch.optim import Optimizer
 from torch.optim.lr_scheduler import LRScheduler
 from torch_geometric.utils import to_dense_batch
-
-from torch import Tensor
-import pytorch_lightning as pl
 
 
 @torch.jit.script
@@ -32,14 +31,10 @@ class SelfMultiheadAttention(nn.Module):
         self.dropout = dropout
 
         self.head_dim = embed_dim // num_heads
-        assert (
-            self.head_dim * num_heads == self.embed_dim
-        ), "embed_dim must be divisible by num_heads"
+        assert self.head_dim * num_heads == self.embed_dim, "embed_dim must be divisible by num_heads"
         self.scaling = (self.head_dim * scaling_factor) ** -0.5
 
-        self.in_proj: Callable[[Tensor], Tensor] = nn.Linear(
-            embed_dim, embed_dim * 3, bias=bias
-        )
+        self.in_proj: Callable[[Tensor], Tensor] = nn.Linear(embed_dim, embed_dim * 3, bias=bias)
         self.out_proj = nn.Linear(embed_dim, embed_dim, bias=bias)
 
     def forward(
@@ -65,9 +60,7 @@ class SelfMultiheadAttention(nn.Module):
 
 
 class Graphormer3DEncoderLayer(nn.Module):
-    """
-    Implements a Graphormer-3D Encoder Layer.
-    """
+    """Implements a Graphormer-3D Encoder Layer."""
 
     def __init__(
         self,
@@ -213,19 +206,14 @@ class NodeTaskHead(nn.Module):
         delta_pos: Tensor,
     ) -> Tensor:
         bsz, n_node, _ = query.size()
-        q = (
-            self.q_proj(query).view(bsz, n_node, self.num_heads, -1).transpose(1, 2)
-            * self.scaling
-        )
+        q = self.q_proj(query).view(bsz, n_node, self.num_heads, -1).transpose(1, 2) * self.scaling
         k = self.k_proj(query).view(bsz, n_node, self.num_heads, -1).transpose(1, 2)
         v = self.v_proj(query).view(bsz, n_node, self.num_heads, -1).transpose(1, 2)
         attn = q @ k.transpose(-1, -2)  # [bsz, head, n, n]
-        attn_probs = softmax_dropout(
-            attn.view(-1, n_node, n_node) + attn_bias, 0.1, self.training
-        ).view(bsz, self.num_heads, n_node, n_node)
-        rot_attn_probs = attn_probs.unsqueeze(-1) * delta_pos.unsqueeze(1).type_as(
-            attn_probs
-        )  # [bsz, head, n, n, 3]
+        attn_probs = softmax_dropout(attn.view(-1, n_node, n_node) + attn_bias, 0.1, self.training).view(
+            bsz, self.num_heads, n_node, n_node
+        )
+        rot_attn_probs = attn_probs.unsqueeze(-1) * delta_pos.unsqueeze(1).type_as(attn_probs)  # [bsz, head, n, n, 3]
         rot_attn_probs = rot_attn_probs.permute(0, 1, 4, 2, 3)
         x = rot_attn_probs @ v.unsqueeze(2)  # [bsz, head , 3, n, d]
         x = x.permute(0, 3, 2, 1, 4).contiguous().view(bsz, n_node, 3, -1)
@@ -296,31 +284,21 @@ class Graphormer3D(nn.Module):
         dist: Tensor = delta_pos.norm(dim=-1)
         delta_pos /= dist.unsqueeze(-1) + 1e-5
 
-        edge_type = atoms.view(n_graph, n_node, 1) * self.atom_types + atoms.view(
-            n_graph, 1, n_node
-        )
+        edge_type = atoms.view(n_graph, n_node, 1) * self.atom_types + atoms.view(n_graph, 1, n_node)
 
         gbf_feature = self.gbf(dist, edge_type)
-        edge_features = gbf_feature.masked_fill(
-            padding_mask.unsqueeze(1).unsqueeze(-1), 0.0
-        )
+        edge_features = gbf_feature.masked_fill(padding_mask.unsqueeze(1).unsqueeze(-1), 0.0)
 
         graph_node_feature = (
-            self.tag_encoder(tags)
-            + self.atom_encoder(atoms)
-            + self.edge_proj(edge_features.sum(dim=-2))
+            self.tag_encoder(tags) + self.atom_encoder(atoms) + self.edge_proj(edge_features.sum(dim=-2))
         )
 
         # ===== MAIN MODEL =====
-        output = F.dropout(
-            graph_node_feature, p=self.input_dropout, training=self.training
-        )
+        output = F.dropout(graph_node_feature, p=self.input_dropout, training=self.training)
         output = output.transpose(0, 1).contiguous()
 
         graph_attn_bias = self.bias_proj(gbf_feature).permute(0, 3, 1, 2).contiguous()
-        graph_attn_bias.masked_fill_(
-            padding_mask.unsqueeze(1).unsqueeze(2), float("-inf")
-        )
+        graph_attn_bias.masked_fill_(padding_mask.unsqueeze(1).unsqueeze(2), float("-inf"))
 
         graph_attn_bias = graph_attn_bias.view(-1, n_node, n_node)
         for _ in range(self.blocks):
@@ -331,12 +309,8 @@ class Graphormer3D(nn.Module):
         output = output.transpose(0, 1)
 
         eng_output = F.dropout(output, p=0.1, training=self.training)
-        eng_output = (
-            self.energy_proj(eng_output) * self.energy_agg_factor(tags)
-        ).flatten(-2)
-        output_mask = (
-            tags > 0
-        ) & mask  # no need to consider padding, since padding has tag 0, real_mask False
+        eng_output = (self.energy_proj(eng_output) * self.energy_agg_factor(tags)).flatten(-2)
+        output_mask = (tags > 0) & mask  # no need to consider padding, since padding has tag 0, real_mask False
 
         eng_output *= output_mask
         eng_output = eng_output.sum(dim=-1)
@@ -373,9 +347,7 @@ class Graphormer3DLightning(pl.LightningModule):
         forces_out *= mask_out
         return energy_out, forces_out, mask_out
 
-    def step(
-        self, batch, calculate_metrics: bool = False
-    ) -> Union[Tuple[Any, Dict], Any]:
+    def step(self, batch, calculate_metrics: bool = False) -> Union[Tuple[Any, Dict], Any]:
         bsz = self._get_batch_size(batch)  # get batch size
         y = batch.y
         energy_out, forces_out, mask_out = self(batch)

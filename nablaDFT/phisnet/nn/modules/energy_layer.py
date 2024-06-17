@@ -33,25 +33,15 @@ class EnergyLayer(nn.Module):
         nn.init.zeros_(self.linear_out.bias)
 
     def forward(self, fii, fij, sizes, pair_sizes):
-        fii_ = self.activation(self.linear_diagonal(fii[0].squeeze(dim=-1))).squeeze(
-            dim=2
-        )
+        fii_ = self.activation(self.linear_diagonal(fii[0].squeeze(dim=-1))).squeeze(dim=2)
 
         diagonal_features = torch.concat(
-            [
-                torch.mean(sample_features, dim=1)
-                for sample_features in torch.split(fii_, sizes, dim=1)
-            ]
+            [torch.mean(sample_features, dim=1) for sample_features in torch.split(fii_, sizes, dim=1)]
         )
-        fij_ = self.activation(self.linear_offdiagonal(fij[0].squeeze(dim=-1))).squeeze(
-            dim=2
-        )
+        fij_ = self.activation(self.linear_offdiagonal(fij[0].squeeze(dim=-1))).squeeze(dim=2)
 
         offdiagonal_features = torch.concat(
-            [
-                torch.mean(sample_features, dim=1)
-                for sample_features in torch.split(fij_, pair_sizes, dim=1)
-            ]
+            [torch.mean(sample_features, dim=1) for sample_features in torch.split(fij_, pair_sizes, dim=1)]
         )
 
         full_features = torch.concat([diagonal_features, offdiagonal_features], dim=1)

@@ -1,7 +1,7 @@
 _target_: nablaDFT.ase_model.task.AtomisticTaskFixed
 
 model_name: "PaiNN"
-net:
+model:
   _target_: schnetpack.model.NeuralNetworkPotential
   representation:
     _target_: schnetpack.representation.PaiNN

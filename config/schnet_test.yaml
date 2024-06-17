@@ -1,9 +1,9 @@
 # Global variables
 name: SchNet
-dataset_name: dataset_test_conformations_tiny
+dataset_name: dataset_test_conformations_large
 max_steps: 1000000
 job_type: test
-pretrained: False # if True downloads checkpoint trained on the largest split
+pretrained: SchNet_train_large # if True downloads checkpoint trained on the largest split
 ckpt_path: null # path to checkpoint for training resume or test run
 
 # Datamodule parameters

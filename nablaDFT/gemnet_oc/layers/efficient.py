@@ -1,5 +1,4 @@
-"""
-Copyright (c) Facebook, Inc. and its affiliates.
+"""Copyright (c) Facebook, Inc. and its affiliates.
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
 """
@@ -13,10 +12,9 @@ from .base_layers import Dense
 
 
 class BasisEmbedding(torch.nn.Module):
-    """
-    Embed a basis (CBF, SBF), optionally using the efficient reformulation.
+    """Embed a basis (CBF, SBF), optionally using the efficient reformulation.
 
-    Arguments
+    Arguments:
     ---------
     num_radial: int
         Number of radial basis functions.
@@ -63,9 +61,7 @@ class BasisEmbedding(torch.nn.Module):
         idx_sph_inner=None,
         num_atoms=None,
     ):
-        """
-
-        Arguments
+        """Arguments:
         ---------
         rad_basis: torch.Tensor, shape=(num_edges, num_radial or num_orders * num_radial)
             Raw radial basis.
@@ -87,7 +83,7 @@ class BasisEmbedding(torch.nn.Module):
             Total number of atoms.
             Optional, used for efficient edge aggregation.
 
-        Returns
+        Returns:
         -------
         rad_W1: torch.Tensor, shape=(num_edges, emb_size_interm, num_spherical)
         sph: torch.Tensor, shape=(num_edges, Kmax, num_spherical)
@@ -154,10 +150,9 @@ class BasisEmbedding(torch.nn.Module):
 
 
 class EfficientInteractionBilinear(torch.nn.Module):
-    """
-    Efficient reformulation of the bilinear layer and subsequent summation.
+    """Efficient reformulation of the bilinear layer and subsequent summation.
 
-    Arguments
+    Arguments:
     ---------
     emb_size_in: int
         Embedding size of input triplets/quadruplets.
@@ -195,9 +190,7 @@ class EfficientInteractionBilinear(torch.nn.Module):
         idx_agg2_inner=None,
         agg2_out_size=None,
     ):
-        """
-
-        Arguments
+        """Arguments:
         ---------
         basis: Tuple (torch.Tensor, torch.Tensor),
             shapes=((num_edges, emb_size_interm, num_spherical),
@@ -218,7 +211,7 @@ class EfficientInteractionBilinear(torch.nn.Module):
             Number of output embeddings when aggregating twice. Typically
             the number of atoms.
 
-        Returns
+        Returns:
         -------
         m_ca: torch.Tensor, shape=(num_edges, emb_size)
             Aggregated edge/atom embeddings.
@@ -240,9 +233,7 @@ class EfficientInteractionBilinear(torch.nn.Module):
 
         if idx_agg2_outer is not None:
             Kmax2 = torch.max(idx_agg2_inner) + 1
-            sph_m_padded = sph_m.new_zeros(
-                agg2_out_size, Kmax2, sph_m.shape[1], sph_m.shape[2]
-            )
+            sph_m_padded = sph_m.new_zeros(agg2_out_size, Kmax2, sph_m.shape[1], sph_m.shape[2])
             sph_m_padded[idx_agg2_outer, idx_agg2_inner] = sph_m
             # (num_atoms, Kmax2, num_spherical, emb_size_in)
             sph_m_padded = sph_m_padded.reshape(agg2_out_size, -1, sph_m.shape[-1])

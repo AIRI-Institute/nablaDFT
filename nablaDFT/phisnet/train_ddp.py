@@ -1,32 +1,29 @@
 #!/usr/bin/env python3
 
-import time
-import math
-import torch
 import logging
-import multiprocessing
-import numpy as np
+import math
+import time
 from datetime import datetime
 
+import numpy as np
+import torch
+import torch.distributed as dist
+from nn import NeuralNetwork
 from tensorboardX import SummaryWriter
 from torch.nn.functional import softplus
-
-from nn import NeuralNetwork
-from training import ExponentialMovingAverage, Lookahead
+from torch.nn.parallel import DistributedDataParallel as DDP
+from torch.utils.data.distributed import DistributedSampler
 from training import (
-    seeded_random_split,
-    parse_command_line_arguments,
-    generate_id,
-    empty_error_dict,
+    ExponentialMovingAverage,
+    Lookahead,
     compute_error_dict,
+    empty_error_dict,
+    generate_id,
+    parse_command_line_arguments,
+    seeded_random_split,
 )
 
 from nablaDFT.dataset import NablaDFT
-
-import torch.distributed as dist
-from torch.nn.parallel import DistributedDataParallel as DDP
-from torch.utils.data import DataLoader, Dataset
-from torch.utils.data.distributed import DistributedSampler
 
 if __name__ == "__main__":
     import os
@@ -47,12 +44,8 @@ if __name__ == "__main__":
 
     # no restart directory specified
     if args.restart is None and args.local_rank == 0:
-        ID = (
-            generate_id()
-        )  # generate "unique" id for the run (very unlikely that two runs will have the same ID)
-        directory = (
-            datetime.utcnow().strftime("%Y-%m-%d_") + ID
-        )  # generate directory name
+        ID = generate_id()  # generate "unique" id for the run (very unlikely that two runs will have the same ID)
+        directory = datetime.utcnow().strftime("%Y-%m-%d_") + ID  # generate directory name
         checkpoint_dir = os.path.join(directory, "checkpoints")  # checkpoint directory
 
         # create directories
@@ -77,9 +70,7 @@ if __name__ == "__main__":
         checkpoint_dir = os.path.join(directory, "checkpoints")  # checkpoint directory
 
         # load latest checkpoint
-        checkpoint = torch.load(
-            os.path.join(checkpoint_dir, "latest_checkpoint.pth"), map_location="cpu"
-        )
+        checkpoint = torch.load(os.path.join(checkpoint_dir, "latest_checkpoint.pth"), map_location="cpu")
         latest_checkpoint = checkpoint["epoch"]
         ID = checkpoint["ID"]  # load ID
         # args = checkpoint['args']  # overwrite args
@@ -178,9 +169,7 @@ if __name__ == "__main__":
     tmp = (loss_weights["energy"] > 0) or (loss_weights["forces"] > 0)
     model.calculate_full_hamiltonian = (loss_weights["full_hamiltonian"] > 0) or tmp
     model.calculate_core_hamiltonian = (loss_weights["core_hamiltonian"] > 0) or tmp
-    model.calculate_overlap_matrix = (
-        (loss_weights["overlap_matrix"] > 0) or tmp
-    ) and not args.orthonormal_basis
+    model.calculate_overlap_matrix = ((loss_weights["overlap_matrix"] > 0) or tmp) and not args.orthonormal_basis
     if args.predict_energy:
         model.predict_energy = 1
         model.calculate_energy = 0
@@ -248,7 +237,7 @@ if __name__ == "__main__":
     parameters = []
     weight_decay_parameters = []
     for name, param in module.named_parameters():
-        if "weight" in name and not "radial_fn" in name and not "embedding" in name:
+        if "weight" in name and "radial_fn" not in name and "embedding" not in name:
             weight_decay_parameters.append(param)
         else:
             parameters.append(param)
@@ -310,9 +299,7 @@ if __name__ == "__main__":
             checkpoint_ema = checkpoint["exponential_moving_average"]
             for key in exponential_moving_average.ema.keys():
                 with torch.no_grad():
-                    exponential_moving_average.ema[key].data.copy_(
-                        checkpoint_ema[key].data
-                    )
+                    exponential_moving_average.ema[key].data.copy_(checkpoint_ema[key].data)
 
     # or initialize step/epoch to 0 and errors to infinity
     else:
@@ -323,9 +310,7 @@ if __name__ == "__main__":
 
     # create summary writer for tensorboard
     if args.local_rank == 0:
-        summary = SummaryWriter(
-            logdir=os.path.join(directory, "./logs/"), purge_step=step
-        )
+        summary = SummaryWriter(logdir=os.path.join(directory, "./logs/"), purge_step=step)
 
     """
     ###############################################
@@ -377,9 +362,7 @@ if __name__ == "__main__":
         predictions = model(data)
 
         # compute error metrics
-        errors = compute_error_dict(
-            predictions, data, loss_weights, max_errors, logging
-        )
+        errors = compute_error_dict(predictions, data, loss_weights, max_errors, logging)
         # backward step
         errors["loss"].backward()
 
@@ -397,9 +380,7 @@ if __name__ == "__main__":
 
         # update train_errors (running average)
         for key in train_errors.keys():
-            train_errors[key] += (errors[key].item() - train_errors[key]) / (
-                train_batch_num + 1
-            )
+            train_errors[key] += (errors[key].item() - train_errors[key]) / (train_batch_num + 1)
             world_errors = [0.0] * dist.get_world_size()
             dist.all_gather_object(world_errors, train_errors[key])
             train_errors[key] = np.mean(world_errors)
@@ -427,15 +408,11 @@ if __name__ == "__main__":
                     predictions = model(data)
 
                     # compute error metrics
-                    errors = compute_error_dict(
-                        predictions, data, loss_weights, max_errors, logging
-                    )
+                    errors = compute_error_dict(predictions, data, loss_weights, max_errors, logging)
 
                     # update valid_errors (running average)
                     for key in valid_errors.keys():
-                        valid_errors[key] += (
-                            errors[key].item() - valid_errors[key]
-                        ) / (valid_batch_num + 1)
+                        valid_errors[key] += (errors[key].item() - valid_errors[key]) / (valid_batch_num + 1)
 
             for key in valid_errors.keys():
                 world_errors = [0.0] * dist.get_world_size()
@@ -483,9 +460,7 @@ if __name__ == "__main__":
                 summary.add_scalar("gradient/norm", gradient_norm, step)
 
             # write summaries for scalar model parameters (always)
-            summary.add_scalar(
-                "rbf/alpha", softplus(module.radial_basis_functions._alpha), step
-            )
+            summary.add_scalar("rbf/alpha", softplus(module.radial_basis_functions._alpha), step)
 
             # write optional summaries for model parameters
             if args.write_parameter_summaries:
@@ -496,17 +471,11 @@ if __name__ == "__main__":
                     else:
                         first = "nn"
                         last = splitted_name[0]
-                    if (
-                        param.numel() > 1 and param.requires_grad
-                    ):  # only tensors get written as histogram
-                        summary.add_histogram(
-                            first + "/" + last, param.clone().cpu().data.numpy(), step
-                        )
+                    if param.numel() > 1 and param.requires_grad:  # only tensors get written as histogram
+                        summary.add_histogram(first + "/" + last, param.clone().cpu().data.numpy(), step)
 
             # print progress to consoles
-            progress_string = (
-                str(step).zfill(len(str(args.max_steps))) + "/" + str(args.max_steps)
-            )
+            progress_string = str(step).zfill(len(str(args.max_steps))) + "/" + str(args.max_steps)
             progress_string += " epoch: %6d" % epoch
 
             for key in loss_weights.keys():
@@ -558,9 +527,7 @@ if __name__ == "__main__":
                     "optimizer_state_dict": optimizer.state_dict(),
                     "scheduler_state_dict": scheduler.state_dict(),
                     "exponential_moving_average": (
-                        exponential_moving_average.ema
-                        if args.use_parameter_averaging
-                        else None
+                        exponential_moving_average.ema if args.use_parameter_averaging else None
                     ),
                 },
                 os.path.join(checkpoint_dir, "latest_checkpoint.pth"),
@@ -569,17 +536,12 @@ if __name__ == "__main__":
             summary.add_text("checkpoints", "saved checkpoint", step)
 
             # remove oldest checkpoints
-            if (
-                args.keep_checkpoints >= 0
-            ):  # for negative arguments, all checkpoints are kept
+            if args.keep_checkpoints >= 0:  # for negative arguments, all checkpoints are kept
                 for file in os.listdir(checkpoint_dir):
                     if file.startswith("checkpoint") and file.endswith(".pth"):
                         checkpoint_step = int(file.split(".pth")[0].split("_")[-1])
 
-                        if (
-                            checkpoint_step
-                            < step - args.checkpoint_interval * args.keep_checkpoints
-                        ):
+                        if checkpoint_step < step - args.checkpoint_interval * args.keep_checkpoints:
                             filename = os.path.join(checkpoint_dir, file)
 
                             if os.path.isfile(filename):
@@ -589,16 +551,10 @@ if __name__ == "__main__":
         stop_training = True
 
         for param_group in optimizer.param_groups:
-            stop_training = stop_training and (
-                param_group["lr"] < args.stop_at_learning_rate
-            )
+            stop_training = stop_training and (param_group["lr"] < args.stop_at_learning_rate)
 
         if stop_training:
-            logging.info(
-                "Learning rate is smaller than "
-                + str(args.stop_at_learning_rate)
-                + "! Training stopped."
-            )
+            logging.info("Learning rate is smaller than " + str(args.stop_at_learning_rate) + "! Training stopped.")
             break
 
     # close summary writer

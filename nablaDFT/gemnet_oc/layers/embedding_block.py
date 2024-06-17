@@ -1,5 +1,4 @@
-"""
-Copyright (c) Facebook, Inc. and its affiliates.
+"""Copyright (c) Facebook, Inc. and its affiliates.
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
 """
@@ -13,10 +12,9 @@ from .base_layers import Dense
 
 
 class AtomEmbedding(torch.nn.Module):
-    """
-    Initial atom embeddings based on the atom type
+    """Initial atom embeddings based on the atom type
 
-    Arguments
+    Arguments:
     ---------
     emb_size: int
         Atom embeddings size
@@ -31,8 +29,7 @@ class AtomEmbedding(torch.nn.Module):
         torch.nn.init.uniform_(self.embeddings.weight, a=-np.sqrt(3), b=np.sqrt(3))
 
     def forward(self, Z) -> torch.Tensor:
-        """
-        Returns
+        """Returns:
         -------
         h: torch.Tensor, shape=(nAtoms, emb_size)
             Atom embeddings.
@@ -42,11 +39,10 @@ class AtomEmbedding(torch.nn.Module):
 
 
 class EdgeEmbedding(torch.nn.Module):
-    """
-    Edge embedding based on the concatenation of atom embeddings
+    """Edge embedding based on the concatenation of atom embeddings
     and a subsequent dense layer.
 
-    Arguments
+    Arguments:
     ---------
     atom_features: int
         Embedding size of the atom embedding.
@@ -75,8 +71,7 @@ class EdgeEmbedding(torch.nn.Module):
         m: torch.Tensor,
         edge_index,
     ) -> torch.Tensor:
-        """
-        Arguments
+        """Arguments:
         ---------
         h: torch.Tensor, shape (num_atoms, atom_features)
             Atom embeddings.
@@ -84,7 +79,7 @@ class EdgeEmbedding(torch.nn.Module):
             Radial basis in embedding block,
             edge embedding in interaction block.
 
-        Returns
+        Returns:
         -------
             m_st: torch.Tensor, shape=(nEdges, emb_size)
                 Edge embeddings.

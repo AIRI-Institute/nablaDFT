@@ -8,7 +8,7 @@ from .optimizers import BatchwiseOptimizer
 
 class BatchwiseOptimizeTask:
     """Use for batchwise molecules conformations geometry optimization.
-    
+
     Args:
         input_datapath (str): path to ASE database with molecules.
         output_datapath (str): path to output database.
@@ -44,19 +44,13 @@ class BatchwiseOptimizeTask:
         for batch_idx in tqdm.tqdm(range(batch_count)):
             atoms_list = [
                 self.data_db_conn.get(i + 1).toatoms()
-                for i in range(
-                    batch_idx * self.bs, min(db_len, self.bs * (batch_idx + 1))
-                )
+                for i in range(batch_idx * self.bs, min(db_len, self.bs * (batch_idx + 1)))
             ]
             atoms_list = self.optimize_batch(atoms_list)
-            for relative_id, i in enumerate(
-                range(batch_idx * self.bs, min(db_len, self.bs * (batch_idx + 1)))
-            ):
+            for relative_id, i in enumerate(range(batch_idx * self.bs, min(db_len, self.bs * (batch_idx + 1)))):
                 row = self.data_db_conn.get(i + 1)
                 data = row.data
-                data["model_energy"] = float(
-                    self.optimizer.calculator.results["energy"][relative_id]
-                )
+                data["model_energy"] = float(self.optimizer.calculator.results["energy"][relative_id])
                 self.out_db_conn.write(
                     atoms_list[relative_id],
                     data=data,

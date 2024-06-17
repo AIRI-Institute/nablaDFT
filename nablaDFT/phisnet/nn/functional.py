@@ -1,8 +1,9 @@
 # coding: utf-8
 import math
+
 import torch
 import torch.nn.functional as F
-from .spherical_harmonics import spherical_harmonics
+
 
 """
     IMPORTANT NOTE: The cutoff and the switch function are numerically a bit tricky:
@@ -17,22 +18,17 @@ _log2 = math.log(2)
 
 
 def shifted_softplus(x):
-    """
-    shifted softplus activation function
-    """
+    """Shifted softplus activation function"""
     return F.softplus(x) - _log2
 
 
 def cutoff_function(x, cutoff):
-    """
-    cutoff function that smoothly goes from y = 1..0 in the interval x = 0..cutoff
+    """Cutoff function that smoothly goes from y = 1..0 in the interval x = 0..cutoff
     (this cutoff function has infinitely many smooth derivatives)
     """
     zeros = torch.zeros_like(x)
     x_ = torch.where(x < cutoff, x, zeros)
-    return torch.where(
-        x < cutoff, torch.exp(-(x_**2) / ((cutoff - x_) * (cutoff + x_))), zeros
-    )
+    return torch.where(x < cutoff, torch.exp(-(x_**2) / ((cutoff - x_) * (cutoff + x_))), zeros)
 
 
 """

@@ -1,5 +1,4 @@
-"""
-Copyright (c) Facebook, Inc. and its affiliates.
+"""Copyright (c) Facebook, Inc. and its affiliates.
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
 """
@@ -8,18 +7,17 @@ import math
 
 import torch
 
-from .scale_factor import ScaleFactor
 from .atom_update_block import AtomUpdateBlock
 from .base_layers import Dense, ResidualLayer
 from .efficient import EfficientInteractionBilinear
 from .embedding_block import EdgeEmbedding
+from .scale_factor import ScaleFactor
 
 
 class InteractionBlock(torch.nn.Module):
-    """
-    Interaction block for GemNet-Q/dQ.
+    """Interaction block for GemNet-Q/dQ.
 
-    Arguments
+    Arguments:
     ---------
     emb_size_atom: int
         Embedding size of the atoms.
@@ -221,10 +219,7 @@ class InteractionBlock(torch.nn.Module):
             activation=activation,
         )
         self.residual_m = torch.nn.ModuleList(
-            [
-                ResidualLayer(emb_size_edge, activation=activation)
-                for _ in range(num_concat)
-            ]
+            [ResidualLayer(emb_size_edge, activation=activation) for _ in range(num_concat)]
         )
 
         self.inv_sqrt_2 = 1 / math.sqrt(2.0)
@@ -252,8 +247,7 @@ class InteractionBlock(torch.nn.Module):
         trip_idx_e2a,
         quad_idx,
     ):
-        """
-        Returns
+        """Returns:
         -------
         h: torch.Tensor, shape=(nEdges, emb_size_atom)
             Atom embeddings.
@@ -356,10 +350,9 @@ class InteractionBlock(torch.nn.Module):
 
 
 class QuadrupletInteraction(torch.nn.Module):
-    """
-    Quadruplet-based message passing block.
+    """Quadruplet-based message passing block.
 
-    Arguments
+    Arguments:
     ---------
     emb_size_edge: int
         Embedding size of the edges.
@@ -422,9 +415,7 @@ class QuadrupletInteraction(torch.nn.Module):
         )
         self.scale_cbf = ScaleFactor()
 
-        self.mlp_sbf = EfficientInteractionBilinear(
-            emb_size_quad_in, emb_size_sbf, emb_size_quad_out
-        )
+        self.mlp_sbf = EfficientInteractionBilinear(emb_size_quad_in, emb_size_sbf, emb_size_quad_out)
         self.scale_sbf_sum = ScaleFactor()
         # combines scaling for bilinear layer and summation
 
@@ -458,13 +449,11 @@ class QuadrupletInteraction(torch.nn.Module):
         idx,
         id_swap,
     ):
-        """
-        Returns
+        """Returns:
         -------
         m: torch.Tensor, shape=(nEdges, emb_size_edge)
             Edge embeddings (c->a).
         """
-
         x_db = self.dense_db(m)  # (nEdges, emb_size_edge)
 
         # Transform via radial basis
@@ -510,10 +499,9 @@ class QuadrupletInteraction(torch.nn.Module):
 
 
 class TripletInteraction(torch.nn.Module):
-    """
-    Triplet-based message passing block.
+    """Triplet-based message passing block.
 
-    Arguments
+    Arguments:
     ---------
     emb_size_in: int
         Embedding size of the input embeddings.
@@ -572,9 +560,7 @@ class TripletInteraction(torch.nn.Module):
         )
         self.scale_rbf = ScaleFactor()
 
-        self.mlp_cbf = EfficientInteractionBilinear(
-            emb_size_trip_in, emb_size_cbf, emb_size_trip_out
-        )
+        self.mlp_cbf = EfficientInteractionBilinear(emb_size_trip_in, emb_size_cbf, emb_size_trip_out)
         self.scale_cbf_sum = ScaleFactor()
         # combines scaling for bilinear layer and summation
 
@@ -612,13 +598,11 @@ class TripletInteraction(torch.nn.Module):
         idx_agg2_inner=None,
         agg2_out_size=None,
     ):
-        """
-        Returns
+        """Returns:
         -------
         m: torch.Tensor, shape=(nEdges, emb_size_edge)
             Edge embeddings.
         """
-
         # Dense transformation
         x_ba = self.dense_ba(m)  # (nEdges, emb_size_edge)
 
@@ -670,10 +654,9 @@ class TripletInteraction(torch.nn.Module):
 
 
 class PairInteraction(torch.nn.Module):
-    """
-    Pair-based message passing block.
+    """Pair-based message passing block.
 
-    Arguments
+    Arguments:
     ---------
     emb_size_atom: int
         Embedding size of the atoms.
@@ -729,8 +712,7 @@ class PairInteraction(torch.nn.Module):
         edge_index,
         target_neighbor_idx,
     ):
-        """
-        Returns
+        """Returns:
         -------
         h: torch.Tensor, shape=(num_atoms, emb_size_atom)
             Atom embeddings.
