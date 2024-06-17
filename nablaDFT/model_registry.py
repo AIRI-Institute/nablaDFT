@@ -19,7 +19,7 @@ class ModelRegistry:
     default_ckpt_dir = Path("./checkpoints")
 
     def __init__(self):
-        with open(nablaDFT.__path__[0] + "/links/models_checkpoints.json", "r") as fin:
+        with open(nablaDFT.__path__[0] + "/links/models_checkpoints.json") as fin:
             content = json.load(fin)
         self._model_checkpoints = content["checkpoints"]
         self._model_checkpoints_etag = content["etag"]

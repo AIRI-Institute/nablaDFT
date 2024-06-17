@@ -13,7 +13,7 @@ class ScaledSiLU(nn.Module):
         return F.silu(inputs, inplace=self.inplace) * self.scale_factor
 
     def extra_repr(self):
-        str = "scale_factor={}".format(self.scale_factor)
+        str = f"scale_factor={self.scale_factor}"
         if self.inplace:
             str = str + ", inplace=True"
         return str
@@ -66,7 +66,7 @@ class SmoothLeakyReLU(torch.nn.Module):
         return x1 + x2
 
     def extra_repr(self):
-        return "negative_slope={}".format(self.alpha)
+        return f"negative_slope={self.alpha}"
 
 
 class ScaledSmoothLeakyReLU(torch.nn.Module):
@@ -79,7 +79,7 @@ class ScaledSmoothLeakyReLU(torch.nn.Module):
         return self.act(x) * self.scale_factor
 
     def extra_repr(self):
-        return "negative_slope={}, scale_factor={}".format(self.act.alpha, self.scale_factor)
+        return f"negative_slope={self.act.alpha}, scale_factor={self.scale_factor}"
 
 
 class ScaledSigmoid(torch.nn.Module):

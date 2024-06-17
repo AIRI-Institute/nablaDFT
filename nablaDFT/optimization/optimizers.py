@@ -270,7 +270,7 @@ class BatchwiseOptimizer(BatchwiseDynamics):
             for struc_idx, at in enumerate(self.atoms):
                 # store in trajectory
                 write(
-                    self.trajectory + "_{}.xyz".format(struc_idx),
+                    self.trajectory + f"_{struc_idx}.xyz",
                     at,
                     format="extxyz",
                     append=False if self.nsteps == 0 else True,

@@ -420,12 +420,8 @@ class eSCN(nn.Module):
         if self.show_timing_info is True:
             torch.cuda.synchronize()
             logging.info(
-                "{} Time: {}\tMemory: {}\t{}".format(
-                    self.counter,
-                    time.time() - start_time,
-                    len(data.pos),
-                    torch.cuda.max_memory_allocated() / 1000000,
-                )
+                f"{self.counter} Time: {time.time() - start_time}\t"
+                f"Memory: {len(data.pos)}\t{torch.cuda.max_memory_allocated() / 1000000}"
             )
 
         self.counter = self.counter + 1
@@ -442,16 +438,11 @@ class eSCN(nn.Module):
 
         # Make sure the atoms are far enough apart
         if torch.min(edge_vec_0_distance) < 0.0001:
-            logging.error("Error edge_vec_0_distance: {}".format(torch.min(edge_vec_0_distance)))
+            logging.error(f"Error edge_vec_0_distance: {torch.min(edge_vec_0_distance)}")
             (minval, minidx) = torch.min(edge_vec_0_distance, 0)
             logging.error(
-                "Error edge_vec_0_distance: {} {} {} {} {}".format(
-                    minidx,
-                    edge_index[0, minidx],
-                    edge_index[1, minidx],
-                    data.pos[edge_index[0, minidx]],
-                    data.pos[edge_index[1, minidx]],
-                )
+                f"Error edge_vec_0_distance: {minidx} {edge_index[0, minidx]} {edge_index[1, minidx]}"
+                f" {data.pos[edge_index[0, minidx]]} {data.pos[edge_index[1, minidx]]}"
             )
 
         norm_x = edge_vec_0 / (edge_vec_0_distance.view(-1, 1))

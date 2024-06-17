@@ -520,7 +520,7 @@ def _load_scale_dict(scale_file: Optional[Union[str, ScaleDict]]):
     if path.suffix == ".pt":
         scale_dict = torch.load(path)
     elif path.suffix == ".json":
-        with open(path, "r") as f:
+        with open(path) as f:
             scale_dict = json.load(f)
 
         if isinstance(scale_dict, dict):

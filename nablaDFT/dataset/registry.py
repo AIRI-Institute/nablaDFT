@@ -9,11 +9,11 @@ class DatasetRegistry:
 
     def __init__(self) -> None:
         self.hamiltonian_datasets = {}
-        with open(nablaDFT.__path__[0] + "/links/energy_databases.json", "r") as fin:
+        with open(nablaDFT.__path__[0] + "/links/energy_databases.json") as fin:
             content = json.load(fin)
         self.energy_datasets = content["databases"]
         self.energy_datasets_etag = content["etag"]
-        with open(nablaDFT.__path__[0] + "/links/hamiltonian_databases.json", "r") as fin:
+        with open(nablaDFT.__path__[0] + "/links/hamiltonian_databases.json") as fin:
             content = json.load(fin)
         self.hamiltonian_datasets = content["databases"]
         self.hamiltonian_datasets_etag = content["etag"]

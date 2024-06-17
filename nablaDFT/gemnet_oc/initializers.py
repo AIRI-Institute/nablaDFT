@@ -46,7 +46,8 @@ def he_orthogonal_init(tensor: torch.Tensor) -> torch.Tensor:
 
 def grid_init(tensor: torch.Tensor, start: int = -1, end: int = 1) -> torch.Tensor:
     """Generate a weight matrix so that each input value corresponds
-    to one value on a regular grid between start and end."""
+    to one value on a regular grid between start and end.
+    """
     fan_in = tensor.shape[1]
 
     with torch.no_grad():
@@ -58,7 +59,8 @@ def grid_init(tensor: torch.Tensor, start: int = -1, end: int = 1) -> torch.Tens
 
 def log_grid_init(tensor: torch.Tensor, start: int = -4, end: int = 0) -> torch.Tensor:
     """Generate a weight matrix so that each input value corresponds
-    to one value on a regular logarithmic grid between 10^start and 10^end."""
+    to one value on a regular logarithmic grid between 10^start and 10^end.
+    """
     fan_in = tensor.shape[1]
 
     with torch.no_grad():

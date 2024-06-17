@@ -99,7 +99,7 @@ class PYGCalculator(Calculator):
         Returns:
            AtomisticTask: loaded schnetpack model
         """
-        log.info("Loading model from {:s}".format(ckpt_path))
+        log.info(f"Loading model from {ckpt_path:s}")
         # load model and keep it on CPU, device can be changed afterwards
         model = load_model(config, ckpt_path)
         model = model.eval()
@@ -205,7 +205,7 @@ class PYGAseInterface:
             file_format: Format to store geometry (default xyz).
             append: If set to true, geometry is added to end of file (default False).
         """
-        molecule_path = os.path.join(self.working_dir, "{:s}.{:s}".format(name, file_format))
+        molecule_path = os.path.join(self.working_dir, f"{name:s}.{file_format:s}")
         write(molecule_path, self.molecule, format=file_format, append=append)
 
     def calculate_single_point(self):
@@ -263,8 +263,8 @@ class PYGAseInterface:
             )
 
         # Create monitors for logfile and a trajectory file
-        logfile = os.path.join(self.working_dir, "{:s}.log".format(name))
-        trajfile = os.path.join(self.working_dir, "{:s}.traj".format(name))
+        logfile = os.path.join(self.working_dir, f"{name:s}.log")
+        trajfile = os.path.join(self.working_dir, f"{name:s}.traj")
         logger = MDLogger(
             self.dynamics,
             self.molecule,
@@ -322,7 +322,7 @@ class PYGAseInterface:
         optimize_file = os.path.join(self.working_dir, name)
         optimizer = self.optimizer_class(
             self.molecule,
-            trajectory="{:s}.traj".format(optimize_file),
+            trajectory=f"{optimize_file:s}.traj",
             restart=None,
         )
         optimizer.run(fmax, steps)

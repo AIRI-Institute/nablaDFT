@@ -174,7 +174,7 @@ class SpkBatchwiseCalculator(BatchwiseCalculator):
                 results[prop] = model_results[prop].detach().cpu().numpy() * self.property_units[prop]
             else:
                 raise AtomsConverterError(
-                    "'{:s}' is not a property of your model. Please " "check the model " "properties!".format(prop)
+                    f"'{prop:s}' is not a property of your model. Please " "check the model " "properties!"
                 )
 
         self.results = results

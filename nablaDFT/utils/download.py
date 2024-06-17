@@ -12,7 +12,7 @@ def get_file_etag_checksum(filename: int, chunk_size=8 * 1024 * 1024):
         for data in iter(lambda: f.read(chunk_size), b""):
             md5s.append(hashlib.md5(data).digest())
     m = hashlib.md5(b"".join(md5s))
-    return "{}-{}".format(m.hexdigest(), len(md5s))
+    return f"{m.hexdigest()}-{len(md5s)}"
 
 
 def get_file_md5(filepath: str, chunk_size=8 * 1024 * 1024):

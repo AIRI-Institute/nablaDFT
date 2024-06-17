@@ -95,7 +95,7 @@ class ExponentialBernsteinRadialBasisFunctions(nn.Module):
         self.num_basis_functions = num_basis_functions
         self.ini_alpha = ini_alpha
         # compute values to initialize buffers
-        logfactorial = np.zeros((num_basis_functions))
+        logfactorial = np.zeros(num_basis_functions)
         for i in range(2, num_basis_functions):
             logfactorial[i] = logfactorial[i - 1] + np.log(i)
         v = np.arange(0, num_basis_functions)

@@ -37,7 +37,7 @@ class DropPath(nn.Module):
         return drop_path(x, self.drop_prob, self.training)
 
     def extra_repr(self) -> str:
-        return "drop_prob={}".format(self.drop_prob)
+        return f"drop_prob={self.drop_prob}"
 
 
 class GraphDropPath(nn.Module):
@@ -56,7 +56,7 @@ class GraphDropPath(nn.Module):
         return out
 
     def extra_repr(self) -> str:
-        return "drop_prob={}".format(self.drop_prob)
+        return f"drop_prob={self.drop_prob}"
 
 
 class EquivariantDropout(nn.Module):
@@ -66,7 +66,7 @@ class EquivariantDropout(nn.Module):
         self.num_irreps = irreps.num_irreps
         self.drop_prob = drop_prob
         self.drop = torch.nn.Dropout(drop_prob, True)
-        self.mul = o3.ElementwiseTensorProduct(irreps, o3.Irreps("{}x0e".format(self.num_irreps)))
+        self.mul = o3.ElementwiseTensorProduct(irreps, o3.Irreps(f"{self.num_irreps}x0e"))
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         if not self.training or self.drop_prob == 0.0:
@@ -99,7 +99,7 @@ class EquivariantScalarsDropout(nn.Module):
         return out
 
     def extra_repr(self) -> str:
-        return "irreps={}, drop_prob={}".format(self.irreps, self.drop_prob)
+        return f"irreps={self.irreps}, drop_prob={self.drop_prob}"
 
 
 class EquivariantDropoutArraySphericalHarmonics(nn.Module):
@@ -130,4 +130,4 @@ class EquivariantDropoutArraySphericalHarmonics(nn.Module):
         return out
 
     def extra_repr(self) -> str:
-        return "drop_prob={}, drop_graph={}".format(self.drop_prob, self.drop_graph)
+        return f"drop_prob={self.drop_prob}, drop_graph={self.drop_graph}"

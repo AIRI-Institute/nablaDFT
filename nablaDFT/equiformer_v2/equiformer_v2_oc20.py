@@ -270,7 +270,7 @@ class EquiformerV2_OC20(nn.Module):
         self.mappingReduced = CoefficientMappingModule(self.lmax_list, self.mmax_list)
 
         # Initialize the transformations between spherical and grid representations
-        self.SO3_grid = ModuleListInfo("({}, {})".format(max(self.lmax_list), max(self.lmax_list)))
+        self.SO3_grid = ModuleListInfo(f"({max(self.lmax_list)}, {max(self.lmax_list)})")
         for lval in range(max(self.lmax_list) + 1):
             SO3_m_grid = nn.ModuleList()
             for m in range(max(self.lmax_list) + 1):
