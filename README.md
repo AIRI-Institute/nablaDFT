@@ -180,7 +180,7 @@ List of available dataset splits could be obtained with:
 ```python
 from nablaDFT.dataset import dataset_registry
 dataset_registry.list_datasets("energy")  # for energy databases
-dataset_registry.list_datasets("hamiltonian")  # for energy databases
+dataset_registry.list_datasets("hamiltonian")  # for hamiltonian databases
 ```
 
 For more detailed list of datamodules parameters please refer to [datamodule example config](./config/datamodule/nablaDFT_pyg.yaml).

@@ -60,7 +60,7 @@ List of available splits could be obtained with:
 ```python
 from nablaDFT.dataset import dataset_registry
 dataset_registry.list_datasets("energy")  # for energy databases
-dataset_registry.list_datasets("hamiltonian")  # for energy databases
+dataset_registry.list_datasets("hamiltonian")  # for hamiltonian databases
 ```
 
 ### Model
