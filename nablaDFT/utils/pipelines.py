@@ -54,6 +54,9 @@ def init_wandb():
 
 
 def set_additional_params(config: DictConfig) -> DictConfig:
+    if config.job_type == "optimize":
+        return config
+
     datamodule_cls = config.datamodule._target_
     if datamodule_cls == "nablaDFT.dataset.ASENablaDFT":
         config.root = os.path.join(config.root, "raw")

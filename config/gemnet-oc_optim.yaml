@@ -8,9 +8,11 @@ input_db: ./test_opt.db # relative path to input database
 output_dir: ./traj_optimize # relative path to output database
 batch_size: 1024
 device: cuda:0  # GPU-distributed not supported, specify device
+devices: [0]
 
 defaults:
   - _self_
+  - datamodule: nablaDFT_pyg.yaml
   - model: gemnet-oc.yaml
   - calculator: pyg_calculator.yaml
   - optimizer: batchwise_lbfgs.yaml
