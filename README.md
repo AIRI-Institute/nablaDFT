@@ -153,7 +153,7 @@ use [GOLF_schnetpack](https://github.com/AIRI-Institute/GOLF/blob/nabla2DFT-eval
 and [GOLF_PYG](https://github.com/AIRI-Institute/GOLF/blob/nabla2DFT-eval-dimenet) for the optimization metrics reproduction.
 
 ### Datamodules
-To create a dataset, we use interfaces from ASE and PyTorch Lightning.
+To create a dataset, we use interfaces from ASE, PyTorch Geometric and PyTorch Lightning.
 An example of the initialisation of ASE-type data classes (for SchNet, PaiNN models) is presented below:
 ```python
 datamodule = ASENablaDFT(split="train", dataset_name="dataset_train_tiny")
@@ -176,10 +176,24 @@ Dataset itself could be acquired in the following ways:
 datamodule.dataset_train
 datamodule.dataset_val
 ```
+List of available dataset splits could be obtained with:
+```python
+from nablaDFT.dataset import dataset_registry
+dataset_registry.list_datasets("energy")  # for energy databases
+dataset_registry.list_datasets("hamiltonian")  # for energy databases
+```
+
 For more detailed list of datamodules parameters please refer to [datamodule example config](./config/datamodule/nablaDFT_pyg.yaml).
 
 ### Checkpoint
-Several checkpoints for each model are available here: [checkpoints links](./nablaDFT/links/models_checkpoints.json)
+Available model checkpoints could be obtained with:
+```python
+from nablaDFT import model_registry
+model_registry.list_models()
+```
+For complete list of available checkpoints for different training splits 
+see [Pretrained models](./nablaDFT/README.md#pretrained-models).  
+Links for checkpoints are available here: [checkpoints links](./nablaDFT/links/models_checkpoints.json)
 
 ### Tutorials and examples
 
@@ -187,16 +201,15 @@ Several checkpoints for each model are available here: [checkpoints links](./nab
 * [Meta-information tutorial](examples/1a_meta_information.ipynb)
 
 Models training and testing example:
-* [PAINN jupyter](examples/PAINN_example.ipynb)
+* [PAINN](examples/PAINN_example.ipynb)
 * [Collab](https://colab.research.google.com/drive/1VaiPa05pu-55XR6eR4DXv6cC6fy3lUwJ?usp=sharing)
-* [GemNet-OC jupyter](examples/GemNet-OC_example.ipynb)
+* [GemNet-OC](examples/GemNet-OC_example.ipynb)
 
 Models inference example:
 * [GemNet-OC](examples/Inference%20example.ipynb)
 
 Molecular geometry optimization example:
 * [GemNet-OC](examples/Geometry%20Optimization.ipynb)
-* [Examples](examples/)
 
 ### Metrics
 In the tables below ST, SF, CF denote structures test set, scaffolds test set and conformations test set correspondingly.

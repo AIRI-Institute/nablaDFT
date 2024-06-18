@@ -56,6 +56,13 @@ Datamodule config defines type of dataset (ASE, Hamiltonian, PyG), dataset root 
 Note: for ASE type `datapath` parameter must direct to directory with database. For PyG type `root` parameter should direct to directory
 with `raw/` subfolder with database. Processed PyG dataset will be stored in the same directory in `processed/` folder.
 
+List of available splits could be obtained with:
+```python
+from nablaDFT.dataset import dataset_registry
+dataset_registry.list_datasets("energy")  # for energy databases
+dataset_registry.list_datasets("hamiltonian")  # for energy databases
+```
+
 ### Model
 [Example](../config/model/gemnet-oc.yaml)  
 Model config defines hyperparameters for chosen model architecture together with metrics and losses. See examples from `config/models/`.
@@ -80,12 +87,6 @@ Defines additional parameters for trainer like accelerator, strategy and devices
 
 [Example](../config/gemnet-oc.yaml)  
 Basically you may need to change `dataset_name` parameter in order to pick one of nablaDFT training split.
-List of available splits could be obtained with:
-```python
-from nablaDFT.dataset import dataset_registry
-dataset_registry.list_datasets("energy")  # for energy databases
-dataset_registry.list_datasets("hamiltonian")  # for energy databases
-```
 In the case of training resume, just specify checkpoint path in `ckpt_path` parameter.
 
 ## Test
@@ -119,3 +120,24 @@ Results will be saved at `output_db` parameter path.
 
 
 ## Pretrained models
+
+List of available pretrained models could be obtained with:
+```python
+from nablaDFT import model_registry
+model_registry.list_models()
+```
+
+Table shows checkpoint names for each model trained on training splits:
+
+| 	                        | **dataset_train_tiny**        	 | **dataset_train_small**        	 | **dataset_train_medium**        	 | **dataset_train_large**        	 |
+|--------------------------|---------------------------------|----------------------------------|-----------------------------------|----------------------------------|
+| **SchNet**             	 | SchNet_train_tiny             	 | SchNet_train_small             	 | SchNet_train_medium             	 | SchNet_train_large             	 |
+| **PaiNN**              	 | PaiNN_train_tiny              	 | PaiNN_train_small              	 | PaiNN_train_medium              	 | PaiNN_train_large              	 |
+| **DimeNet++**          	 | DimeNet++_train_tiny          	 | DimeNet++_train_small          	 | DimeNet++_train_medium          	 | DimeNet++_train_large          	 |
+| **Graphormer3D-small** 	 | Graphormer3D-small_train_tiny 	 | Graphormer3D-small_train_small 	 | Graphormer3D-small_train_medium 	 | Graphormer3D-small_train_large 	 |
+| **GemNet-OC**          	 | GemNet-OC_train_tiny          	 | GemNet-OC_train_small          	 | GemNet-OC_train_medium          	 | GemNet-OC_train_large          	 |
+| **Equiformer-V2**      	 | Equiformer-v2_train_tiny      	 | Equiformer-v2_train_small      	 | Equiformer-v2_train_medium      	 | Equiformer-v2_train_large      	 |
+| **eSCN**               	 | ESCN-OC_train_tiny            	 | ESCN-OC_train_small            	 | ESCN-OC_train_medium            	 | ESCN-OC_train_large            	 |
+| **SchNOrb**            	 | SchNOrb_train_tiny            	 | SchNOrb_train_small            	 | SchNOrb_train_medium            	 | SchNOrb_train_large            	 |
+| **PhiSNet**            	 | PhiSNet_train_tiny            	 | PhiSNet_train_small            	 | PhiSNet_train_medium            	 | PhiSNet_train_large            	 |
+| **QHNet**              	 | QHNet_train_tiny              	 | QHNet_train_small              	 | QHNet_train_medium              	 | QHNet_train_large              	 |
