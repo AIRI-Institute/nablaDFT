@@ -2,7 +2,6 @@ import glob
 import logging
 import os
 import random
-from copy import deepcopy
 from pathlib import Path
 from typing import Dict, List, Tuple
 
@@ -60,7 +59,7 @@ def set_additional_params(config: DictConfig) -> DictConfig:
     datamodule_cls = config.datamodule._target_
     if datamodule_cls == "nablaDFT.dataset.ASENablaDFT":
         config.root = os.path.join(config.root, "raw")
-    if config.name in ["SchNet", "PaiNN", "Dimenet++"]:
+    if config.name in ["SchNet", "PaiNN", "DimeNet++"]:
         with open_dict(config):
             config.trainer.inference_mode = False
     if len(config.devices) > 1:

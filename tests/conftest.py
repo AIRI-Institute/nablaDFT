@@ -1,16 +1,8 @@
-from pathlib import Path
+import os
 
-import nablaDFT
 import pytest
 
 
-@pytest.fixture()
-def db_path():
-    db_path = Path(nablaDFT.__path__[0]) / ".." / "tests/data/raw/test_database.db"
-    return str(db_path)
-
-
-@pytest.fixture()
-def hamiltonian_db_path():
-    db_path = Path(nablaDFT.__path__[0]) / ".." / "tests/data/raw/test_hamiltonian_database.db"
-    return str(db_path)
+@pytest.fixture(autouse=True)
+def set_cublas_var():
+    os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"

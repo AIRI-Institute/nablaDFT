@@ -23,3 +23,8 @@ where category could be:
 - pipeline: runs tests for full pipeline.
 - download: runs tests for dataset availability.
 - optimization (WIP): runs tests for parts of optimization pipeline.
+
+To check code coverage:
+```bash
+pytest --cov=nablaDFT --cov-report=html -v tests/
+```

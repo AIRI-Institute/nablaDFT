@@ -98,11 +98,13 @@ To reproduce test results for pretrained checkpoints set `pretrained` parameter 
 Otherwise, specify path to checkpoint in `ckpt_path`.
 
 ## Predict
+> NOTE: Hamiltonian models are not supported (QHNet, PhiSNet, SchNOrb).  
 
 [Example](../config/gemnet-oc_predict.yaml)  
 To obtain model preidctions for another datasets use `job_type: predict`.
 Specify dataset path relative to `root` or `datapath` parameter from datamodule config.
-Predictions will be stored in database `./predictions/{model_name}_{dataset_name}.db`.
+`output_dir` parameter defines directory to store predictions. 
+Predictions will be stored in database `./{output_dir}/{model_name}_{dataset_name}.db`.  
 Interactive example could be found [here](../examples/Inference%20example.ipynb).
 
 ## Optimize

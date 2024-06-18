@@ -4,7 +4,7 @@ dataset_name: null # filename w/o extension from root directory
 max_steps: 1000000
 warmup_steps: 0
 job_type: predict
-pretrained: True # if True downloads checkpoint trained on the largest split
+pretrained: GemNet-OC_train_large # if True downloads checkpoint trained on the largest split
 ckpt_path: null # path to checkpoint for training resume or test run
 
 # Datamodule parameters
@@ -14,6 +14,9 @@ num_workers: 8
 
 # Devices
 devices: [0]
+
+# Directory, where predictions will be saved
+output_dir: "./predictions"
 
 # configs
 defaults:
