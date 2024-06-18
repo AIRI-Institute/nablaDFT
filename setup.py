@@ -15,7 +15,7 @@ PYTHON_VERSION = get_python_version()
 
 setup(
     name="nablaDFT",
-    version="2.0.0",
+    version="2.0.0-alpha",
     author="Khrabrov, Kuzma and Shenbin, Ilya and Ryabov, Alexander and Tsypin, Artem and Telepov, Alexander and "
     "Alekseev, Anton and Grishin, Alexander and Strashnov, Pavel and Zhilyaev, Petr and Nikolenko, Sergey and "
     "Kadurin, Artur",
