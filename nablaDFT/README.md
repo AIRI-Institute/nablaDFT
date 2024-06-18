@@ -1,5 +1,5 @@
 ## Run configuration
-Overall pipeline heavily inspired by https://github.com/ashleve/lightning-hydra-template
+Pipeline heavily inspired by https://github.com/ashleve/lightning-hydra-template
 Run command from repo root:
 ```bash
 python run.py --config-name <config_name>.yaml
@@ -9,14 +9,44 @@ Type of run defined with `job_type` parameter and it must be one of:
 - train
 - test
 - predict
-- optimize
+- optimize (WIP)
 
-Each config consists of global variables and section with other trainer parts:
+Each config consists of global variables:
+- `name`: defines run name, usually you should put model name.
+- `dataset_name`: in the case of nablaDFT splits, here must be the split name. If you plan to use other dataset,
+you should write database file name without extension.
+- `max_steps`: defines maximum number of steps for `pytorch_lightning.Trainer`.
+- `warmup_steps`: defines number of warmup steps for model.
+- `job_type`: defines task type, must be one of `["train", "test", "predict"]`.
+- `pretrained`: by default is `null`, change if you want to use one of nablaDFT's pretrained models.
+See [Pretrained models](#Pretrained-models) section.
+> NOTE: currently PhiSNet and SchNOrb model checkpoints can't be used with `pretrained` parameter.
+- `ckpt_path`: absolute or relative path to model checkpoint.
+> WARNING: `ckpt_path` and `pretrained` are mutually exclusive parameters, one of them should be used.
+- `root`: path to directory with existing dataset or location for downloading dataset.
+> NOTE: Torch Geometric puts raw dataset in `raw/` subfolder and processed in `processed/`. `root` parameter must not
+> include one of this subfolder to prevent re-downloading. See [Datamodule](#datamodule).
+- `batch_size`: number of samples in one batch.
+- `num_workers`: number of workers for samples loading.
+- `devices`: number of GPUs or devices id.
+- `gradient_clip_algorithm/gradient_clip_val`: gradient clipping parameters for `pytorch_lightning.Trainer`,
+null by default.
+
+Section with `defaults` parts:
 - datamodule
 - model
 - callbacks
 - loggers
 - trainer
+
+### Change run configuration from train to test
+
+Example train config could be easily switched to test config. Change values in `defaults` section:
+```
+defaults:
+    - datamodule: config-name.yaml -> config-name_test.yaml
+    - trainer: train.yaml -> test.yaml
+```
 
 ### Datamodule
 [PyG Example](../config/datamodule/nablaDFT_pyg.yaml)
@@ -33,11 +63,13 @@ To add another model you need to define `LightningModule` (see examples from `na
 
 ### Callbacks
 [Example](../config/callbacks/default.yaml)
-By default we use `ModelCheckpoint` and `EarlyStopping` callbacks, you may add desired callbacks with `config/callbacks/default.yaml`.
+By default we use `ModelCheckpoint` and `EarlyStopping` callbacks, you may add desired callbacks
+with [callbacks config file](../config/callbacks/default.yaml).
 
 ### Loggers
 [Example](../config/loggers/wandb.yaml)
-By default we use solely `WandbLogger`, you may add other loggers in `config/callbacks/default.yaml`.
+By default we use solely `WandbLogger`, you may add other loggers
+in [loggers config file](../config/callbacks/default.yaml).
 
 ### Trainer
 [Train](../config/trainer/train.yaml)
@@ -48,23 +80,35 @@ Defines additional parameters for trainer like accelerator, strategy and devices
 
 [Example](../config/gemnet-oc.yaml)
 Basically you may need to change `dataset_name` parameter in order to pick one of nablaDFT training split.
-Available training splits for energy datasets could be found in [energy_databases.json](./links/energy_databases.json).
-For hamiltonian datasets: [hamiltonian_databases.json](./links/hamiltonian_databases.json)
+List of available splits could be obtained with:
+```python
+from nablaDFT.dataset import dataset_registry
+dataset_registry.list_datasets("energy")  # for energy databases
+dataset_registry.list_datasets("hamiltonian")  # for energy databases
+```
 In the case of training resume, just specify checkpoint path in `ckpt_path` parameter.
 
 ## Test
 
 [Example](../config/gemnet-oc_test.yaml)
 Same as for training run, you need to change `dataset_name` parameter for desired test split.
-To reproduce test results for pretrained on biggest training dataset split (large) set `pretrained` parameter to `True` with ckpt_path to `null`. Otherwise, specify path to checkpoint with pretrained model in `ckpt_path`.
+To reproduce test results for pretrained checkpoints set `pretrained` parameter to desired name
+([see Pretrained models](#Pretrained-models)) with ckpt_path to `null`.
+Otherwise, specify path to checkpoint in `ckpt_path`.
 
 ## Predict
 
 [Example](../config/gemnet-oc_predict.yaml)
-To obtain model preidctions for another datasets use `job_type: predict`. Specify dataset path relative to `root` or `datapath` parameter from datamodule config.
-Predictions will be stored in `predictions/{model_name}_{dataset_name}.pt`
+To obtain model preidctions for another datasets use `job_type: predict`.
+Specify dataset path relative to `root` or `datapath` parameter from datamodule config.
+Predictions will be stored in database `./predictions/{model_name}_{dataset_name}.db`.
+Interactive example could be found [here](../examples/Inference%20example.ipynb).
 
 ## Optimize
+> WARNING: currently optimize pipeline under construction, please,
+> use [GOLF_schnetpack](https://github.com/AIRI-Institute/GOLF/blob/nabla2DFT-eval)
+> and [GOLF_PYG](https://github.com/AIRI-Institute/GOLF/blob/nabla2DFT-eval-dimenet)
+> for the optimization metrics reproduction.
 
 [Example for PyG model](../config/gemnet-oc_optim.yaml)
 [Example for ASE](../config/schnet_optim.yaml)
@@ -72,3 +116,6 @@ Predictions will be stored in `predictions/{model_name}_{dataset_name}.pt`
 Molecules from `input_db` parameter will be optimized using pretrained checkpoint from `ckpt_path`.
 Currently only LBFGS optimizer supported.
 Results will be saved at `output_db` parameter path.
+
+
+## Pretrained models

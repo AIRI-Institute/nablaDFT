@@ -2,7 +2,9 @@
 
 ## Environment preparation
 
-
+```bash
+pip install -r requirements/requirements-dev.txt
+```
 
 ## Test run
 
@@ -20,4 +22,4 @@ where category could be:
 - model: runs tests for model creation.
 - pipeline: runs tests for full pipeline.
 - download: runs tests for dataset availability.
-- optimization: runs tests for parts of optimization pipeline.
+- optimization (WIP): runs tests for parts of optimization pipeline.
