@@ -8,7 +8,6 @@ repos:
       - id: check-merge-conflict
       - id: check-yaml
       - id: debug-statements
-      - id: trailing-whitespace
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
     rev: v0.4.9

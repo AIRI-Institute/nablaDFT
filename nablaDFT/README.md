@@ -1,5 +1,5 @@
 ## Run configuration
-Pipeline heavily inspired by https://github.com/ashleve/lightning-hydra-template
+Pipeline heavily inspired by https://github.com/ashleve/lightning-hydra-template  
 Run command from repo root:
 ```bash
 python run.py --config-name <config_name>.yaml
@@ -49,36 +49,36 @@ defaults:
 ```
 
 ### Datamodule
-[PyG Example](../config/datamodule/nablaDFT_pyg.yaml)
-[ASE Example](../config/datamodule/nablaDFT_ase.yaml)
-[Hamiltonian Example](../config/datamodule/nablaDFT_hamiltonian.yaml)
+[PyG Example](../config/datamodule/nablaDFT_pyg.yaml)  
+[ASE Example](../config/datamodule/nablaDFT_ase.yaml)  
+[Hamiltonian Example](../config/datamodule/nablaDFT_hamiltonian.yaml)  
 Datamodule config defines type of dataset (ASE, Hamiltonian, PyG), dataset root path, batch size, train/val ratio for training job.
 Note: for ASE type `datapath` parameter must direct to directory with database. For PyG type `root` parameter should direct to directory
 with `raw/` subfolder with database. Processed PyG dataset will be stored in the same directory in `processed/` folder.
 
 ### Model
-[Example](../config/model/gemnet-oc.yaml)
+[Example](../config/model/gemnet-oc.yaml)  
 Model config defines hyperparameters for chosen model architecture together with metrics and losses. See examples from `config/models/`.
 To add another model you need to define `LightningModule` (see examples from `nablaDFT/`) and pass model config to run configuration.
 
 ### Callbacks
-[Example](../config/callbacks/default.yaml)
+[Example](../config/callbacks/default.yaml)  
 By default we use `ModelCheckpoint` and `EarlyStopping` callbacks, you may add desired callbacks
 with [callbacks config file](../config/callbacks/default.yaml).
 
 ### Loggers
-[Example](../config/loggers/wandb.yaml)
+[Example](../config/loggers/wandb.yaml)  
 By default we use solely `WandbLogger`, you may add other loggers
 in [loggers config file](../config/callbacks/default.yaml).
 
 ### Trainer
-[Train](../config/trainer/train.yaml)
-[Test](../config/trainer/test.yaml)
+[Train](../config/trainer/train.yaml)  
+[Test](../config/trainer/test.yaml)  
 Defines additional parameters for trainer like accelerator, strategy and devices.
 
 ## Train
 
-[Example](../config/gemnet-oc.yaml)
+[Example](../config/gemnet-oc.yaml)  
 Basically you may need to change `dataset_name` parameter in order to pick one of nablaDFT training split.
 List of available splits could be obtained with:
 ```python
@@ -90,7 +90,7 @@ In the case of training resume, just specify checkpoint path in `ckpt_path` para
 
 ## Test
 
-[Example](../config/gemnet-oc_test.yaml)
+[Example](../config/gemnet-oc_test.yaml)  
 Same as for training run, you need to change `dataset_name` parameter for desired test split.
 To reproduce test results for pretrained checkpoints set `pretrained` parameter to desired name
 ([see Pretrained models](#Pretrained-models)) with ckpt_path to `null`.
@@ -98,7 +98,7 @@ Otherwise, specify path to checkpoint in `ckpt_path`.
 
 ## Predict
 
-[Example](../config/gemnet-oc_predict.yaml)
+[Example](../config/gemnet-oc_predict.yaml)  
 To obtain model preidctions for another datasets use `job_type: predict`.
 Specify dataset path relative to `root` or `datapath` parameter from datamodule config.
 Predictions will be stored in database `./predictions/{model_name}_{dataset_name}.db`.
@@ -110,8 +110,8 @@ Interactive example could be found [here](../examples/Inference%20example.ipynb)
 > and [GOLF_PYG](https://github.com/AIRI-Institute/GOLF/blob/nabla2DFT-eval-dimenet)
 > for the optimization metrics reproduction.
 
-[Example for PyG model](../config/gemnet-oc_optim.yaml)
-[Example for ASE](../config/schnet_optim.yaml)
+[Example for PyG model](../config/gemnet-oc_optim.yaml)  
+[Example for ASE](../config/schnet_optim.yaml)  
 `job_type: optimize` stands for molecule geometry optimization with pretrained model.
 Molecules from `input_db` parameter will be optimized using pretrained checkpoint from `ckpt_path`.
 Currently only LBFGS optimizer supported.
