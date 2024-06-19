@@ -5,6 +5,7 @@ import random
 from pathlib import Path
 from typing import Dict, List, Tuple
 
+import hydra.utils
 import numpy as np
 import pytorch_lightning as pl
 import torch
@@ -108,3 +109,12 @@ def write_predictions_to_db(input_db_path: Path, output_db_path: Path, predictio
                 data["forces_pred"] = forces[force_idx : (force_idx + natoms)]
                 out_db.write(row, data=data)
     logger.info(f"Write predictions to {output_db_path}")
+
+
+def load_from_checkpoint(config: DictConfig):
+    model: pl.LightningModule = hydra.utils.instantiate(config.model)
+    ckpt = torch.load(config.ckpt_path)
+    model.load_state_dict(ckpt["state_dict"])
+    logger.info(f"Restore model weights from {config.ckpt_path}")
+    model.eval()
+    return model

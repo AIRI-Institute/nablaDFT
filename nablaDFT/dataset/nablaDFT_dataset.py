@@ -110,6 +110,7 @@ class ASENablaDFT(AtomsDataModule):
         self.test_ratio = test_ratio
 
     def prepare_data(self):
+        # TODO: maybe switch to pathlib.Path
         datapath_with_no_suffix = os.path.splitext(self.datapath)[0]
         suffix = os.path.splitext(self.datapath)[1]
         if not os.path.exists(datapath_with_no_suffix):

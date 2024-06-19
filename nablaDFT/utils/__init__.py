@@ -4,6 +4,7 @@ from .pipelines import (
     close_loggers,
     init_wandb,
     load_envs,
+    load_from_checkpoint,
     seed_everything,
     set_additional_params,
     write_predictions_to_db,
@@ -18,4 +19,5 @@ __all__ = [
     seed_everything,
     set_additional_params,
     write_predictions_to_db,
+    load_from_checkpoint,
 ]
