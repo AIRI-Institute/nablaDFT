@@ -27,9 +27,16 @@ from nablaDFT.utils import (
 
 
 def predict(
-    trainer: Trainer, model: LightningModule, datamodule: LightningDataModule, model_name: str, output_dir: str
+    trainer: Trainer,
+    model: LightningModule,
+    datamodule: LightningDataModule,
+    ckpt_path: str,
+    model_name: str,
+    output_dir: str,
 ):
     """Function for prediction loop execution.
+
+    NOTE: experimental function, may be changed in the future.
 
     Saves model prediction to "predictions" directory.
     """
@@ -40,17 +47,17 @@ def predict(
         input_db_path = Path(datamodule.datapath).parent / f"raw/{datamodule.dataset_name}.db"
     else:
         input_db_path = Path(datamodule.root) / f"raw/{datamodule.dataset_name}.db"
-    predictions = trainer.predict(model=model, datamodule=datamodule)
+    predictions = trainer.predict(model=model, datamodule=datamodule, ckpt_path=ckpt_path)
     write_predictions_to_db(input_db_path, output_db_path, predictions)
 
 
-def optimize(config: DictConfig):
+def optimize(config: DictConfig, model: LightningModule):
     """Function for batched molecules optimization.
     Uses model defined in config.
 
     Args:
-        ckpt_path (str): path to model checkpoint.
         config (DictConfig): config for task. see r'config/' for examples.
+        model (LightningModule): instantiated lightning model.
     """
     output_dir = config.get("output_dir")
     if not os.path.exists(output_dir):
@@ -59,7 +66,8 @@ def optimize(config: DictConfig):
     # append to existing database not supported
     if os.path.exists(output_datapath):
         os.remove(output_datapath)
-    model = load_from_checkpoint(config)
+    if config.ckpt_path:
+        model = load_from_checkpoint(config)
     calculator = hydra.utils.instantiate(config.calculator, model)
     optimizer = hydra.utils.instantiate(config.optimizer, calculator)
     task = BatchwiseOptimizeTask(
@@ -88,12 +96,12 @@ def run(config: DictConfig):
         config.ckpt_path = None
     config = set_additional_params(config)
     # download checkpoint if pretrained=True
-    if job_type == "optimize":
-        return optimize(config)
     if config.get("pretrained"):
         model: LightningModule = model_registry.get_pretrained_model("lightning", config.pretrained)
     else:
         model: LightningModule = hydra.utils.instantiate(config.model)
+    if job_type == "optimize":
+        return optimize(config, model)
     # Callbacks
     callbacks: List[Callback] = []
     for _, callback_cfg in config.callbacks.items():
@@ -111,7 +119,7 @@ def run(config: DictConfig):
     elif job_type == "test":
         trainer.test(model=model, datamodule=datamodule, ckpt_path=config.ckpt_path)
     elif job_type == "predict":
-        predict(trainer, model, datamodule, config.model.model_name, config.output_dir)
+        predict(trainer, model, datamodule, config.ckpt_path, config.model.model_name, config.output_dir)
     # Finalize
     close_loggers(
         logger=loggers,

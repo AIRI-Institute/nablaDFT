@@ -21,8 +21,6 @@ from omegaconf import DictConfig
 from schnetpack.units import convert_units
 from torch_geometric.data import Batch, Data
 
-from nablaDFT.utils import load_model
-
 log = logging.getLogger(__name__)
 
 
@@ -55,8 +53,7 @@ class PYGCalculator(Calculator):
 
     def __init__(
         self,
-        config: DictConfig,
-        ckpt_path: str,
+        model: torch.nn.Module,
         energy_key: str = "energy",
         force_key: str = "forces",
         energy_unit: Union[str, float] = "Hartree",
@@ -76,7 +73,7 @@ class PYGCalculator(Calculator):
             self.forces: force_key,
         }
 
-        self.model = self._load_model(config, ckpt_path)
+        self.model = model
         self.model.to(device=device, dtype=dtype)
 
         # set up basic conversion factors
@@ -91,20 +88,6 @@ class PYGCalculator(Calculator):
 
         # Container for basic ml model ouputs
         self.model_results = None
-
-    def _load_model(self, config, ckpt_path):
-        """Args:
-            model_file (str): path to model.
-
-        Returns:
-           AtomisticTask: loaded schnetpack model
-        """
-        log.info(f"Loading model from {ckpt_path:s}")
-        # load model and keep it on CPU, device can be changed afterwards
-        model = load_model(config, ckpt_path)
-        model = model.eval()
-
-        return model
 
     def calculate(
         self,
@@ -155,7 +138,7 @@ class PYGAseInterface:
         molecule_path: str,
         working_dir: str,
         config: DictConfig,
-        ckpt_path: str,
+        model: torch.nn.Module,
         energy_key: str = "energy",
         force_key: str = "forces",
         energy_unit: Union[str, float] = "Hartree",
@@ -184,7 +167,7 @@ class PYGAseInterface:
         # Set up calculator
         calculator = PYGCalculator(
             config=config,
-            ckpt_path=ckpt_path,
+            model=model,
             energy_key=energy_key,
             force_key=force_key,
             energy_unit=energy_unit,

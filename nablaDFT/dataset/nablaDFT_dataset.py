@@ -76,6 +76,8 @@ class ASENablaDFT(AtomsDataModule):
         pin_memory: Optional[bool] = False,
     ):
         """"""
+        if not Path(root).exists():
+            Path(root).mkdir(parents=True, exist_ok=True)
         super().__init__(
             datapath=root,
             batch_size=batch_size,
@@ -110,14 +112,15 @@ class ASENablaDFT(AtomsDataModule):
         self.test_ratio = test_ratio
 
     def prepare_data(self):
-        # TODO: maybe switch to pathlib.Path
-        datapath_with_no_suffix = os.path.splitext(self.datapath)[0]
-        suffix = os.path.splitext(self.datapath)[1]
-        if not os.path.exists(datapath_with_no_suffix):
-            os.makedirs(datapath_with_no_suffix)
-        self.datapath = datapath_with_no_suffix + "/" + self.dataset_name + suffix
-        exists = os.path.exists(self.datapath)
-        if not exists:
+        datapath = Path(self.datapath)
+        datapath_dir = datapath.parent.resolve() / datapath.stem
+        if not datapath_dir.is_dir():
+            datapath_dir = Path(".").resolve()
+        # suffix is always '.db', because other formats are not supported by schnetpack
+        suffix = "db"
+        datapath_dir.mkdir(parents=True, exist_ok=True)
+        self.datapath = datapath_dir / f"{self.dataset_name}.{suffix}"
+        if not self.datapath.exists():
             self._download()
         with connect(self.datapath) as ase_db:
             self._check_metadata(ase_db)

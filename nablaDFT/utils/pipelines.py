@@ -73,14 +73,15 @@ def set_additional_params(config: DictConfig) -> DictConfig:
 
 
 def check_cfg_parameters(cfg: DictConfig):
-    job_type = cfg.get("job_type")
-    if job_type not in JOB_TYPES:
-        raise ValueError(f"job_type must be one of {JOB_TYPES}, got {job_type}")
+    if cfg.job_type not in JOB_TYPES:
+        raise ValueError(f"job_type must be one of {JOB_TYPES}, got {cfg.job_type}")
     if cfg.pretrained and cfg.ckpt_path:
         raise ValueError(
             "Config parameters ckpt_path and pretrained are mutually exclusive. Consider set ckpt_path "
             "to null, if you plan to use pretrained checkpoints."
         )
+    if cfg.model.model_name == "QHNet" and cfg.job_type == "predict":
+        raise ValueError("Hamiltonian models not supported by predict pipeline")
 
 
 def write_predictions_to_db(input_db_path: Path, output_db_path: Path, predictions: List[torch.Tensor]):
