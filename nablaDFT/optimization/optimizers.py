@@ -310,7 +310,7 @@ class ASEBatchwiseLBFGS(BatchwiseOptimizer):
         maxstep: Optional[float] = None,
         memory: int = 100,
         damping: float = 1.0,
-        alpha: float = 70.0,
+        alpha: float = 1.0,
         use_line_search: bool = False,
         master: Optional[str] = None,
         log_every_step: bool = False,

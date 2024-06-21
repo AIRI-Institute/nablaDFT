@@ -45,7 +45,7 @@ class BatchwiseCalculator:
         self.force_key = force_key
 
         # set up basic conversion factors
-        self.energy_conversion = convert_units(energy_unit, "eV")
+        self.energy_conversion = convert_units(energy_unit, "Hartree")
         self.position_conversion = convert_units(position_unit, "Angstrom")
 
         # Unit conversion to default ASE units

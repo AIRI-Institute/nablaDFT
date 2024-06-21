@@ -1,10 +1,10 @@
 name: SchNet  # model name, used for output database name
 dataset_name: test_opt # used for output database name
 job_type: optimize
-pretrained: SchNet_train_large # if True downloads checkpoint trained on the largest split
+pretrained: PaiNN_train_large # if True downloads checkpoint trained on the largest split
 ckpt_path: null # path to checkpoint for training resume or test run
 
-input_db: ./test_opt.db # relative path to input database
+input_db: ./test_optim_database.db # relative path to input database
 output_dir: ./traj_optimize # relative path to directory for output database
 batch_size: 32
 fmax: 1e-5 # condition for max norm of gradients
@@ -13,7 +13,7 @@ device: "cuda:0"  # "cpu" or "cuda:id"
 
 defaults:
   - _self_
-  - model: schnet.yaml
+  - model: painn.yaml
   - calculator: spk_calculator.yaml
   - optimizer: batchwise_lbfgs.yaml
 
