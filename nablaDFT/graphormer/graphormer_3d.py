@@ -422,8 +422,7 @@ class Graphormer3DLightning(pl.LightningModule):
 
     def predict_step(self, data, **kwargs):
         """Note: predictions output consistent with PyG networks"""
-        energy_out, forces_out, mask = self(data)
-        forces_out = torch.masked_select(forces_out, mask).reshape(-1, 3)
+        energy_out, forces_out = self(data)
         return energy_out, forces_out
 
     def configure_optimizers(self):

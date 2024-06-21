@@ -11,12 +11,7 @@ from tests.decorators import withCUDA
 @pytest.mark.model
 @pytest.mark.parametrize(
     "model_name",
-    [
-        "DimeNet++",
-        "Equiformer-v2",
-        "ESCN-OC",
-        "GemNet-OC",
-    ],
+    ["DimeNet++", "Equiformer-v2", "ESCN-OC", "GemNet-OC", "Graphormer3D-small"],
 )
 def test_pyg_lightning_model(model_name, dataset_pyg, device):
     model_name = model_name + "_train_tiny"
@@ -25,18 +20,6 @@ def test_pyg_lightning_model(model_name, dataset_pyg, device):
     energy, forces = model(batch)
     assert energy.shape == batch.y.shape
     assert forces.shape == batch.forces.shape
-
-
-@withCUDA
-@pytest.mark.model
-def test_lightning_graphormer(dataset_pyg, device):
-    model_name = "Graphormer3D-small_train_tiny"
-    model = model_registry.get_pretrained_model("lightning", model_name).to(device)
-    batch = Batch.from_data_list([dataset_pyg[0].to(device)])
-    energy, forces, mask = model(batch)
-    assert energy.shape == batch.y.shape
-    assert forces.squeeze(dim=0).shape == batch.forces.shape
-    assert torch.all(mask)
 
 
 @pytest.mark.model
