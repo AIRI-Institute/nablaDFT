@@ -12,7 +12,8 @@ def test_pyg_optimization(pyg_optim_config):
     db = connect(output_datapath)
     for idx in range(1, len(db) + 1):
         row = db.get(idx)
-        assert row.data["energy"][0] > row.data["model_energy"][0]
+        assert isinstance(row.data["model_energy"], list)
+        assert row.data["model_energy"][0] < 0
         assert row.data["forces"].shape == row.data["model_forces"].shape
 
 

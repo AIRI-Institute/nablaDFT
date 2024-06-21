@@ -69,8 +69,7 @@ def test_config(request):
         "schnet.yaml",
     ]
 )
-def predict_config(request):
-    # TODO: need to clean up the mess after tests run
+def predict_config(request, tmp_path):
     cfg_dir_path = (Path(nablaDFT.__path__[0]) / "../config").resolve()
     cfg = OmegaConf.load(cfg_dir_path / request.param)
     datamodule_cfg_name = cfg.defaults[1]["datamodule"].split(".")[0]
@@ -82,7 +81,7 @@ def predict_config(request):
     config.callbacks = {}
     config.job_type = "predict"
     with open_dict(config):
-        config.output_dir = "./predictions_test"
+        config.output_dir = tmp_path / "predictions_test"
     config.root = (Path(nablaDFT.__path__[0]) / "../tests/data").resolve()
     config.dataset_name = "test_database"
     return config

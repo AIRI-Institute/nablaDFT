@@ -1,7 +1,5 @@
 import pytest
-import torch
 from nablaDFT import model_registry
-from schnetpack.data.loader import AtomsLoader
 from torch_geometric.data import Batch
 
 from tests.decorators import withCUDA
