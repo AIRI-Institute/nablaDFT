@@ -53,10 +53,13 @@ class BatchwiseOptimizeTask:
                 for i in range(batch_idx * self.bs, min(db_len, self.bs * (batch_idx + 1)))
             ]
             atoms_list = self.optimize_batch(atoms_list)
+            force_idx = 0
             for relative_id, i in enumerate(range(batch_idx * self.bs, min(db_len, self.bs * (batch_idx + 1)))):
                 row = self.data_db_conn.get(i + 1)
                 data = row.data
-                data["model_energy"] = float(self.optimizer.calculator.results["energy"][relative_id])
+                natoms = row.natoms
+                data["model_energy"] = [float(self.optimizer.calculator.results["energy"][relative_id])]
+                data["model_forces"] = self.optimizer.calculator.results["forces"][force_idx : force_idx + natoms]
                 self.out_db_conn.write(
                     atoms_list[relative_id],
                     data=data,

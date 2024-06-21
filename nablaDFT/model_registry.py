@@ -101,6 +101,8 @@ class ModelRegistry:
             cfg._target_.split(".")[-1],
         )
         model_cls: pl.LightningModule = getattr(importlib.import_module(module), cls_name)
+        # SchNet, PaiNN, DimeNet++ checkpoints were created from torch state dict.
+        # TODO: refactor checkpoints, add other parameters.
         if "SchNet" in cfg.model_name or "PaiNN" in cfg.model_name:
             kwargs = {}
             for key in ["model", "outputs", "optimizer_cls", "scheduler_cls"]:
@@ -111,6 +113,23 @@ class ModelRegistry:
                 optimizer_args=cfg.optimizer_args,
                 scheduler_args=cfg.scheduler_args,
                 scheduler_monitor=cfg.scheduler_monitor,
+                **kwargs,
+            )
+        elif "Graphormer3D" in cfg.model_name:
+            kwargs = {}
+            kwargs["loss"] = hydra.utils.instantiate(cfg["loss"])
+            torch_model: torch.nn.Module = hydra.utils.instantiate(cfg.net)
+            model = model_cls.load_from_checkpoint(ckpt_path, net=torch_model, **kwargs)
+        elif "DimeNet++" in cfg.model_name:
+            kwargs = {}
+            torch_model: torch.nn.Module = hydra.utils.instantiate(cfg.net)
+            kwargs["loss"] = hydra.utils.instantiate(cfg["loss"])
+            kwargs["metric"] = hydra.utils.instantiate(cfg["metric"])
+            model = model_cls.load_from_checkpoint(
+                ckpt_path,
+                net=torch_model,
+                energy_loss_coef=cfg.energy_loss_coef,
+                forces_loss_coef=cfg.forces_loss_coef,
                 **kwargs,
             )
         else:

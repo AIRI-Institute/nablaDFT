@@ -122,7 +122,6 @@ class PyGBatchwiseCalculator(BatchwiseCalculator):
     def calculate(self, atoms: List[ase.Atoms]) -> None:
         model_inputs = atoms_list_to_PYG(atoms, device=self.device)
         model_results = self.model(model_inputs)
-
         results = dict()
         results["energy"] = model_results[0].cpu().data.numpy() * self.property_units["energy"]
         results["forces"] = model_results[1].cpu().data.numpy() * self.property_units["forces"]

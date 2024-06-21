@@ -335,7 +335,7 @@ class Graphormer3DLightning(pl.LightningModule):
         forces_loss_coef: float,
     ) -> None:
         super(Graphormer3DLightning, self).__init__()
-        self.save_hyperparameters(logger=True, ignore=["net", "loss"])
+        self.save_hyperparameters(logger=True, ignore=["net"])
         self.net = net
         self.loss = loss
 
@@ -343,14 +343,15 @@ class Graphormer3DLightning(pl.LightningModule):
         self.loss_forces_coef = forces_loss_coef
 
     def forward(self, data):
+        """Returns only energy and forces without masks"""
         energy_out, forces_out, mask_out = self.net(data)
-        forces_out *= mask_out
-        return energy_out, forces_out, mask_out
+        forces_out = torch.masked_select(forces_out, mask_out).reshape(-1, 3)
+        return energy_out, forces_out
 
     def step(self, batch, calculate_metrics: bool = False) -> Union[Tuple[Any, Dict], Any]:
         bsz = self._get_batch_size(batch)  # get batch size
         y = batch.y
-        energy_out, forces_out, mask_out = self(batch)
+        energy_out, forces_out, mask_out = self.net(batch)
         loss_energy = self.loss(energy_out, y)
         forces, mask_forces = to_dense_batch(batch.forces, batch.batch, batch_size=bsz)
         masked_forces_out = forces_out * mask_forces.unsqueeze(-1)

@@ -75,6 +75,8 @@ def optimize(config: DictConfig, model: LightningModule):
         output_datapath,
         optimizer=optimizer,
         batch_size=config.batch_size,
+        fmax=config.fmax,
+        steps=config.steps,
     )
     task.run()
 
@@ -95,7 +97,7 @@ def run(config: DictConfig):
     else:
         config.ckpt_path = None
     config = set_additional_params(config)
-    # download checkpoint if pretrained=True
+    # download checkpoint if pretrained
     if config.get("pretrained"):
         model: LightningModule = model_registry.get_pretrained_model("lightning", config.pretrained)
     else:

@@ -29,7 +29,7 @@ class AtomisticTaskFixed(spk.task.AtomisticTask):
             scheduler_monitor=scheduler_monitor,
             warmup_steps=warmup_steps,
         )
-        self.model_name = model_name
+        self.hparams.model_name = model_name
 
     def predict_step(self, batch, batch_idx):
         torch.set_grad_enabled(self.grad_enabled)

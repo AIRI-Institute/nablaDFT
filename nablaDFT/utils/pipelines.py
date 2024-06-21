@@ -16,7 +16,7 @@ from omegaconf import DictConfig, open_dict
 from pytorch_lightning.strategies.ddp import DDPStrategy
 from pytorch_lightning.utilities import rank_zero_only
 
-JOB_TYPES = ["train", "test", "predict"]
+JOB_TYPES = ["train", "test", "predict", "optimize"]
 logger = logging.getLogger()
 
 
