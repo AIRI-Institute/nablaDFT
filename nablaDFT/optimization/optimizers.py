@@ -445,6 +445,7 @@ class ASEBatchwiseLBFGS(BatchwiseOptimizer):
         r = np.zeros((self.n_ats, 3), dtype=np.float64)
         current_pos = 0
         mask = []
+        configs_mask = []
         for config_idx, at in enumerate(self.atoms):
             first_idx = current_pos
             last_idx = current_pos + len(at.numbers)
@@ -455,17 +456,8 @@ class ASEBatchwiseLBFGS(BatchwiseOptimizer):
             mask.append(
                 np.array([squared_max_forces < self.fmax**2])[:, None].repeat(3, 1).repeat(last_idx - first_idx, 0)
             )
-        # check if updates for respective structures are required
-        # q_euclidean = -f.reshape(self.n_configs, -1, 3)
-        # squared_max_forces = (q_euclidean**2).sum(axis=-1).max(axis=-1)
-        # for config_idx, at in enumerate(self.atoms):
+            configs_mask.append(squared_max_forces < self.fmax ** 2)
 
-        # configs_mask = squared_max_forces < self.fmax**2
-        # mask = (
-        #    configs_mask[:, None]
-        #    .repeat(q_euclidean.shape[1], 0)
-        #    .repeat(q_euclidean.shape[2], 1)
-        # )
         mask = np.concatenate(mask, axis=0)
         self.update(r, f, self.r0, self.f0)
 
@@ -518,7 +510,7 @@ class ASEBatchwiseLBFGS(BatchwiseOptimizer):
         g = -f
         if self.use_line_search is True:
             e = self.func(r)
-            self.line_search(r, g, e)
+            self.line_search(r, g, e, configs_mask)
 
             dr = (self.p * self.alpha_k.reshape(self.n_ats, -1)).reshape(r.shape[0], -1)
         else:
@@ -597,7 +589,7 @@ class ASEBatchwiseLBFGS(BatchwiseOptimizer):
             y0 = f0 - f
             self.y.append(y0)
 
-            rho0 = np.ones((self.n_configs), dtype=np.float64)
+            rho0 = np.ones(self.n_configs, dtype=np.float64)
             for config_idx in range(self.n_configs):
                 ys0 = np.dot(
                     y0[self.ats_mask[config_idx]].reshape(-1),
@@ -642,7 +634,7 @@ class ASEBatchwiseLBFGS(BatchwiseOptimizer):
         # Remember that forces are minus the gradient!
         return -self.calculator.get_forces(self.atoms)
 
-    def line_search(self, r, g, e):  # , default_step=1.):
+    def line_search(self, r, g, e, configs_mask):
         ls = LineSearch()
         self.alpha_k, e, self.e0, self.no_update = ls._line_search(
             self.func,
@@ -657,6 +649,7 @@ class ASEBatchwiseLBFGS(BatchwiseOptimizer):
             self.batch,
             self.n_ats_per_config,
             self.n_ats,
+            configs_mask,
             maxstep=self.maxstep,
             c1=0.23,
             c2=0.46,

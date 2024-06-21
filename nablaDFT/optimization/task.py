@@ -15,6 +15,8 @@ class BatchwiseOptimizeTask:
         optimizer (BatchwiseOptimizer): used for molecule geometry optimization.
         converter (AtomsConverter): optional, mandatory for SchNetPack models.
         batch_size (int): number of samples per batch.
+        fmax (float): condition for max norm of gradients
+        steps (int): number of optimization steps
     """
 
     def __init__(
@@ -23,16 +25,20 @@ class BatchwiseOptimizeTask:
         output_datapath: str,
         optimizer: BatchwiseOptimizer,
         batch_size: int,
+        fmax: float,
+        steps: int,
     ) -> None:
         self.optimizer = optimizer
         self.bs = batch_size
         self.data_db_conn = None
         self.out_db_conn = None
         self._open(input_datapath, output_datapath)
+        self.fmax = fmax
+        self.steps = steps
 
     def optimize_batch(self, atoms_list: List):
         self.optimizer.initialize()
-        self.optimizer.run(atoms_list, fmax=1e-4, steps=100)
+        self.optimizer.run(atoms_list, fmax=self.fmax, steps=self.steps)
         atoms_list = self.optimizer.atoms
         return atoms_list
 
