@@ -28,9 +28,7 @@ def cosine_lr_lambda(current_step: int, scheduler_params):
     else:
         if current_step >= max_epochs:
             return lr_min_factor
-        lr_scale = lr_min_factor + 0.5 * (1 - lr_min_factor) * (
-            1 + math.cos(math.pi * (current_step / max_epochs))
-        )
+        lr_scale = lr_min_factor + 0.5 * (1 - lr_min_factor) * (1 + math.cos(math.pi * (current_step / max_epochs)))
         return lr_scale
 
 
@@ -86,8 +84,7 @@ class MultistepLRLambda:
 
 
 class LRScheduler:
-    """
-    Notes:
+    """Notes:
         1. scheduler.step() is called for every step for OC20 training.
         2. We use "scheduler_params" in .yml to specify scheduler parameters.
         3. For cosine learning rate, we use LambdaLR with lambda function being cosine:
@@ -156,11 +153,7 @@ class LRScheduler:
     def filter_kwargs(self, config):
         # adapted from https://stackoverflow.com/questions/26515595/
         sig = inspect.signature(self.scheduler)
-        filter_keys = [
-            param.name
-            for param in sig.parameters.values()
-            if param.kind == param.POSITIONAL_OR_KEYWORD
-        ]
+        filter_keys = [param.name for param in sig.parameters.values() if param.kind == param.POSITIONAL_OR_KEYWORD]
         filter_keys.remove("optimizer")
         scheduler_args = {arg: config[arg] for arg in config if arg in filter_keys}
         return scheduler_args
@@ -170,9 +163,7 @@ class LRScheduler:
             return group["lr"]
 
     def state_dict(self):
-        return {
-            key: value for key, value in self.__dict__.items() if key != "optimizer"
-        }
+        return {key: value for key, value in self.__dict__.items() if key != "optimizer"}
 
     def load_state_dict(self, state_dict):
         self.__dict__.update(state_dict)

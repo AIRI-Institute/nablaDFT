@@ -1,21 +1,19 @@
-"""
-Copyright (c) Facebook, Inc. and its affiliates.
+"""Copyright (c) Facebook, Inc. and its affiliates.
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
 """
 
 import torch
 
-from .scale_factor import ScaleFactor
 from .basis import get_sph_harm_basis
 from .radial_basis import GaussianBasis, RadialBasis
+from .scale_factor import ScaleFactor
 
 
 class CircularBasisLayer(torch.nn.Module):
-    """
-    2D Fourier Bessel Basis
+    """2D Fourier Bessel Basis
 
-    Arguments
+    Arguments:
     ---------
     num_spherical: int
         Number of basis functions. Controls the maximum frequency.
@@ -47,9 +45,7 @@ class CircularBasisLayer(torch.nn.Module):
         del cbf_hparams["name"]
 
         if cbf_name == "gaussian":
-            self.cosφ_basis = GaussianBasis(
-                start=-1, stop=1, num_gaussians=num_spherical, **cbf_hparams
-            )
+            self.cosφ_basis = GaussianBasis(start=-1, stop=1, num_gaussians=num_spherical, **cbf_hparams)
         elif cbf_name == "spherical_harmonics":
             self.cosφ_basis = get_sph_harm_basis(num_spherical, zero_m_only=True)
         else:
@@ -67,10 +63,9 @@ class CircularBasisLayer(torch.nn.Module):
 
 
 class SphericalBasisLayer(torch.nn.Module):
-    """
-    3D Fourier Bessel Basis
+    """3D Fourier Bessel Basis
 
-    Arguments
+    Arguments:
     ---------
     num_spherical: int
         Number of basis functions. Controls the maximum frequency.
@@ -108,17 +103,13 @@ class SphericalBasisLayer(torch.nn.Module):
         elif sbf_name == "legendre_outer":
             circular_basis = get_sph_harm_basis(num_spherical, zero_m_only=True)
             self.spherical_basis = lambda cosφ, ϑ: (
-                circular_basis(cosφ)[:, :, None]
-                * circular_basis(torch.cos(ϑ))[:, None, :]
+                circular_basis(cosφ)[:, :, None] * circular_basis(torch.cos(ϑ))[:, None, :]
             ).reshape(cosφ.shape[0], -1)
 
         elif sbf_name == "gaussian_outer":
-            self.circular_basis = GaussianBasis(
-                start=-1, stop=1, num_gaussians=num_spherical, **sbf_hparams
-            )
+            self.circular_basis = GaussianBasis(start=-1, stop=1, num_gaussians=num_spherical, **sbf_hparams)
             self.spherical_basis = lambda cosφ, ϑ: (
-                self.circular_basis(cosφ)[:, :, None]
-                * self.circular_basis(torch.cos(ϑ))[:, None, :]
+                self.circular_basis(cosφ)[:, :, None] * self.circular_basis(torch.cos(ϑ))[:, None, :]
             ).reshape(cosφ.shape[0], -1)
 
         else:

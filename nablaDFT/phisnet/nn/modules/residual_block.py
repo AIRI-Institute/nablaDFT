@@ -1,8 +1,7 @@
-import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from .spherical_linear import SphericalLinear
+
 from .shifted_softplus import ShiftedSoftplus
+from .spherical_linear import SphericalLinear
 from .swish import Swish
 
 """

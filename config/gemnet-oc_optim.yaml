@@ -1,13 +1,15 @@
 name: GemNet-OC
 dataset_name: test_opt # used for output database name
 job_type: optimize
-pretrained: True # if True downloads checkpoint trained on the largest split
+pretrained: GemNet-OC_train_large # if True downloads checkpoint trained on the largest split
 ckpt_path: null # path to checkpoint for training resume or test run
 
 input_db: ./test_opt.db # relative path to input database
-output_dir: ./traj_optimize # relative path to output database
-batch_size: 1024
-device: cuda:0  # GPU-distributed not supported, specify device
+output_dir: ./traj_optimize # relative path to directory for output database
+batch_size: 32
+fmax: 1e-5 # condition for max norm of gradients
+steps: 500 # number of optimization steps
+device: "cuda:0"
 
 defaults:
   - _self_

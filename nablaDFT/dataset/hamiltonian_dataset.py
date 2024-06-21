@@ -1,77 +1,105 @@
-import math
-import os
-import multiprocessing
+"""Module with interfaces for nablaDFT's Hamiltonian Databases.
 
+Create torch HamiltonianDataset object and get a DataLoader:
+"""
+
+import math
+import multiprocessing
+import os
+from typing import List, Sequence, Tuple, Union
+
+import apsw  # way faster than sqlite3
 import numpy as np
 import torch
-import apsw  # way faster than sqlite3
+from torch.utils.data import Dataset
 
 
 class HamiltonianDatabase:
-    """
-    This is a class to store large amounts of ab initio reference data
-    for training a neural network in a SQLite database
+    """Stores large amounts of ab initio reference data for training a neural network in a SQLite database.
 
+    Provides interface for retrieving Hamiltonian and other data from nablaDFT's datasets.
     Data structure:
-    Z (N)    (int)        nuclear charges
-    R (N, 3) (float)      Cartesian coordinates in bohr
-    E ()     (float)      energy in Eh
-    F (N, 3) (float)      forces in Eh/bohr
-    H (Norb, Norb)        full hamiltonian in atomic units
-    S (Norb, Norb)        overlap matrix in atomic units
-    C (Norb, Norb)        core hamiltonian in atomic units
-    moses_id () (int)     molecule id in MOSES dataset
-    conformer_id () (int) conformation id
+        Z (N)    (int)        nuclear charges
+        R (N, 3) (float)      Cartesian coordinates in bohr
+        E ()     (float)      energy in Eh
+        F (N, 3) (float)      forces in Eh/bohr
+        H (Norb, Norb)        full hamiltonian in atomic units
+        S (Norb, Norb)        overlap matrix in atomic units
+        C (Norb, Norb)        core hamiltonian in atomic units
+        moses_id () (int)     molecule id in MOSES dataset
+        conformer_id () (int) conformation id
+
+    Example 1: open existing Hamiltonian database to get elements:
+    .. code-block:: python
+        from nablaDFT.dataset import (
+            HamiltonianDatabase,
+        )
+
+        database = HamiltonianDatabase(
+            "path-to-database.db"
+        )
+        # get first row
+        (
+            Z,
+            R,
+            E,
+            F,
+            H,
+            S,
+            C,
+            moses_id,
+            conformer_id,
+        ) = database[0]
+        # get several rows by indices
+        samples = database[[1, 15, 72]]
+        (
+            Z,
+            R,
+            E,
+            F,
+            H,
+            S,
+            C,
+            moses_id,
+            conformer_id,
+        ) = samples[0]
 
     Args:
         filename (str): path to database.
     """
 
-    def __init__(self, filename, flags=apsw.SQLITE_OPEN_READONLY):
-        self.db = filename
-        self.connections = {}  # allow multiple connections (needed for multi-threading)
+    def __init__(self, filename: str, flags=apsw.SQLITE_OPEN_READONLY) -> None:
+        self.filename = filename
+        self._connections = {}  # allow multiple connections (needed for multi-threading)
         self._open(flags=flags)  # creates the database if it doesn't exist yet
 
-    def __len__(self):
+    def __len__(self) -> int:
         cursor = self._get_connection(flags=apsw.SQLITE_OPEN_READONLY).cursor()
         return cursor.execute("""SELECT * FROM metadata WHERE id=0""").fetchone()[-1]
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: Union[int, List]) -> Tuple:
         cursor = self._get_connection(flags=apsw.SQLITE_OPEN_READONLY).cursor()
-        if type(idx) == list:  # for batched data retrieval
-            data = cursor.execute(
-                """SELECT * FROM data WHERE id IN (""" + str(idx)[1:-1] + ")"
-            ).fetchall()
-            ids = cursor.execute(
-                """SELECT * FROM dataset_ids WHERE id IN (""" + str(idx)[1:-1] + ")"
-            ).fetchall()
+        if isinstance(idx, list):  # for batched data retrieval
+            data = cursor.execute("""SELECT * FROM data WHERE id IN (""" + str(idx)[1:-1] + ")").fetchall()
+            ids = cursor.execute("""SELECT * FROM dataset_ids WHERE id IN (""" + str(idx)[1:-1] + ")").fetchall()
             moses_ids, conformer_ids = [i[1] for i in ids], [i[2] for i in ids]
             unpacked_data = [
-                (*self._unpack_data_tuple(chunk), moses_ids[i], conformer_ids[i])
-                for i, chunk in enumerate(data)
+                (*self._unpack_data_tuple(chunk), moses_ids[i], conformer_ids[i]) for i, chunk in enumerate(data)
             ]
             return unpacked_data
         else:
-            data = cursor.execute(
-                """SELECT * FROM data WHERE id=""" + str(idx)
-            ).fetchone()
-            ids = cursor.execute(
-                """SELECT * FROM dataset_ids WHERE id=""" + str(idx)
-            ).fetchall()[0]
+            data = cursor.execute("""SELECT * FROM data WHERE id=""" + str(idx)).fetchone()
+            ids = cursor.execute("""SELECT * FROM dataset_ids WHERE id=""" + str(idx)).fetchall()[0]
             moses_id, conformer_id = ids[1], ids[2]
             return (*self._unpack_data_tuple(data), moses_id, conformer_id)
 
-    def _unpack_data_tuple(self, data):
-        N = (
-            len(data[2]) // 4 // 3
-        )  # a single float32 is 4 bytes, we have 3 in data[1] (positions)
+    def _unpack_data_tuple(self, data) -> Tuple[np.ndarray]:
+        N = len(data[2]) // 4 // 3  # a single float32 is 4 bytes, we have 3 in data[1] (positions)
         R = self._deblob(data[2], dtype=np.float32, shape=(N, 3))
         Z = self._deblob(data[1], dtype=np.int32, shape=(N))
         E = np.array([0.0 if data[3] is None else data[3]], dtype=np.float32)
         F = self._deblob(data[4], dtype=np.float32, shape=(N, 3))
-        Norb = int(
-            math.sqrt(len(data[5]) // 4)
-        )  # a single float32 is 4 bytes, we have Norb**2 of them
+        Norb = int(math.sqrt(len(data[5]) // 4))  # a single float32 is 4 bytes, we have Norb**2 of them
         H = self._deblob(data[5], dtype=np.float32, shape=(Norb, Norb))
         S = self._deblob(data[6], dtype=np.float32, shape=(Norb, Norb))
         C = self._deblob(data[7], dtype=np.float32, shape=(Norb, Norb))
@@ -79,18 +107,18 @@ class HamiltonianDatabase:
 
     def add_data(
         self,
-        Z,
-        R,
-        E,
-        F,
-        H,
-        S,
-        C,
-        moses_id,
-        conformer_id,
+        Z: np.ndarray,
+        R: np.ndarray,
+        E: np.ndarray,
+        F: np.ndarray,
+        H: np.ndarray,
+        S: np.ndarray,
+        C: np.ndarray,
+        moses_id: int,
+        conformer_id: int,
         flags=apsw.SQLITE_OPEN_READWRITE,
-        transaction=True,
-    ):
+        transaction: bool = True,
+    ) -> None:
         # check that no NaN values are added
         if self._any_is_nan(Z, R, E, F, H, S, C):
             print("encountered NaN, data is not added")
@@ -102,9 +130,7 @@ class HamiltonianDatabase:
             # if database is accessed from multiple programs at once (default for safety)
             cursor.execute("""BEGIN EXCLUSIVE""")
         try:
-            length = cursor.execute("""SELECT * FROM metadata WHERE id=0""").fetchone()[
-                -1
-            ]
+            length = cursor.execute("""SELECT * FROM metadata WHERE id=0""").fetchone()[-1]
             cursor.execute(
                 """INSERT INTO dataset_ids (id, MOSES_ID, CONFORMER_ID) VALUES (?,?,?)""",
                 (
@@ -128,9 +154,7 @@ class HamiltonianDatabase:
             )
 
             # update metadata
-            cursor.execute(
-                """INSERT OR REPLACE INTO metadata VALUES (?,?)""", (0, length + 1)
-            )
+            cursor.execute("""INSERT OR REPLACE INTO metadata VALUES (?,?)""", (0, length + 1))
 
             if transaction:
                 cursor.execute("""COMMIT""")  # end transaction
@@ -146,13 +170,14 @@ class HamiltonianDatabase:
             (int(Z), self._blob(orbitals)),
         )
 
-    def get_orbitals(self, Z):
+    def get_orbitals(self, Z: int) -> Tuple:
+        """Return orbitals for given"""
         cursor = self._get_connection(flags=apsw.SQLITE_OPEN_READONLY).cursor()
         data = cursor.execute("""SELECT * FROM basisset WHERE Z=""" + str(Z)).fetchone()
         Norb = len(data[1]) // 4  # each entry is 4 bytes
         return self._deblob(data[1], dtype=np.int32, shape=(Norb,))
 
-    def _any_is_nan(self, *vals):
+    def _any_is_nan(self, *vals) -> bool:
         nan = False
         for val in vals:
             if val is None:
@@ -160,7 +185,7 @@ class HamiltonianDatabase:
             nan = nan or np.any(np.isnan(val))
         return nan
 
-    def _blob(self, array):
+    def _blob(self, array: np.ndarray):
         """Convert numpy array to blob/buffer object."""
         if array is None:
             return None
@@ -172,7 +197,7 @@ class HamiltonianDatabase:
             array = array.byteswap()
         return memoryview(np.ascontiguousarray(array))
 
-    def _deblob(self, buf, dtype=np.float32, shape=None):
+    def _deblob(self, buf, dtype=np.float32, shape=None) -> np.ndarray:
         """Convert blob/buffer object to numpy array."""
         if buf is None:
             return np.zeros(shape)
@@ -182,8 +207,8 @@ class HamiltonianDatabase:
         array.shape = shape
         return array
 
-    def _open(self, flags=apsw.SQLITE_OPEN_READONLY):
-        newdb = not os.path.isfile(self.db)
+    def _open(self, flags=apsw.SQLITE_OPEN_READONLY) -> None:
+        newdb = not os.path.isfile(self.filename)
         cursor = self._get_connection(flags=flags).cursor()
         if newdb:
             # create table to store data
@@ -229,22 +254,19 @@ class HamiltonianDatabase:
                 """CREATE TABLE IF NOT EXISTS metadata
                 (id INTEGER PRIMARY KEY, N INTEGER)"""
             )
-            cursor.execute(
-                """INSERT OR IGNORE INTO metadata (id, N) VALUES (?,?)""", (0, 0)
-            )  # num_data
+            cursor.execute("""INSERT OR IGNORE INTO metadata (id, N) VALUES (?,?)""", (0, 0))  # num_data
 
     def _get_connection(self, flags=apsw.SQLITE_OPEN_READONLY):
-        """
-        This allows multiple processes to access the database at once,
+        """This allows multiple processes to access the database at once,
         every process must have its own connection
         """
         key = multiprocessing.current_process().name
-        if key not in self.connections.keys():
-            self.connections[key] = apsw.Connection(self.db, flags=flags)
-            self.connections[key].setbusytimeout(300000)  # 5 minute timeout
-        return self.connections[key]
+        if key not in self._connections.keys():
+            self._connections[key] = apsw.Connection(self.filename, flags=flags)
+            self._connections[key].setbusytimeout(300000)  # 5 minute timeout
+        return self._connections[key]
 
-    def add_Z(self, Z, flags=apsw.SQLITE_OPEN_READWRITE):
+    def add_Z(self, Z, flags=apsw.SQLITE_OPEN_READWRITE) -> None:
         cursor = self._get_connection(flags=flags).cursor()
         self.N = len(Z)
         cursor.execute(
@@ -253,45 +275,62 @@ class HamiltonianDatabase:
         )
 
     @property
-    def Z(self):
+    def Z(self) -> np.ndarray:
+        """Returns NumPy array with atoms' charges presented in database."""
         cursor = self._get_connection(flags=apsw.SQLITE_OPEN_READONLY).cursor()
         data = cursor.execute("""SELECT * FROM nuclear_charges WHERE id=0""").fetchone()
         N = data[1]
         return self._deblob(data[2], dtype=np.int32, shape=(N,))
 
 
-class HamiltonianDataset(torch.utils.data.Dataset):
+class HamiltonianDataset(Dataset):
     """PyTorch interface for nablaDFT Hamiltonian databases.
 
     Collates hamiltonian, overlap and core hamiltonian matrices
     from batch into block diagonal matrix.
 
+    .. note::
+        HamiltonianDataset.collate_fn must be directly passed to DataLoader object
+        to get block diagonal matrices for Hamitlonians.
+        .. code-block:: python
+            from torch.utils.data import DataLoader
+            from nablaDFT.dataset import (
+                HamiltonianDataset,
+            )
+
+            dataset = HamiltonianDataset(
+                "path-to-database.db"
+            )
+            dataloader = DataLoader(
+                dataset,
+                batch_size=4,
+                collate_fn=dataset.collate_fn,
+            )
+
     Args:
-        - filepath (str): path to database.
-        - max_batch_orbitals (int): maximum number of orbitals in one batch.
-        - max_batch_atoms (int): maximum number of atoms in one batch..
-        - max_squares (int): maximum size of block diagonal matrix in one batch.
-        - subset() path to saved numpy array with selected indexes.
-        - dtype (torch.dtype): defines torch.dtype for tensors.
+        filepath (str): path to database.
+        max_batch_orbitals (int): maximum number of orbitals in one batch.
+        max_batch_atoms (int): maximum number of atoms in one batch.
+        max_squares (int): maximum size of block diagonal matrix in one batch.
+        subset (str): path to saved numpy array with selected indexes.
+        dtype: defines torch.dtype for tensors.
     """
 
     def __init__(
         self,
-        filepath,
-        max_batch_orbitals=1200,
-        max_batch_atoms=150,
-        max_squares=4802,
-        subset=None,
+        filepath: str,
+        max_batch_orbitals: int = 1200,
+        max_batch_atoms: int = 150,
+        max_squares: int = 4802,
+        subset: str = None,
         dtype=torch.float32,
     ):
         super(HamiltonianDataset, self).__init__()
         self.dtype = dtype
-        self.database = HamiltonianDatabase(filepath)
+        self._database = HamiltonianDatabase(filepath)
         max_orbitals = []
-        for z in self.database.Z:
-            max_orbitals.append(
-                tuple((int(z), int(l)) for l in self.database.get_orbitals(z))
-            )
+        for z in self._database.Z:
+            max_orbitals.append(tuple((int(z), int(orb_num)) for orb_num in self._database.get_orbitals(z)))
         max_orbitals = tuple(max_orbitals)
         self.max_orbitals = max_orbitals
         self.max_batch_orbitals = max_batch_orbitals
@@ -304,20 +343,21 @@ class HamiltonianDataset(torch.utils.data.Dataset):
     def __len__(self):
         if self.subset is not None:
             return len(self.subset)
-        return len(self.database)
+        return len(self._database)
 
     def __getitem__(self, idx):
         if self.subset is not None:
-            return self.subset[
-                idx
-            ]  # just return the idx, the custom collate_fn does the querying
+            return self.subset[idx]  # just return the idx, the custom collate_fn does the querying
         else:
             return idx
 
-    # collate function to collate several data points into a batch, should be passed
-    # to data loader (default_collate is not efficient, because there should be a batch-wise query)
     def collate_fn(self, batch, return_filtered=False):
-        all_data = self.database[batch]  # fetch the batch data
+        """Collate function to collate several data points into a batch
+
+        Should be passed to data loader (default_collate is not efficient,
+        because there should be a batch-wise query).
+        """
+        all_data = self._database[batch]  # fetch the batch data
         Z, R, E, F, H, S, C, mask = [], [], [], [], [], [], [], []
         orbitals = []
         orbitals_number = 0
@@ -327,10 +367,8 @@ class HamiltonianDataset(torch.utils.data.Dataset):
             local_orbitals = []
             local_orbitals_number = 0
             for z in Z_:
-                local_orbitals.append(
-                    tuple((int(z), int(l)) for l in self.database.get_orbitals(z))
-                )
-                local_orbitals_number += sum(2 * l + 1 for _, l in local_orbitals[-1])
+                local_orbitals.append(tuple((int(z), int(orb_num)) for orb_num in self._database.get_orbitals(z)))
+                local_orbitals_number += sum(2 * orb_num + 1 for _, orb_num in local_orbitals[-1])
             if (
                 orbitals_number + local_orbitals_number > self.max_batch_orbitals
                 or len(local_orbitals) + len(orbitals) > self.max_batch_atoms
@@ -367,21 +405,18 @@ class HamiltonianDataset(torch.utils.data.Dataset):
         return return_dict
 
 
-def seeded_random_split(dataset, lengths, seed=None):
-    """
-    Randomly split a dataset into non-overlapping new datasets of given lengths.
+def seeded_random_split(dataset: Dataset, lengths: Sequence, seed=None):
+    """Randomly split a dataset into non-overlapping new datasets of given lengths.
+
     This is very similar to the pytorch equivalent, but this version allows a seed to
     be specified in order to make the split reproducible
 
-    Arguments:
+    Args:
         dataset (Dataset): Dataset to be split
         lengths (sequence): lengths of splits to be produced
     """
-
     if sum(lengths) != len(dataset):
-        raise ValueError(
-            "Sum of input lengths does not equal the length of the input dataset!"
-        )
+        raise ValueError("Sum of input lengths does not equal the length of the input dataset!")
 
     indices = np.random.RandomState(seed=seed).permutation(sum(lengths))
 
@@ -393,7 +428,4 @@ def seeded_random_split(dataset, lengths, seed=None):
 
 def file_split(dataset, filename):
     splits = np.load(filename)
-    return [
-        torch.utils.data.Subset(dataset, splits[split_name])
-        for split_name in ["train_idx", "val_idx", "test_idx"]
-    ]
+    return [torch.utils.data.Subset(dataset, splits[split_name]) for split_name in ["train_idx", "val_idx", "test_idx"]]

@@ -1,6 +1,6 @@
-import numpy as np
 from argparse import Namespace
 
+import numpy as np
 
 convention_dict = {
     "orca_631Gss": Namespace(
@@ -150,9 +150,7 @@ def transform_to_aims(hamiltonians):
     for i_out, i_in in mapping:
         for j_out, j_in in mapping:
             print(np.meshgrid(i_out, j_out))
-            hamiltonians_new[tuple(np.meshgrid(i_out, j_out))] = hamiltonians[
-                tuple(np.meshgrid(i_in, j_in))
-            ]
+            hamiltonians_new[tuple(np.meshgrid(i_out, j_out))] = hamiltonians[tuple(np.meshgrid(i_in, j_in))]
     hamiltonians_new = np.transpose(hamiltonians_new, axes=(2, 0, 1))  # batch, i, j
     nonzero_indices = np.concatenate([out for out, _in in mapping])
 
@@ -189,9 +187,7 @@ def transform_to_orca(hamiltonians):
     for i_out, i_in in mapping:
         for j_out, j_in in mapping:
             print(np.meshgrid(i_out, j_out))
-            hamiltonians_new[tuple(np.meshgrid(i_out, j_out))] = hamiltonians[
-                tuple(np.meshgrid(i_in, j_in))
-            ]
+            hamiltonians_new[tuple(np.meshgrid(i_out, j_out))] = hamiltonians[tuple(np.meshgrid(i_in, j_in))]
     hamiltonians_new = np.transpose(hamiltonians_new, axes=(2, 0, 1))  # batch, i, j
     nonzero_indices = np.concatenate([out for out, _in in mapping])
 

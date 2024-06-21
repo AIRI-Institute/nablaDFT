@@ -10,7 +10,7 @@
 <p align="left">
 <a href="https://developer.nvidia.com/cuda-downloads"><img alt="CUDA versions" src="https://img.shields.io/badge/cuda-11.8~12.1-green"></a>
 <a href="https://github.com/AIRI-Institute/nablaDFT/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-blue"></a>
-<a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
+<a href="https://github.com/astral-sh/ruff"><img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json" alt="Ruff" style="max-width:100%;"></a>
 </p>
 
 
@@ -78,9 +78,9 @@ Minimal usage example:
 from nablaDFT.dataset import HamiltonianDatabase
 
 train = HamiltonianDatabase("train_2k.db")
-# atoms numbers, atoms positions, energy, forces, core hamiltonian, overlap matrix, coefficients matrix, 
+# atoms numbers, atoms positions, energy, forces, core hamiltonian, overlap matrix, coefficients matrix,
 # moses_id, conformation_id
-Z, R, E, F, H, S, C, moses_id, conformation_id = train[0]  
+Z, R, E, F, H, S, C, moses_id, conformation_id = train[0]
 ```
 #### Energies database
 Downloading of the smallest file (`train-tiny` data split, 51 Mb):
@@ -101,7 +101,7 @@ https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/moses_wf
 tar -xf wfns_moses_conformers_archive_0.tar
 cd mnt/sdd/data/moses_wfns_big/
 ```
-A variety of properties can be loaded directly from the wavefunction files. 
+A variety of properties can be loaded directly from the wavefunction files.
 See main paper for more details. Properties include DFT matrices:
 ```python
 import numpy as np
@@ -113,9 +113,9 @@ density_matrix_b = wfn["matrix"]["Db"]        # beta electonic density
 aotoso_matrix = wfn["matrix"]["aotoso"]       # atomic orbital to symmetry orbital transformation matrix
 core_hamiltonian_matrix = wfn["matrix"]["H"]  # core Hamiltonian matrix
 fock_matrix_a = wfn["matrix"]["Fa"]           # DFT alpha Fock matrix
-fock_matrix_b = wfn["matrix"]["Fb"]           # DFT betta Fock matrix 
+fock_matrix_b = wfn["matrix"]["Fb"]           # DFT betta Fock matrix
 ```
-and bond orders for covalent and non-covalent interactions and atomic charges: 
+and bond orders for covalent and non-covalent interactions and atomic charges:
 ```python
 import psi4
 wfn = psi4.core.Wavefunction.from_file('wfn_conf_50000_0.npy')
@@ -148,12 +148,12 @@ python run.py --config-name <config-name>.yaml
 ```
 For the detailed run configuration please refer to [run configuration README](./nablaDFT/README.md).
 
-Currently, the optimization pipeline is under construction, please, 
-use [GOLF_schnetpack](https://github.com/AIRI-Institute/GOLF/blob/nabla2DFT-eval) 
+Currently, the optimization pipeline is under construction, please,
+use [GOLF_schnetpack](https://github.com/AIRI-Institute/GOLF/blob/nabla2DFT-eval)
 and [GOLF_PYG](https://github.com/AIRI-Institute/GOLF/blob/nabla2DFT-eval-dimenet) for the optimization metrics reproduction.
 
 ### Datamodules
-To create a dataset, we use interfaces from ASE and PyTorch Lightning.  
+To create a dataset, we use interfaces from ASE, PyTorch Geometric and PyTorch Lightning.
 An example of the initialisation of ASE-type data classes (for SchNet, PaiNN models) is presented below:
 ```python
 datamodule = ASENablaDFT(split="train", dataset_name="dataset_train_tiny")
@@ -176,10 +176,24 @@ Dataset itself could be acquired in the following ways:
 datamodule.dataset_train
 datamodule.dataset_val
 ```
+List of available dataset splits could be obtained with:
+```python
+from nablaDFT.dataset import dataset_registry
+dataset_registry.list_datasets("energy")  # for energy databases
+dataset_registry.list_datasets("hamiltonian")  # for hamiltonian databases
+```
+
 For more detailed list of datamodules parameters please refer to [datamodule example config](./config/datamodule/nablaDFT_pyg.yaml).
 
 ### Checkpoint
-Several checkpoints for each model are available here: [checkpoints links](./nablaDFT/links/models_checkpoints.json)
+Available model checkpoints could be obtained with:
+```python
+from nablaDFT import model_registry
+model_registry.list_models()
+```
+For complete list of available checkpoints for different training splits 
+see [Pretrained models](./nablaDFT/README.md#pretrained-models).  
+Links for checkpoints are available here: [checkpoints links](./nablaDFT/links/models_checkpoints.json)
 
 ### Tutorials and examples
 
@@ -187,16 +201,15 @@ Several checkpoints for each model are available here: [checkpoints links](./nab
 * [Meta-information tutorial](examples/1a_meta_information.ipynb)
 
 Models training and testing example:
-* [PAINN jupyter](examples/PAINN_example.ipynb)
+* [PAINN](examples/PAINN_example.ipynb)
 * [Collab](https://colab.research.google.com/drive/1VaiPa05pu-55XR6eR4DXv6cC6fy3lUwJ?usp=sharing)
-* [GemNet-OC jupyter](examples/GemNet-OC_example.ipynb)
+* [GemNet-OC](examples/GemNet-OC_example.ipynb)
 
 Models inference example:
 * [GemNet-OC](examples/Inference%20example.ipynb)
 
 Molecular geometry optimization example:
 * [GemNet-OC](examples/Geometry%20Optimization.ipynb)
-* [Examples](examples/)
 
 ### Metrics
 In the tables below ST, SF, CF denote structures test set, scaffolds test set and conformations test set correspondingly.

@@ -1,5 +1,4 @@
-"""
-Nuclear charges and electron configurations (scaled between 0 and 1) for all elements up to Z=86
+"""Nuclear charges and electron configurations (scaled between 0 and 1) for all elements up to Z=86
 This encourages the NN to learn atom embeddings that generalize across the periodic table
 """
 

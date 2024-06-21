@@ -1,11 +1,27 @@
-from . import dataset
-from . import phisnet
-from . import graphormer
-from . import gemnet_oc
-from . import dimenetplusplus
-from . import equiformer_v2
-from . import escn
-from . import ase_model
-from . import painn_pyg
+from . import (
+    ase_model,
+    dataset,
+    dimenetplusplus,
+    equiformer_v2,
+    escn,
+    gemnet_oc,
+    graphormer,
+    painn_pyg,
+    phisnet,
+    schedulers,
+)
+from .model_registry import model_registry
 
-from . import schedulers
+__all__ = [
+    ase_model,
+    dataset,
+    dimenetplusplus,
+    equiformer_v2,
+    escn,
+    gemnet_oc,
+    graphormer,
+    painn_pyg,
+    phisnet,
+    schedulers,
+    model_registry,
+]

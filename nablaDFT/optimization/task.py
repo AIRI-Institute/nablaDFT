@@ -8,13 +8,15 @@ from .optimizers import BatchwiseOptimizer
 
 class BatchwiseOptimizeTask:
     """Use for batchwise molecules conformations geometry optimization.
-    
+
     Args:
         input_datapath (str): path to ASE database with molecules.
         output_datapath (str): path to output database.
         optimizer (BatchwiseOptimizer): used for molecule geometry optimization.
         converter (AtomsConverter): optional, mandatory for SchNetPack models.
         batch_size (int): number of samples per batch.
+        fmax (float): condition for max norm of gradients
+        steps (int): number of optimization steps
     """
 
     def __init__(
@@ -23,16 +25,20 @@ class BatchwiseOptimizeTask:
         output_datapath: str,
         optimizer: BatchwiseOptimizer,
         batch_size: int,
+        fmax: float,
+        steps: int,
     ) -> None:
         self.optimizer = optimizer
         self.bs = batch_size
         self.data_db_conn = None
         self.out_db_conn = None
         self._open(input_datapath, output_datapath)
+        self.fmax = fmax
+        self.steps = steps
 
     def optimize_batch(self, atoms_list: List):
         self.optimizer.initialize()
-        self.optimizer.run(atoms_list, fmax=1e-4, steps=100)
+        self.optimizer.run(atoms_list, fmax=self.fmax, steps=self.steps)
         atoms_list = self.optimizer.atoms
         return atoms_list
 
@@ -44,19 +50,16 @@ class BatchwiseOptimizeTask:
         for batch_idx in tqdm.tqdm(range(batch_count)):
             atoms_list = [
                 self.data_db_conn.get(i + 1).toatoms()
-                for i in range(
-                    batch_idx * self.bs, min(db_len, self.bs * (batch_idx + 1))
-                )
+                for i in range(batch_idx * self.bs, min(db_len, self.bs * (batch_idx + 1)))
             ]
             atoms_list = self.optimize_batch(atoms_list)
-            for relative_id, i in enumerate(
-                range(batch_idx * self.bs, min(db_len, self.bs * (batch_idx + 1)))
-            ):
+            force_idx = 0
+            for relative_id, i in enumerate(range(batch_idx * self.bs, min(db_len, self.bs * (batch_idx + 1)))):
                 row = self.data_db_conn.get(i + 1)
                 data = row.data
-                data["model_energy"] = float(
-                    self.optimizer.calculator.results["energy"][relative_id]
-                )
+                natoms = row.natoms
+                data["model_energy"] = [float(self.optimizer.calculator.results["energy"][relative_id])]
+                data["model_forces"] = self.optimizer.calculator.results["forces"][force_idx : force_idx + natoms]
                 self.out_db_conn.write(
                     atoms_list[relative_id],
                     data=data,

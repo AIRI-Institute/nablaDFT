@@ -2,22 +2,17 @@ import logging
 from typing import Dict, Optional, Union
 
 import numpy as np
+import pytorch_lightning as pl
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from torch.optim import Optimizer
 from torch.optim.lr_scheduler import LRScheduler
-from torch_scatter import segment_coo, scatter
-from torch_geometric.nn import radius_graph
 from torch_geometric.data import Data
-import pytorch_lightning as pl
+from torch_geometric.nn import radius_graph
+from torch_scatter import scatter, segment_coo
 
 from .initializers import get_initializer
-from .interaction_indices import (
-    get_mixed_triplets,
-    get_quadruplets,
-    get_triplets,
-)
+from .interaction_indices import get_mixed_triplets, get_quadruplets, get_triplets
 from .layers.atom_update_block import OutputBlock
 from .layers.base_layers import Dense, ResidualLayer
 from .layers.efficient import BasisEmbedding
@@ -27,23 +22,22 @@ from .layers.interaction_block import InteractionBlock
 from .layers.radial_basis import RadialBasis
 from .layers.spherical_basis import CircularBasisLayer, SphericalBasisLayer
 from .utils import (
+    compute_neighbors,
     get_angle,
     get_edge_id,
     get_inner_idx,
-    inner_product_clamped,
-    mask_neighbors,
-    repeat_blocks,
     get_max_neighbors_mask,
-    load_scales_compat,
-    radius_graph_pbc,
     get_pbc_distances,
-    compute_neighbors,
+    inner_product_clamped,
+    load_scales_compat,
+    mask_neighbors,
+    radius_graph_pbc,
+    repeat_blocks,
 )
 
 
 class GemNetOC(nn.Module):
-    """
-    Arguments
+    """Arguments:
     ---------
     num_targets: int
         Number of prediction targets.
@@ -271,15 +265,11 @@ class GemNetOC(nn.Module):
             sbf,
             scale_basis,
         )
-        self.init_shared_basis_layers(
-            num_radial, num_spherical, emb_size_rbf, emb_size_cbf, emb_size_sbf
-        )
+        self.init_shared_basis_layers(num_radial, num_spherical, emb_size_rbf, emb_size_cbf, emb_size_sbf)
 
         # Embedding blocks
         self.atom_emb = AtomEmbedding(emb_size_atom, num_elements)
-        self.edge_emb = EdgeEmbedding(
-            emb_size_atom, num_radial, emb_size_edge, activation=activation
-        )
+        self.edge_emb = EdgeEmbedding(emb_size_atom, num_radial, emb_size_edge, activation=activation)
 
         # Interaction Blocks
         int_blocks = []
@@ -356,9 +346,7 @@ class GemNetOC(nn.Module):
                 for _ in range(num_global_out_layers)
             ]
             self.out_mlp_F = torch.nn.Sequential(*out_mlp_F)
-            self.out_forces = Dense(
-                emb_size_edge, num_targets, bias=False, activation=None
-            )
+            self.out_forces = Dense(emb_size_edge, num_targets, bias=False, activation=None)
 
         out_initializer = get_initializer(output_init)
         self.out_energy.reset_parameters(out_initializer)
@@ -370,10 +358,7 @@ class GemNetOC(nn.Module):
     def set_cutoffs(self, cutoff, cutoff_qint, cutoff_aeaint, cutoff_aint):
         self.cutoff = cutoff
 
-        if (
-            not (self.atom_edge_interaction or self.edge_atom_interaction)
-            or cutoff_aeaint is None
-        ):
+        if not (self.atom_edge_interaction or self.edge_atom_interaction) or cutoff_aeaint is None:
             self.cutoff_aeaint = self.cutoff
         else:
             self.cutoff_aeaint = cutoff_aeaint
@@ -403,10 +388,7 @@ class GemNetOC(nn.Module):
     ):
         self.max_neighbors = max_neighbors
 
-        if (
-            not (self.atom_edge_interaction or self.edge_atom_interaction)
-            or max_neighbors_aeaint is None
-        ):
+        if not (self.atom_edge_interaction or self.edge_atom_interaction) or max_neighbors_aeaint is None:
             self.max_neighbors_aeaint = self.max_neighbors
         else:
             self.max_neighbors_aeaint = max_neighbors_aeaint
@@ -541,9 +523,7 @@ class GemNetOC(nn.Module):
                 bias=False,
             )
             self.mlp_cbf_qint = BasisEmbedding(num_radial, emb_size_cbf, num_spherical)
-            self.mlp_sbf_qint = BasisEmbedding(
-                num_radial, emb_size_sbf, num_spherical**2
-            )
+            self.mlp_sbf_qint = BasisEmbedding(num_radial, emb_size_sbf, num_spherical**2)
 
         if self.atom_edge_interaction:
             self.mlp_rbf_aeint = Dense(
@@ -622,7 +602,7 @@ class GemNetOC(nn.Module):
     ):
         """Calculate angles for quadruplet-based message passing.
 
-        Arguments
+        Arguments:
         ---------
         V_st: Tensor, shape = (nAtoms, 3)
             Normalized directions from s to t
@@ -632,7 +612,7 @@ class GemNetOC(nn.Module):
         quad_idx: dict of torch.Tensor
             Indices relevant for quadruplet interactions.
 
-        Returns
+        Returns:
         -------
         cosφ_cab: Tensor, shape = (num_triplets_inint,)
             Cosine of angle between atoms c -> a <- b.
@@ -684,7 +664,7 @@ class GemNetOC(nn.Module):
         """Use a mask to remove values of removed edges and then
         duplicate the values for the correct edge direction.
 
-        Arguments
+        Arguments:
         ---------
         tensor: torch.Tensor
             Values to symmetrize for the new tensor.
@@ -697,7 +677,7 @@ class GemNetOC(nn.Module):
             Whether the edge in the opposite direction should use the
             negative tensor value.
 
-        Returns
+        Returns:
         -------
         tensor_ordered: torch.Tensor
             A tensor with symmetrized values.
@@ -716,8 +696,7 @@ class GemNetOC(nn.Module):
         graph,
         batch_idx,
     ):
-        """
-        Symmetrize edges to ensure existence of counter-directional edges.
+        """Symmetrize edges to ensure existence of counter-directional edges.
 
         Some edges are only present in one direction in the data,
         since every atom has a maximum number of neighbors.
@@ -733,20 +712,14 @@ class GemNetOC(nn.Module):
         cell_earlier = (
             (graph["cell_offset"][:, 0] < 0)
             | ((graph["cell_offset"][:, 0] == 0) & (graph["cell_offset"][:, 1] < 0))
-            | (
-                (graph["cell_offset"][:, 0] == 0)
-                & (graph["cell_offset"][:, 1] == 0)
-                & (graph["cell_offset"][:, 2] < 0)
-            )
+            | ((graph["cell_offset"][:, 0] == 0) & (graph["cell_offset"][:, 1] == 0) & (graph["cell_offset"][:, 2] < 0))
         )
         mask_same_atoms = graph["edge_index"][0] == graph["edge_index"][1]
         mask_same_atoms &= cell_earlier
         mask = mask_sep_atoms | mask_same_atoms
 
         # Mask out counter-edges
-        edge_index_directed = graph["edge_index"][mask[None, :].expand(2, -1)].view(
-            2, -1
-        )
+        edge_index_directed = graph["edge_index"][mask[None, :].expand(2, -1)].view(2, -1)
 
         # Concatenate counter-edges after normal edges
         edge_index_cat = torch.cat(
@@ -766,9 +739,7 @@ class GemNetOC(nn.Module):
         # segment_coo assumes sorted batch_edge
         # Factor 2 since this is only one half of the edges
         ones = batch_edge.new_ones(1).expand_as(batch_edge)
-        new_graph["num_neighbors"] = 2 * segment_coo(
-            ones, batch_edge, dim_size=graph["num_neighbors"].size(0)
-        )
+        new_graph["num_neighbors"] = 2 * segment_coo(ones, batch_edge, dim_size=graph["num_neighbors"].size(0))
 
         # Create indexing array
         edge_reorder_idx = repeat_blocks(
@@ -780,15 +751,9 @@ class GemNetOC(nn.Module):
 
         # Reorder everything so the edges of every image are consecutive
         new_graph["edge_index"] = edge_index_cat[:, edge_reorder_idx]
-        new_graph["cell_offset"] = self.select_symmetric_edges(
-            graph["cell_offset"], mask, edge_reorder_idx, True
-        )
-        new_graph["distance"] = self.select_symmetric_edges(
-            graph["distance"], mask, edge_reorder_idx, False
-        )
-        new_graph["vector"] = self.select_symmetric_edges(
-            graph["vector"], mask, edge_reorder_idx, True
-        )
+        new_graph["cell_offset"] = self.select_symmetric_edges(graph["cell_offset"], mask, edge_reorder_idx, True)
+        new_graph["distance"] = self.select_symmetric_edges(graph["distance"], mask, edge_reorder_idx, False)
+        new_graph["vector"] = self.select_symmetric_edges(graph["vector"], mask, edge_reorder_idx, True)
 
         # Indices for swapping c->a and a->c (for symmetric MP)
         # To obtain these efficiently and without any index assumptions,
@@ -796,9 +761,7 @@ class GemNetOC(nn.Module):
         # map this order back to the edge IDs.
         # Double argsort gives the desired mapping
         # from the ordered tensor to the original tensor.
-        edge_ids = get_edge_id(
-            new_graph["edge_index"], new_graph["cell_offset"], num_atoms
-        )
+        edge_ids = get_edge_id(new_graph["edge_index"], new_graph["cell_offset"], num_atoms)
         order_edge_ids = torch.argsort(edge_ids)
         inv_order_edge_ids = torch.argsort(order_edge_ids)
         edge_ids_counter = get_edge_id(
@@ -826,9 +789,7 @@ class GemNetOC(nn.Module):
 
             subgraph["edge_index"] = subgraph["edge_index"][:, edge_mask]
             subgraph["cell_offset"] = subgraph["cell_offset"][edge_mask]
-            subgraph["num_neighbors"] = mask_neighbors(
-                subgraph["num_neighbors"], edge_mask
-            )
+            subgraph["num_neighbors"] = mask_neighbors(subgraph["num_neighbors"], edge_mask)
             subgraph["distance"] = subgraph["distance"][edge_mask]
             subgraph["vector"] = subgraph["vector"][edge_mask]
 
@@ -938,14 +899,8 @@ class GemNetOC(nn.Module):
         num_atoms = data.z.size(0)
 
         # Atom interaction graph is always the largest
-        if (
-            self.atom_edge_interaction
-            or self.edge_atom_interaction
-            or self.atom_interaction
-        ):
-            a2a_graph = self.generate_graph_dict(
-                data, self.cutoff_aint, self.max_neighbors_aint
-            )
+        if self.atom_edge_interaction or self.edge_atom_interaction or self.atom_interaction:
+            a2a_graph = self.generate_graph_dict(data, self.cutoff_aint, self.max_neighbors_aint)
             main_graph = self.subselect_graph(
                 data,
                 a2a_graph,
@@ -967,11 +922,7 @@ class GemNetOC(nn.Module):
             a2a_graph = {}
             a2ee2a_graph = {}
         if self.quad_interaction:
-            if (
-                self.atom_edge_interaction
-                or self.edge_atom_interaction
-                or self.atom_interaction
-            ):
+            if self.atom_edge_interaction or self.edge_atom_interaction or self.atom_interaction:
                 qint_graph = self.subselect_graph(
                     data,
                     a2a_graph,
@@ -1026,16 +977,12 @@ class GemNetOC(nn.Module):
                 return_agg_idx=True,
             )
             # a2ee2a_graph['edge_index'][1] has to be sorted for this
-            a2ee2a_graph["target_neighbor_idx"] = get_inner_idx(
-                a2ee2a_graph["edge_index"][1], dim_size=num_atoms
-            )
+            a2ee2a_graph["target_neighbor_idx"] = get_inner_idx(a2ee2a_graph["edge_index"][1], dim_size=num_atoms)
         else:
             trip_idx_e2a = {}
         if self.atom_interaction:
             # a2a_graph['edge_index'][1] has to be sorted for this
-            a2a_graph["target_neighbor_idx"] = get_inner_idx(
-                a2a_graph["edge_index"][1], dim_size=num_atoms
-            )
+            a2a_graph["target_neighbor_idx"] = get_inner_idx(a2a_graph["edge_index"][1], dim_size=num_atoms)
 
         return (
             main_graph,
@@ -1069,9 +1016,7 @@ class GemNetOC(nn.Module):
             main_graph["vector"][trip_idx_e2e["out"]],
             main_graph["vector"][trip_idx_e2e["in"]],
         )
-        basis_rad_cir_e2e_raw, basis_cir_e2e_raw = self.cbf_basis_tint(
-            main_graph["distance"], cosφ_cab
-        )
+        basis_rad_cir_e2e_raw, basis_cir_e2e_raw = self.cbf_basis_tint(main_graph["distance"], cosφ_cab)
 
         if self.quad_interaction:
             # Calculate quadruplet angles
@@ -1081,9 +1026,7 @@ class GemNetOC(nn.Module):
                 quad_idx,
             )
 
-            basis_rad_cir_qint_raw, basis_cir_qint_raw = self.cbf_basis_qint(
-                qint_graph["distance"], cosφ_abd
-            )
+            basis_rad_cir_qint_raw, basis_cir_qint_raw = self.cbf_basis_qint(qint_graph["distance"], cosφ_abd)
             basis_rad_sph_qint_raw, basis_sph_qint_raw = self.sbf_basis_qint(
                 main_graph["distance"],
                 cosφ_cab_q[quad_idx["trip_out_to_quad"]],
@@ -1095,17 +1038,13 @@ class GemNetOC(nn.Module):
                 main_graph["vector"][trip_idx_a2e["out"]],
                 a2ee2a_graph["vector"][trip_idx_a2e["in"]],
             )
-            basis_rad_cir_a2e_raw, basis_cir_a2e_raw = self.cbf_basis_aeint(
-                main_graph["distance"], cosφ_cab_a2e
-            )
+            basis_rad_cir_a2e_raw, basis_cir_a2e_raw = self.cbf_basis_aeint(main_graph["distance"], cosφ_cab_a2e)
         if self.edge_atom_interaction:
             cosφ_cab_e2a = inner_product_clamped(
                 a2ee2a_graph["vector"][trip_idx_e2a["out"]],
                 main_graph["vector"][trip_idx_e2a["in"]],
             )
-            basis_rad_cir_e2a_raw, basis_cir_e2a_raw = self.cbf_basis_eaint(
-                a2ee2a_graph["distance"], cosφ_cab_e2a
-            )
+            basis_rad_cir_e2a_raw, basis_cir_e2a_raw = self.cbf_basis_eaint(a2ee2a_graph["distance"], cosφ_cab_e2a)
         if self.atom_interaction:
             basis_rad_a2a_raw = self.radial_basis_aint(a2a_graph["distance"])
 
@@ -1269,13 +1208,9 @@ class GemNetOC(nn.Module):
 
         nMolecules = torch.max(batch) + 1
         if self.extensive:
-            E_t = scatter(
-                E_t, batch, dim=0, dim_size=nMolecules, reduce="add"
-            )  # (nMolecules, num_targets)
+            E_t = scatter(E_t, batch, dim=0, dim_size=nMolecules, reduce="add")  # (nMolecules, num_targets)
         else:
-            E_t = scatter(
-                E_t, batch, dim=0, dim_size=nMolecules, reduce="mean"
-            )  # (nMolecules, num_targets)
+            E_t = scatter(E_t, batch, dim=0, dim_size=nMolecules, reduce="mean")  # (nMolecules, num_targets)
 
         if self.regress_forces:
             if self.direct_forces:
@@ -1351,9 +1286,7 @@ class GemNetOC(nn.Module):
                     neighbors = data.neighbors
 
             except AttributeError:
-                logging.warning(
-                    "Turning otf_graph=True as required attributes not present in data object"
-                )
+                logging.warning("Turning otf_graph=True as required attributes not present in data object")
                 otf_graph = True
 
         if use_pbc:
@@ -1393,9 +1326,7 @@ class GemNetOC(nn.Module):
 
             edge_dist = distance_vec.norm(dim=-1)
             cell_offsets = torch.zeros(edge_index.shape[1], 3, device=data.pos.device)
-            cell_offset_distances = torch.zeros_like(
-                cell_offsets, device=data.pos.device
-            )
+            cell_offset_distances = torch.zeros_like(cell_offsets, device=data.pos.device)
             neighbors = compute_neighbors(data, edge_index)
 
         return (
@@ -1527,9 +1458,7 @@ class GemNetOCLightning(pl.LightningModule):
     def _calculate_loss(self, y_pred, y_true) -> float:
         total_loss = 0.0
         for name, loss in self.hparams.losses.items():
-            total_loss += self.hparams.loss_coefs[name] * loss(
-                y_pred[name], y_true[name]
-            )
+            total_loss += self.hparams.loss_coefs[name] * loss(y_pred[name], y_true[name])
         return total_loss
 
     def _calculate_metrics(self, y_pred, y_true) -> Dict:

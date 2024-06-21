@@ -8,7 +8,7 @@ Package requirements (lower versions might work, but were not tested):
 - numpy >= 1.20.2
 - torch >= 1.8.1
 - cudatoolkit >= 10.2
-- ase >= 3.21.1 
+- ase >= 3.21.1
 - apsw >= 3.34.0.r1
 - tensorboardX >= 2.2
 - psi4 >= 1.5 (Optional)

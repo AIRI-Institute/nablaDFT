@@ -1,6 +1,6 @@
 import numpy as np
 import torch
-from torch_geometric.data import Data, Batch
+from torch_geometric.data import Batch, Data
 
 
 def np_scatter_add(updates, indices, shape):
@@ -11,6 +11,7 @@ def np_scatter_add(updates, indices, shape):
 
 def atoms_list_to_PYG(ase_atoms_list, device):
     """Function to convert ase.Atoms object to PyG data batches.
+
     Args:
         ase_atoms_list (List[ase.Atoms]): list of ase.Atoms object to convert.
         device (str): task device.

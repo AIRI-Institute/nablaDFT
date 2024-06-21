@@ -19,7 +19,6 @@ class AtomisticTaskFixed(spk.task.AtomisticTask):
         scheduler_monitor: Optional[str] = None,
         warmup_steps: int = 0,
     ):
-        
         super(AtomisticTaskFixed, self).__init__(
             model=model,
             outputs=outputs,
@@ -28,9 +27,9 @@ class AtomisticTaskFixed(spk.task.AtomisticTask):
             scheduler_cls=scheduler_cls,
             scheduler_args=scheduler_args,
             scheduler_monitor=scheduler_monitor,
-            warmup_steps=warmup_steps
+            warmup_steps=warmup_steps,
         )
-        self.model_name = model_name
+        self.hparams.model_name = model_name
 
     def predict_step(self, batch, batch_idx):
         torch.set_grad_enabled(self.grad_enabled)
@@ -42,7 +41,7 @@ class AtomisticTaskFixed(spk.task.AtomisticTask):
         }
         try:
             targets["considered_atoms"] = batch["considered_atoms"]
-        except:
+        except KeyError:
             pass
         pred = self.predict_without_postprocessing(batch)
         pred, targets = self.apply_constraints(pred, targets)
@@ -52,10 +51,10 @@ class AtomisticTaskFixed(spk.task.AtomisticTask):
         # reshape model.postprocessors (AddOffsets)
         #  otherwise during test error will occur
         if checkpoint["state_dict"].get("model.postprocessors.0.mean", None):
-            checkpoint["state_dict"]["model.postprocessors.0.mean"] = checkpoint[
-                "state_dict"
-            ]["model.postprocessors.0.mean"].reshape(1)
-            
+            checkpoint["state_dict"]["model.postprocessors.0.mean"] = checkpoint["state_dict"][
+                "model.postprocessors.0.mean"
+            ].reshape(1)
+
     # override base class method
     def predict_without_postprocessing(self, batch):
         pred = self(batch)

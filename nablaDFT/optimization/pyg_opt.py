@@ -1,11 +1,10 @@
-import os
 import argparse
+import os
 
+import hydra.utils
 import torch
 from hydra import compose, initialize
-
 from pyg_ase_interface import PYGAseInterface
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run PyG molecule optimization")
@@ -26,9 +25,15 @@ if __name__ == "__main__":
     if not os.path.exists(ase_dir):
         os.mkdir(ase_dir)
 
+    model = hydra.utils.instantiate(cfg.model)
+    ckpt = torch.load(cfg.ckpt_path)
+    model.load_state_dict(ckpt["state_dict"])
+    model.eval()
+
     cutoff = 5.0
     nablaDFT_ase = PYGAseInterface(
         molecule_path=args.molecule_path,
+        model=model,
         working_dir=ase_dir,
         config=cfg,
         ckpt_path=args.model_ckpt_path,

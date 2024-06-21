@@ -6,5 +6,5 @@ Code adapted from [repo](https://github.com/Open-Catalyst-Project/ocp/tree/main/
 For the training, run the following command from the root of the repository:
 
 ```bash
-python run.py --config-name gemnet-oc.yaml 
+python run.py --config-name gemnet-oc.yaml
 ```

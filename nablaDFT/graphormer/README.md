@@ -6,5 +6,5 @@ Code adapted from [repo](https://github.com/microsoft/Graphormer/)
 For the training, run the following command from the root of the repository:
 
 ```bash
-python run.py --config-name graphormer3d.yaml 
+python run.py --config-name graphormer3d.yaml
 ```

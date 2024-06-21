@@ -1,8 +1,8 @@
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import numpy as np
-from scipy.special import binom
+
 from ..functional import cutoff_function, softplus_inverse
 
 """
@@ -27,9 +27,7 @@ class OverlapBernsteinRadialBasisFunctions(nn.Module):
         self.register_buffer("logc", torch.tensor(logbinomial, dtype=torch.float64))
         self.register_buffer("n", torch.tensor(n, dtype=torch.float64))
         self.register_buffer("v", torch.tensor(v, dtype=torch.float64))
-        self.register_parameter(
-            "_alpha", nn.Parameter(torch.tensor(1.0, dtype=torch.float64))
-        )
+        self.register_parameter("_alpha", nn.Parameter(torch.tensor(1.0, dtype=torch.float64)))
         self.reset_parameters()
 
     def reset_parameters(self):

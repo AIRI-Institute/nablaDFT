@@ -1,13 +1,7 @@
 import sys
-import os
-import io
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
-
-def read(fname):
-    with io.open(os.path.join(os.path.dirname(__file__), fname), encoding="utf-8") as f:
-        return f.read()
 
 def get_python_version():
     version_info = sys.version_info
@@ -16,20 +10,21 @@ def get_python_version():
     return f"cp{major}{minor}"
 
 
-CUDA = "cu121"
 PYTHON_VERSION = get_python_version()
 
 
 setup(
     name="nablaDFT",
-    version="2.0.0",
-    author="Khrabrov, Kuzma and Shenbin, Ilya and Ryabov, Alexander and Tsypin, Artem and Telepov, Alexander and Alekseev, Anton and Grishin, Alexander and Strashnov, Pavel and Zhilyaev, Petr and Nikolenko, Sergey and Kadurin, Artur",
+    version="2.0.0-alpha",
+    author="Khrabrov, Kuzma and Shenbin, Ilya and Ryabov, Alexander and Tsypin, Artem and Telepov, Alexander and "
+    "Alekseev, Anton and Grishin, Alexander and Strashnov, Pavel and Zhilyaev, Petr and Nikolenko, Sergey and "
+    "Kadurin, Artur",
     url="https://github.com/AIRI-Institute/nablaDFT",
     packages=find_packages(),
     include_package_data=True,
     python_requires=">=3.8",
     install_requires=[
-        "numpy>=1.26",
+        "numpy>=1.26,<2.0.0",
         "sympy==1.12",
         "ase==3.22.1",
         "h5py==3.10.0",
@@ -53,11 +48,16 @@ setup(
         "matscipy",
         "python-dotenv",
         "wandb==0.16.3",
-        "e3nn==0.5.1"
+        "e3nn==0.5.1",
     ],
     license="MIT",
     description="nablaDFT: Large-Scale Conformational Energy and Hamiltonian Prediction benchmark and dataset",
-    long_description="""
-        Electronic wave function calculation is a fundamental task of computational quantum  chemistry. Knowledge of the wave function parameters allows one to compute physical and chemical properties of molecules and materials.
-        In this work we: introduce a new curated large-scale dataset of electron structures of drug-like molecules, establish a novel benchmark for the estimation of molecular properties in the multi-molecule setting, and evaluate a wide range of methods with this benchmark.""",
+    long_description="""Electronic wave function calculation is a fundamental task of computational quantum
+    chemistry. Knowledge of the wave function parameters allows one to compute physical and chemical properties of
+    molecules and materials. In this work we: introduce a new curated large-scale dataset of electron structures of
+    drug-like molecules, establish a novel benchmark for the estimation of molecular properties in the multi-molecule
+    setting, and evaluate a wide range of methods with this benchmark.""",
+    classifiers=[
+        "Development Status :: 4 - Beta",
+    ],
 )

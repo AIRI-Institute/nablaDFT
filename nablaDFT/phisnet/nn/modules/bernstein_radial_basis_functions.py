@@ -1,9 +1,8 @@
+import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-import numpy as np
-from scipy.special import binom
-from ..functional import cutoff_function, softplus_inverse
+
+from ..functional import cutoff_function
 
 """
 computes radial basis functions with Bernstein polynomials

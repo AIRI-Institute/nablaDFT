@@ -1,5 +1,4 @@
-"""
-Copyright (c) Facebook, Inc. and its affiliates.
+"""Copyright (c) Facebook, Inc. and its affiliates.
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
 """
@@ -15,10 +14,9 @@ from .scale_factor import ScaleFactor
 
 
 class PolynomialEnvelope(torch.nn.Module):
-    """
-    Polynomial envelope function that ensures a smooth cutoff.
+    """Polynomial envelope function that ensures a smooth cutoff.
 
-    Arguments
+    Arguments:
     ---------
         exponent: int
             Exponent of the envelope function.
@@ -33,18 +31,12 @@ class PolynomialEnvelope(torch.nn.Module):
         self.c: float = -self.p * (self.p + 1) / 2
 
     def forward(self, d_scaled: torch.Tensor) -> torch.Tensor:
-        env_val = (
-            1
-            + self.a * d_scaled**self.p
-            + self.b * d_scaled ** (self.p + 1)
-            + self.c * d_scaled ** (self.p + 2)
-        )
+        env_val = 1 + self.a * d_scaled**self.p + self.b * d_scaled ** (self.p + 1) + self.c * d_scaled ** (self.p + 2)
         return torch.where(d_scaled < 1, env_val, torch.zeros_like(d_scaled))
 
 
 class ExponentialEnvelope(torch.nn.Module):
-    """
-    Exponential envelope function that ensures a smooth cutoff,
+    """Exponential envelope function that ensures a smooth cutoff,
     as proposed in Unke, Chmiela, Gastegger, Schütt, Sauceda, Müller 2021.
     SpookyNet: Learning Force Fields with Electronic Degrees of Freedom
     and Nonlocal Effects
@@ -80,10 +72,9 @@ class GaussianBasis(torch.nn.Module):
 
 
 class SphericalBesselBasis(torch.nn.Module):
-    """
-    First-order spherical Bessel basis
+    """First-order spherical Bessel basis
 
-    Arguments
+    Arguments:
     ---------
     num_radial: int
         Number of basis functions. Controls the maximum frequency.
@@ -108,20 +99,17 @@ class SphericalBesselBasis(torch.nn.Module):
 
     def forward(self, d_scaled: torch.Tensor) -> torch.Tensor:
         return (
-            self.norm_const
-            / d_scaled[:, None]
-            * torch.sin(self.frequencies * d_scaled[:, None])
+            self.norm_const / d_scaled[:, None] * torch.sin(self.frequencies * d_scaled[:, None])
         )  # (num_edges, num_radial)
 
 
 class BernsteinBasis(torch.nn.Module):
-    """
-    Bernstein polynomial basis,
+    """Bernstein polynomial basis,
     as proposed in Unke, Chmiela, Gastegger, Schütt, Sauceda, Müller 2021.
     SpookyNet: Learning Force Fields with Electronic Degrees of Freedom
     and Nonlocal Effects
 
-    Arguments
+    Arguments:
     ---------
     num_radial: int
         Number of basis functions. Controls the maximum frequency.
@@ -162,9 +150,7 @@ class BernsteinBasis(torch.nn.Module):
 
 
 class RadialBasis(torch.nn.Module):
-    """
-
-    Arguments
+    """Arguments:
     ---------
     num_radial: int
         Number of basis functions. Controls the maximum frequency.
@@ -213,13 +199,9 @@ class RadialBasis(torch.nn.Module):
 
         # RBFs get distances scaled to be in [0, 1]
         if rbf_name == "gaussian":
-            self.rbf = GaussianBasis(
-                start=0, stop=1, num_gaussians=num_radial, **rbf_hparams
-            )
+            self.rbf = GaussianBasis(start=0, stop=1, num_gaussians=num_radial, **rbf_hparams)
         elif rbf_name == "spherical_bessel":
-            self.rbf = SphericalBesselBasis(
-                num_radial=num_radial, cutoff=cutoff, **rbf_hparams
-            )
+            self.rbf = SphericalBesselBasis(num_radial=num_radial, cutoff=cutoff, **rbf_hparams)
         elif rbf_name == "bernstein":
             self.rbf = BernsteinBasis(num_radial=num_radial, **rbf_hparams)
         else:

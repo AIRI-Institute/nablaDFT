@@ -9,27 +9,27 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from .modules import ClebschGordan, SphericalEmbedding, BernsteinRadialBasisFunctions
 from .modules import (
-    GaussianRadialBasisFunctions,
+    BernsteinRadialBasisFunctions,
+    ClebschGordan,
+    EnergyLayer,
     ExponentialBernsteinRadialBasisFunctions,
-)
-from .modules import (
-    ModularBlock,
-    SphericalLinear,
-    PairMixing,
     ExponentialGaussianRadialBasisFunctions,
+    GaussianRadialBasisFunctions,
+    ModularBlock,
+    PairMixing,
+    ResidualStack,
+    ShiftedSoftplus,
+    SphericalEmbedding,
+    SphericalLinear,
+    Swish,
+    clebsch_gordan,
 )
-from .modules import ShiftedSoftplus, ResidualStack, Swish
-from .modules import clebsch_gordan
-from .modules import EnergyLayer
 from .spherical_harmonics import *
 
 
 class NeuralNetwork(nn.Module):
-    """
-    Neural network for computing Hamiltonian/Overlap matrices in a rotationally equivariant way
-    """
+    """Neural network for computing Hamiltonian/Overlap matrices in a rotationally equivariant way"""
 
     def __init__(
         self,
@@ -90,9 +90,7 @@ class NeuralNetwork(nn.Module):
         self.calculate_energy = False
         self.predict_energy = False
         self.calculate_forces = False
-        self.create_graph = (
-            True  # can be set to False if the NN is only used for inference
-        )
+        self.create_graph = True  # can be set to False if the NN is only used for inference
 
         args = None
 
@@ -104,7 +102,7 @@ class NeuralNetwork(nn.Module):
 
             try:
                 args = saved_state["args"]
-            except KeyError as ke:
+            except KeyError:
                 args = Namespace(**saved_state)
 
             # print(args)
@@ -193,9 +191,7 @@ class NeuralNetwork(nn.Module):
                     order_max, self.order
                 )
             )
-            print(
-                "The neural network MUST have at least the same order as all orbitals!"
-            )
+            print("The neural network MUST have at least the same order as all orbitals!")
             quit()
         if self.order < 2 * order_max:
             print(
@@ -212,21 +208,15 @@ class NeuralNetwork(nn.Module):
         self.clebsch_gordan = ClebschGordan()
         self.embedding = SphericalEmbedding(self.order, self.num_features, self.Zmax)
         if self.basis_functions == "exp-gaussian":
-            self.radial_basis_functions = ExponentialGaussianRadialBasisFunctions(
-                self.num_basis_functions, self.cutoff
-            )
+            self.radial_basis_functions = ExponentialGaussianRadialBasisFunctions(self.num_basis_functions, self.cutoff)
         elif self.basis_functions == "exp-bernstein":
             self.radial_basis_functions = ExponentialBernsteinRadialBasisFunctions(
                 self.num_basis_functions, self.cutoff
             )
         elif self.basis_functions == "gaussian":
-            self.radial_basis_functions = GaussianRadialBasisFunctions(
-                self.num_basis_functions, self.cutoff
-            )
+            self.radial_basis_functions = GaussianRadialBasisFunctions(self.num_basis_functions, self.cutoff)
         elif self.basis_functions == "bernstein":
-            self.radial_basis_functions = BernsteinRadialBasisFunctions(
-                self.num_basis_functions, self.cutoff
-            )
+            self.radial_basis_functions = BernsteinRadialBasisFunctions(self.num_basis_functions, self.cutoff)
         else:
             print("basis function type:", self.basis_functions, "is not supported")
         self.module = nn.ModuleList(
@@ -274,16 +264,10 @@ class NeuralNetwork(nn.Module):
             self.clebsch_gordan,
         )
         self.radial_ii = nn.ModuleList(
-            [
-                nn.Linear(self.num_basis_functions, self.num_features, bias=False)
-                for L in range(self.order + 1)
-            ]
+            [nn.Linear(self.num_basis_functions, self.num_features, bias=False) for L in range(self.order + 1)]
         )
         self.radial_ij = nn.ModuleList(
-            [
-                nn.Linear(self.num_basis_functions, self.num_features, bias=False)
-                for L in range(self.order + 1)
-            ]
+            [nn.Linear(self.num_basis_functions, self.num_features, bias=False) for L in range(self.order + 1)]
         )
         self.residual_pc = ResidualStack(
             self.num_residual_pc,
@@ -415,12 +399,8 @@ class NeuralNetwork(nn.Module):
             self.clebsch_gordan,
             zero_init=True,
         )
-        for L in range(
-            self.output_over_ii.order_out + 1
-        ):  # diagonal blocks of overlap are constant
-            self.output_over_ii.linear[L].weight.requires_grad = (
-                False  # => only bias terms are used
-            )
+        for L in range(self.output_over_ii.order_out + 1):  # diagonal blocks of overlap are constant
+            self.output_over_ii.linear[L].weight.requires_grad = False  # => only bias terms are used
 
         # off-diagonal blocks
         number_L = [
@@ -465,7 +445,7 @@ class NeuralNetwork(nn.Module):
         if load_from is not None:
             try:
                 self.load_state_dict(saved_state["model_state_dict"], strict=False)
-            except KeyError as ke:
+            except KeyError:
                 self.load_state_dict(saved_state["state_dict"], strict=False)
         else:
             self.reset_parameters()
@@ -482,9 +462,9 @@ class NeuralNetwork(nn.Module):
             nn.init.orthogonal_(self.radial_ii[L].weight)
             nn.init.orthogonal_(self.radial_ij[L].weight)
 
-    """    
+    """
     saves the model to a file given by PATH (including all values of the hyperparameters)
-    (this file can be passed to the load_from value in the initialization in order to construct 
+    (this file can be passed to the load_from value in the initialization in order to construct
     the model from the saved state)
     """
 
@@ -573,23 +553,17 @@ class NeuralNetwork(nn.Module):
         for size in molecule_size:
             curr_size = (size * (size - 1)).item()
             curr_idx_pi, curr_idx_pj = self.idx_pdict[size.item()]
-            idx_pi.append(
-                torch.tensor(curr_idx_pi, dtype=torch.int64, device=device) + cum_size
-            )
-            idx_pj.append(
-                torch.tensor(curr_idx_pj, dtype=torch.int64, device=device) + cum_size
-            )
+            idx_pi.append(torch.tensor(curr_idx_pi, dtype=torch.int64, device=device) + cum_size)
+            idx_pj.append(torch.tensor(curr_idx_pj, dtype=torch.int64, device=device) + cum_size)
             cum_size += curr_size
 
         self.idx_pi, self.idx_pj = torch.cat(idx_pi), torch.cat(idx_pj)
-        self.mask = torch.block_diag(
-            *(torch.ones(size, size) for size in molecule_size)
-        )
+        self.mask = torch.block_diag(*(torch.ones(size, size) for size in molecule_size))
 
     """
-    Given the Cartesian coordinates and index lists, calculates pairwise distances and unit displacement 
+    Given the Cartesian coordinates and index lists, calculates pairwise distances and unit displacement
     vectors. Each distance/vector is specified by a pair of atom indices i and j (i != j). The total
-    number of interactions is num_interactions=num_atoms*(num_atoms-1) when all pairwise distances are 
+    number of interactions is num_interactions=num_atoms*(num_atoms-1) when all pairwise distances are
     calculated.
 
     inputs:
@@ -606,16 +580,12 @@ class NeuralNetwork(nn.Module):
         Ri = torch.gather(
             R,
             -2,
-            idx_i.view(*(1,) * len(R.shape[:-2]), -1, 1).repeat(
-                *R.shape[:-2], 1, R.size(-1)
-            ),
+            idx_i.view(*(1,) * len(R.shape[:-2]), -1, 1).repeat(*R.shape[:-2], 1, R.size(-1)),
         )
         Rj = torch.gather(
             R,
             -2,
-            idx_j.view(*(1,) * len(R.shape[:-2]), -1, 1).repeat(
-                *R.shape[:-2], 1, R.size(-1)
-            ),
+            idx_j.view(*(1,) * len(R.shape[:-2]), -1, 1).repeat(*R.shape[:-2], 1, R.size(-1)),
         )
         rij = Rj - Ri  # displacement vectors
         dij = torch.norm(rij, dim=-1, keepdim=True)  # distances
@@ -630,7 +600,7 @@ class NeuralNetwork(nn.Module):
         orbitals_i: Tuple or list of tuples with integer entries (Z, L) that define the orbitals of atom i
         orbitals_j: Tuple or list of tuples with integer entries (Z, L) that define the orbitals of atom j
         irreps: Dictionary that stores the feature indices for collecting irreducible representations
-        number_L: List of length L+1 with integer entries that stores how many irreducible representations of 
+        number_L: List of length L+1 with integer entries that stores how many irreducible representations of
                   each order are already in use
     outputs:
         irreps: Updated input dictionary
@@ -663,9 +633,7 @@ class NeuralNetwork(nn.Module):
         block: batch of matrix blocks of shape [batch_size, nrow, ncol] (nrow/ncol depends on row/col inputs)
     """
 
-    def matrix_block(
-        self, row, col, irreps, batch_size, device="cpu", dtype=torch.float32
-    ):
+    def matrix_block(self, row, col, irreps, batch_size, device="cpu", dtype=torch.float32):
         nrow = sum((2 * l + 1) for z, l in row)  # number of rows in the block
         ncol = sum((2 * l + 1) for z, l in col)  # number of columns in the block
         block = torch.zeros(batch_size, nrow, ncol, device=device, dtype=dtype)
@@ -679,9 +647,7 @@ class NeuralNetwork(nn.Module):
                 n_j = 2 * l_j + 1
                 for L in range(abs(l_i - l_j), l_i + l_j + 1):
                     # compute inverse spherical tensor product
-                    cg = math.sqrt(2 * L + 1) * self.clebsch_gordan(
-                        l_i, l_j, L
-                    ).unsqueeze(0)
+                    cg = math.sqrt(2 * L + 1) * self.clebsch_gordan(l_i, l_j, L).unsqueeze(0)
                     product = (cg * irreps[idx].unsqueeze(-2).unsqueeze(-2)).sum(-1)
 
                     # add product to appropriate part of the block
@@ -697,7 +663,7 @@ class NeuralNetwork(nn.Module):
     Generate matrix from list of irreps
 
     inputs:
-        irreps: dict with keys (z_i, z_j) and values list of irreps, 
+        irreps: dict with keys (z_i, z_j) and values list of irreps,
 
     outputs:
         matrix: matrix of shape [batch_size, num_orbitals, num_orbitals]
@@ -714,17 +680,13 @@ class NeuralNetwork(nn.Module):
         device,
         dtype,
     ):
-        matrix = torch.zeros(
-            batch_size, num_orbitals, num_orbitals, device=device, dtype=dtype
-        )
+        matrix = torch.zeros(batch_size, num_orbitals, num_orbitals, device=device, dtype=dtype)
 
         for z_i, z_j in irreps:
             current_irreps = irreps[(z_i, z_j)]
             current_irreps_tensors = []
             for L in range(len(current_irreps[0][0])):
-                current_irreps_tensors.append(
-                    torch.vstack([irrep[L] for irrep, _, _ in current_irreps])
-                )
+                current_irreps_tensors.append(torch.vstack([irrep[L] for irrep, _, _ in current_irreps]))
 
             blocks = self.matrix_block(
                 atom2orbitals[z_i],
@@ -777,9 +739,7 @@ class NeuralNetwork(nn.Module):
 
         # compute radial basis functions and spherical harmonics
         dij, uij = self.calculate_distances_and_directions(R, self.idx_i, self.idx_j)
-        rbf = self.radial_basis_functions(dij).unsqueeze_(
-            -2
-        )  # unsqueeze for broadcasting
+        rbf = self.radial_basis_functions(dij).unsqueeze_(-2)  # unsqueeze for broadcasting
         sph = spherical_harmonics(self.order, uij)
 
         for L in range(self.order + 1):
@@ -916,27 +876,15 @@ class NeuralNetwork(nn.Module):
                                 ii = self.irreps_ii[(z_i, z_j, n_i, n_j, L)]
                                 if self.calculate_full_hamiltonian:
                                     full_current_irreps.append(
-                                        fii_full[L]
-                                        .narrow(-3, i, 1)
-                                        .narrow(-1, ii, 1)
-                                        .squeeze(-3)
-                                        .squeeze(-1)
+                                        fii_full[L].narrow(-3, i, 1).narrow(-1, ii, 1).squeeze(-3).squeeze(-1)
                                     )
                                 if self.calculate_core_hamiltonian:
                                     core_current_irreps.append(
-                                        fii_core[L]
-                                        .narrow(-3, i, 1)
-                                        .narrow(-1, ii, 1)
-                                        .squeeze(-3)
-                                        .squeeze(-1)
+                                        fii_core[L].narrow(-3, i, 1).narrow(-1, ii, 1).squeeze(-3).squeeze(-1)
                                     )
                                 if self.calculate_overlap_matrix:
                                     over_current_irreps.append(
-                                        fii_over[L]
-                                        .narrow(-3, i, 1)
-                                        .narrow(-1, ii, 1)
-                                        .squeeze(-3)
-                                        .squeeze(-1)
+                                        fii_over[L].narrow(-3, i, 1).narrow(-1, ii, 1).squeeze(-3).squeeze(-1)
                                     )
                 else:  # off-diagonal block
                     if not self.mask[i, j]:
@@ -950,27 +898,15 @@ class NeuralNetwork(nn.Module):
                                 ij = self.irreps_ij[(z_i, z_j, n_i, n_j, L)]
                                 if self.calculate_full_hamiltonian:
                                     full_current_irreps.append(
-                                        fij_full[L]
-                                        .narrow(-3, idx, 1)
-                                        .narrow(-1, ij, 1)
-                                        .squeeze(-3)
-                                        .squeeze(-1)
+                                        fij_full[L].narrow(-3, idx, 1).narrow(-1, ij, 1).squeeze(-3).squeeze(-1)
                                     )
                                 if self.calculate_core_hamiltonian:
                                     core_current_irreps.append(
-                                        fij_core[L]
-                                        .narrow(-3, idx, 1)
-                                        .narrow(-1, ij, 1)
-                                        .squeeze(-3)
-                                        .squeeze(-1)
+                                        fij_core[L].narrow(-3, idx, 1).narrow(-1, ij, 1).squeeze(-3).squeeze(-1)
                                     )
                                 if self.calculate_overlap_matrix:
                                     over_current_irreps.append(
-                                        fij_over[L]
-                                        .narrow(-3, idx, 1)
-                                        .narrow(-1, ij, 1)
-                                        .squeeze(-3)
-                                        .squeeze(-1)
+                                        fij_over[L].narrow(-3, idx, 1).narrow(-1, ij, 1).squeeze(-3).squeeze(-1)
                                     )
                     idx += 1  # increment interaction index
 
@@ -982,11 +918,7 @@ class NeuralNetwork(nn.Module):
                     over_irreps[(z_i, z_j)].append((over_current_irreps, i, j))
 
         #  batch of identity matrices
-        eye = (
-            torch.eye(Norb, device=R.device, dtype=R.dtype)
-            .unsqueeze(0)
-            .repeat(batch_size, 1, 1)
-        )
+        eye = torch.eye(Norb, device=R.device, dtype=R.dtype).unsqueeze(0).repeat(batch_size, 1, 1)
 
         if self.calculate_full_hamiltonian:
             full_hamiltonian = self.generate_matrix_from_irreps(
@@ -999,9 +931,7 @@ class NeuralNetwork(nn.Module):
                 device=R.device,
                 dtype=R.dtype,
             )
-            full_hamiltonian = full_hamiltonian + full_hamiltonian.transpose(
-                -2, -1
-            )  # symmetrize
+            full_hamiltonian = full_hamiltonian + full_hamiltonian.transpose(-2, -1)  # symmetrize
         else:
             full_hamiltonian = eye
 
@@ -1016,9 +946,7 @@ class NeuralNetwork(nn.Module):
                 device=R.device,
                 dtype=R.dtype,
             )
-            core_hamiltonian = core_hamiltonian + core_hamiltonian.transpose(
-                -2, -1
-            )  # symmetrize
+            core_hamiltonian = core_hamiltonian + core_hamiltonian.transpose(-2, -1)  # symmetrize
         else:
             core_hamiltonian = eye
 
@@ -1033,9 +961,7 @@ class NeuralNetwork(nn.Module):
                 device=R.device,
                 dtype=R.dtype,
             )
-            overlap_matrix = overlap_matrix + overlap_matrix.transpose(
-                -2, -1
-            )  # symmetrize
+            overlap_matrix = overlap_matrix + overlap_matrix.transpose(-2, -1)  # symmetrize
             overlap_matrix = (1 - eye) * overlap_matrix + eye  # set diagonal=1
         else:
             overlap_matrix = eye
@@ -1045,23 +971,15 @@ class NeuralNetwork(nn.Module):
             energy = self.energy_predictor(fii, fij, list(molecule_size), pair_sizes)
 
             # the rest is zero
-            orbital_energies = torch.zeros_like(
-                torch.diagonal(full_hamiltonian, dim1=-2, dim2=-1)
-            )
+            orbital_energies = torch.zeros_like(torch.diagonal(full_hamiltonian, dim1=-2, dim2=-1))
             orbital_coefficients = torch.zeros_like(full_hamiltonian)
         else:
-            orbital_energies = torch.zeros_like(
-                torch.diagonal(full_hamiltonian, dim1=-2, dim2=-1)
-            )
+            orbital_energies = torch.zeros_like(torch.diagonal(full_hamiltonian, dim1=-2, dim2=-1))
             orbital_coefficients = torch.zeros_like(full_hamiltonian)
-            energy = torch.zeros(
-                (batch_size, 1), device=R.device, dtype=R.dtype, requires_grad=False
-            )
+            energy = torch.zeros((batch_size, 1), device=R.device, dtype=R.dtype, requires_grad=False)
 
         if self.predict_energy and self.calculate_forces:
-            forces = -torch.autograd.grad(
-                torch.sum(energy), R, create_graph=self.create_graph
-            )[0]
+            forces = -torch.autograd.grad(torch.sum(energy), R, create_graph=self.create_graph)[0]
         else:
             forces = torch.zeros_like(R, requires_grad=self.create_graph)
 
