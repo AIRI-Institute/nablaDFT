@@ -208,8 +208,6 @@ Models training and testing example:
 Models inference example:
 * [GemNet-OC](examples/Inference%20example.ipynb)
 
-Molecular geometry optimization example:
-* [GemNet-OC](examples/Geometry%20Optimization.ipynb)
 
 ### Metrics
 In the tables below ST, SF, CF denote structures test set, scaffolds test set and conformations test set correspondingly.
