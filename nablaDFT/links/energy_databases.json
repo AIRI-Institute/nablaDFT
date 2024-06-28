@@ -32,7 +32,7 @@
     "dataset_test_conformations_tiny": "92c4bdaf97d5c1d6f22ae33c46bf77ca-2",
     "dataset_test_trajectories_initial": "09eaa0a63126356aab6ac03aacd36008-2",
     "dataset_test_trajectories": "fb4c8054c698f46a1d44d1aceed759de-58",
-    "dataset_train_medium_trajectories": "c13b7e62e4dcd5f5adbde719c3866e11-77",
+    "dataset_train_medium_trajectories": "c13b7e62e4dcd5f5adbde719c3866e11-778",
     "dataset_trajectories_additional": "592b8e2c000612ea1baecb5220016944-751"
   }
 }
