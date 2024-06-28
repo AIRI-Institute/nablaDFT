@@ -1,7 +1,7 @@
 name: GemNet-OC
 dataset_name: test_opt # used for output database name
 job_type: optimize
-pretrained: GemNet-OC_train_large # if True downloads checkpoint trained on the largest split
+pretrained: GemNet-OC_train_large # name of pretrained split or 'null'
 ckpt_path: null # path to checkpoint for training resume or test run
 
 input_db: ./test_opt.db # relative path to input database

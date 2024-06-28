@@ -4,7 +4,7 @@ dataset_name: dataset_train_tiny
 max_steps: 1000000
 warmup_steps: 0
 job_type: train
-pretrained: False # if True downloads checkpoint trained on the largest split
+pretrained: null # name of pretrained split or 'null'
 ckpt_path: null # path to checkpoint for training resume or test run
 
 # Datamodule parameters
@@ -13,7 +13,7 @@ batch_size: 8
 num_workers: 8
 
 # Devices
-devices: [0]
+devices: [0, 1]
 
 # Trainer parameters
 gradient_clip_algorithm: norm
