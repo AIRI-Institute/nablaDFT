@@ -31,6 +31,23 @@ class AtomisticTaskFixed(spk.task.AtomisticTask):
         )
         self.hparams.model_name = model_name
 
+    def test_step(self, batch, batch_idx):
+        torch.set_grad_enabled(self.grad_enabled)
+
+        targets = {
+            output.target_property: batch[output.target_property]
+            for output in self.outputs
+            if not isinstance(output, UnsupervisedModelOutput)
+        }
+
+        pred = self(batch)
+
+        loss = self.loss_fn(pred, targets)
+
+        self.log("test_loss", loss, on_step=False, on_epoch=True, prog_bar=True)
+        self.log_metrics(pred, targets, "test")
+        return {"test_loss": loss}
+
     def predict_step(self, batch, batch_idx):
         torch.set_grad_enabled(self.grad_enabled)
 
@@ -43,7 +60,7 @@ class AtomisticTaskFixed(spk.task.AtomisticTask):
             targets["considered_atoms"] = batch["considered_atoms"]
         except KeyError:
             pass
-        pred = self.predict_without_postprocessing(batch)
+        pred = self(batch)
         pred, targets = self.apply_constraints(pred, targets)
         return pred
 
@@ -54,8 +71,3 @@ class AtomisticTaskFixed(spk.task.AtomisticTask):
             checkpoint["state_dict"]["model.postprocessors.0.mean"] = checkpoint["state_dict"][
                 "model.postprocessors.0.mean"
             ].reshape(1)
-
-    # override base class method
-    def predict_without_postprocessing(self, batch):
-        pred = self(batch)
-        return pred

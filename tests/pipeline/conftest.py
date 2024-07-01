@@ -25,6 +25,7 @@ def train_config(request):
     config.callbacks = {}
     with open_dict(config):
         config.trainer.max_epochs = 3
+        config.trainer.enable_checkpointing = False
         del config.trainer.max_steps
     config.root = (Path(nablaDFT.__path__[0]) / "../tests/data").resolve()
     config.dataset_name = "test_database"

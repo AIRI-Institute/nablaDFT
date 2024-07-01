@@ -1,6 +1,5 @@
 """Module defines Pytorch Lightning DataModule interfaces for nablaDFT datasets"""
 
-import os
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
@@ -74,8 +73,8 @@ class ASENablaDFT(AtomsDataModule):
         cleanup_workdir_stage: Optional[str] = "test",
         splitting: Optional[SplittingStrategy] = None,
         pin_memory: Optional[bool] = False,
+        seed: int = 47,
     ):
-        """"""
         if not Path(root).exists():
             Path(root).mkdir(parents=True, exist_ok=True)
         super().__init__(
@@ -103,25 +102,29 @@ class ASENablaDFT(AtomsDataModule):
             splitting=splitting,
             pin_memory=pin_memory,
         )
-        self.split = split
         self._predict_dataset = None
         self._predict_dataloader = None
         self.dataset_name = dataset_name
         self.train_ratio = train_ratio
         self.val_ratio = val_ratio
         self.test_ratio = test_ratio
+        self.split = split
+        self.seed = seed
 
-    def prepare_data(self):
-        datapath = Path(self.datapath)
-        datapath_dir = datapath.parent.resolve() / datapath.stem
-        if not datapath_dir.is_dir():
-            datapath_dir = Path(".").resolve()
-        # suffix is always '.db', because other formats are not supported by schnetpack
-        suffix = "db"
-        datapath_dir.mkdir(parents=True, exist_ok=True)
-        self.datapath = datapath_dir / f"{self.dataset_name}.{suffix}"
+        self._resolve_path(root)
+
+    def prepare_data(self) -> None:
         if not self.datapath.exists():
             self._download()
+
+    def setup(self, stage: Optional[str] = None):
+        """Overrides method from original AtomsDataModule class
+
+        Args:
+            stage (str): trainer stage, must be one of ['fit', 'test', 'predict']
+        """
+        # check whether data needs to be copied
+        # (re)load datasets
         with connect(self.datapath) as ase_db:
             self._check_metadata(ase_db)
             dataset_length = len(ase_db)
@@ -132,42 +135,28 @@ class ASENablaDFT(AtomsDataModule):
             if not self.num_train and not self.num_val:
                 self.num_val = -1
                 self.num_train = -1
+        self.dataset = load_dataset(
+            self.datapath,
+            self.format,
+            property_units=self.property_units,
+            distance_unit=self.distance_unit,
+            load_properties=self.load_properties,
+        )
 
-    def setup(self, stage: Optional[str] = None):
-        """Overrides method from original AtomsDataModule class
-
-        Args:
-            stage (str): trainer stage, must be one of ['fit', 'test', 'predict']
-        """
-        # check whether data needs to be copied
-        if self.data_workdir is None:
-            datapath = self.datapath
-        else:
-            datapath = self._copy_to_workdir()
-        # (re)load datasets
-        if self.dataset is None:
-            self.dataset = load_dataset(
-                datapath,
-                self.format,
-                property_units=self.property_units,
-                distance_unit=self.distance_unit,
-                load_properties=self.load_properties,
-            )
-
-            # load and generate partitions if needed
-            if self.train_idx is None:
-                self._load_partitions()
+        # load and generate partitions if needed
+        if self.train_idx is None:
+            self._load_partitions()
 
             # partition dataset
-            self._train_dataset = self.dataset.subset(self.train_idx)
-            self._val_dataset = self.dataset.subset(self.val_idx)
-            if self.split == "predict":
-                self._predict_dataset = self.dataset.subset(self.test_idx)
-                self._test_dataset = self.dataset.subset([])
-            else:
-                self._test_dataset = self.dataset.subset(self.test_idx)
-                self._predict_dataset = self.dataset.subset([])
-            self._setup_transforms()
+        self._train_dataset = self.dataset.subset(self.train_idx)
+        self._val_dataset = self.dataset.subset(self.val_idx)
+        if self.split == "predict":
+            self._predict_dataset = self.dataset.subset(self.test_idx)
+            self._test_dataset = self.dataset.subset([])
+        else:
+            self._test_dataset = self.dataset.subset(self.test_idx)
+            self._predict_dataset = self.dataset.subset([])
+        self._setup_transforms()
 
     @property
     def predict_dataset(self) -> BaseAtomsData:
@@ -220,6 +209,15 @@ class ASENablaDFT(AtomsDataModule):
                 },
                 "atomrefs": {"energy": list(atomrefs)},
             }
+
+    def _resolve_path(self, root):
+        datapath_dir = Path(root).resolve()
+        if not datapath_dir.is_dir():
+            datapath_dir = Path(".").resolve()
+        # suffix is always '.db', because other formats are not supported by schnetpack
+        suffix = "db"
+        datapath_dir.mkdir(parents=True, exist_ok=True)
+        self.datapath = datapath_dir / f"{self.dataset_name}.{suffix}"
 
 
 class PyGDataModule(LightningDataModule):
