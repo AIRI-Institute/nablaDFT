@@ -138,3 +138,9 @@ Table shows checkpoint names for each model trained on training splits:
 | **SchNOrb**            	 | SchNOrb_train_tiny            	 | SchNOrb_train_small            	 | SchNOrb_train_medium            	 | SchNOrb_train_large            	 |
 | **PhiSNet**            	 | PhiSNet_train_tiny            	 | PhiSNet_train_small            	 | PhiSNet_train_medium            	 | PhiSNet_train_large            	 |
 | **QHNet**              	 | QHNet_train_tiny              	 | QHNet_train_small              	 | QHNet_train_medium              	 | QHNet_train_large              	 |
+
+Table shows checkpoint names, which was subsequently fine-tuned on trajectory dataset.  
+
+| 	                                    | **dataset_train_medium_trajectories**        |
+|--------------------------------------|----------------------------------------------|
+| **PaiNN_train_large**              	 | PaiNN_train_large_traj_medium              	 |
