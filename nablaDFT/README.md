@@ -17,7 +17,7 @@ Each config consists of global variables:
 you should write database file name without extension.
 - `max_steps`: defines maximum number of steps for `pytorch_lightning.Trainer`.
 - `warmup_steps`: defines number of warmup steps for model.
-- `job_type`: defines task type, must be one of `["train", "test", "predict"]`.
+- `job_type`: defines task type, must be one of `["train", "test", "predict", "optimize"]`.
 - `pretrained`: by default is `null`, change if you want to use one of nablaDFT's pretrained models.
 See [Pretrained models](#Pretrained-models) section.
 > NOTE: currently PhiSNet and SchNOrb model checkpoints can't be used with `pretrained` parameter.
@@ -111,7 +111,8 @@ Interactive example could be found [here](../examples/Inference%20example.ipynb)
 [Example for PyG model](../config/gemnet-oc_optim.yaml)  
 [Example for ASE](../config/schnet_optim.yaml)  
 `job_type: optimize` stands for molecule geometry optimization with pretrained model.
-Molecules from `input_db` parameter will be optimized using pretrained checkpoint from `ckpt_path`.
+Molecules from `input_db` parameter will be optimized using pretrained checkpoint from `ckpt_path` or from `pretrained`
+parameter.
 Currently only LBFGS optimizer supported.
 Results will be saved at `output_db` parameter path.
 

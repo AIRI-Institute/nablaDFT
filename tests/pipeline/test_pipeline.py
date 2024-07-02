@@ -1,6 +1,7 @@
 import os
 
 import pytest
+import torch
 from ase.db import connect
 from nablaDFT.pipelines import run
 
@@ -8,6 +9,13 @@ from nablaDFT.pipelines import run
 @pytest.mark.pipeline
 def test_train_pipeline(train_config, caplog):
     run(train_config)
+    assert "`Trainer.fit` stopped: `max_epochs=3` reached." in caplog.messages[-1]
+
+
+@pytest.mark.pipeline
+@pytest.mark.skipif(torch.cuda.device_count() < 2, reason="Can't test DDP with less than 2 devices")
+def test_train_ddp_pipeline(train_ddp_config, caplog):
+    run(train_ddp_config)
     assert "`Trainer.fit` stopped: `max_epochs=3` reached." in caplog.messages[-1]
 
 

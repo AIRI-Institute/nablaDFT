@@ -15,10 +15,10 @@ PYTHON_VERSION = get_python_version()
 
 setup(
     name="nablaDFT",
-    version="2.0.0-alpha",
-    author="Khrabrov, Kuzma and Shenbin, Ilya and Ryabov, Alexander and Tsypin, Artem and Telepov, Alexander and "
-    "Alekseev, Anton and Grishin, Alexander and Strashnov, Pavel and Zhilyaev, Petr and Nikolenko, Sergey and "
-    "Kadurin, Artur",
+    version="2.0.0",
+    author="Khrabrov, Kuzma  and Ber, Anton and Tsypin, Artem and Ushenin, Konstantin and Rumiantsev, Egor"
+    "and Telepov, Alexander and Protasov, Dmitry and Shenbin, Ilya and Alekseev, Anton"
+    "and Shirokikh, Mikhail and Nikolenko, Sergey and Tutubalina, Elena and Kadurin, Artur",
     url="https://github.com/AIRI-Institute/nablaDFT",
     packages=find_packages(),
     include_package_data=True,
@@ -51,12 +51,19 @@ setup(
         "e3nn==0.5.1",
     ],
     license="MIT",
-    description="nablaDFT: Large-Scale Conformational Energy and Hamiltonian Prediction benchmark and dataset",
-    long_description="""Electronic wave function calculation is a fundamental task of computational quantum
-    chemistry. Knowledge of the wave function parameters allows one to compute physical and chemical properties of
-    molecules and materials. In this work we: introduce a new curated large-scale dataset of electron structures of
-    drug-like molecules, establish a novel benchmark for the estimation of molecular properties in the multi-molecule
-    setting, and evaluate a wide range of methods with this benchmark.""",
+    description="$\nabla^2$ DFT: A Universal Quantum Chemistry Dataset of Drug-Like Molecules"
+    "and a Benchmark for Neural Network Potentials",
+    long_description="""Methods of computational quantum chemistry provide accurate approximations of molecular 
+    properties crucial for computer-aided drug discovery and other areas of chemical science. However, 
+    high computational complexity limits the scalability of their applications. Neural network potentials (NNPs) are 
+    a promising alternative to quantum chemistry methods, but they require large and diverse datasets for training. 
+    This work presents a new dataset and benchmark called $\nabla^2$ DFT that is based on the nablaDFT. It contains 
+    twice as much molecular structures, three times more conformations, new data types and tasks, 
+    and state-of-the-art models. The dataset includes energies, forces, 17 molecular properties, Hamiltonian and 
+    overlap matrices, and a wavefunction object. All calculations were performed at the DFT level (ωB97X-D/def2-SVP) 
+    for each conformation. Moreover, $\nabla^2$ DFT is the first dataset that contains relaxation trajectories for a 
+    substantial number of drug-like molecules. We also introduce a novel benchmark for evaluating NNPs in molecular 
+    property prediction, Hamiltonian prediction, and conformational optimization tasks.""",
     classifiers=[
         "Development Status :: 4 - Beta",
     ],
