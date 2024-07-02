@@ -9,6 +9,8 @@ from torch import nn
 
 from .opt_utils import atoms_list_to_PYG
 
+from copy import deepcopy
+
 
 class BatchwiseCalculator:
     """Base class calculator for neural network models for batchwise optimization.
@@ -127,7 +129,7 @@ class PyGBatchwiseCalculator(BatchwiseCalculator):
         results["forces"] = model_results[1].cpu().data.numpy() * self.property_units["forces"]
 
         self.results = results
-        self.atoms = atoms.copy()
+        self.atoms = deepcopy(atoms)
 
 
 class SpkBatchwiseCalculator(BatchwiseCalculator):
