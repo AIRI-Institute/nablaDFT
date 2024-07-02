@@ -12,8 +12,7 @@ import torch
 import wandb
 from ase.db import connect
 from dotenv import load_dotenv
-from omegaconf import DictConfig, open_dict
-from pytorch_lightning.strategies.ddp import DDPStrategy
+from omegaconf import DictConfig, OmegaConf, open_dict
 from pytorch_lightning.utilities import rank_zero_only
 
 JOB_TYPES = ["train", "test", "predict", "optimize"]
@@ -65,7 +64,8 @@ def set_additional_params(config: DictConfig) -> DictConfig:
             config.trainer.inference_mode = False
     if len(config.devices) > 1:
         with open_dict(config):
-            config.trainer.strategy = DDPStrategy()
+            strategy_cfg = OmegaConf.create({"_target_": "pytorch_lightning.strategies.ddp.DDPStrategy"})
+            config.trainer.strategy = strategy_cfg
     if config.job_type == "train" and config.name == "QHNet":
         with open_dict(config):
             config.trainer.find_unused_parameters = True

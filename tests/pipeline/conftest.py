@@ -25,10 +25,19 @@ def train_config(request):
     config.callbacks = {}
     with open_dict(config):
         config.trainer.max_epochs = 3
+        config.trainer.enable_checkpointing = False
         del config.trainer.max_steps
     config.root = (Path(nablaDFT.__path__[0]) / "../tests/data").resolve()
     config.dataset_name = "test_database"
     return config
+
+
+@pytest.fixture()
+def train_ddp_config(train_config):
+    with open_dict(train_config):
+        train_config.devices = [0, 1]
+        train_config.trainer.strategy = OmegaConf.create({"_target_": "pytorch_lightning.strategies.ddp.DDPStrategy"})
+    return train_config
 
 
 @pytest.fixture(

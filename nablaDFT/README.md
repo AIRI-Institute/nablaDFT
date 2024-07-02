@@ -9,7 +9,7 @@ Type of run defined with `job_type` parameter and it must be one of:
 - train
 - test
 - predict
-- optimize (WIP)
+- optimize
 
 Each config consists of global variables:
 - `name`: defines run name, usually you should put model name.
@@ -17,7 +17,7 @@ Each config consists of global variables:
 you should write database file name without extension.
 - `max_steps`: defines maximum number of steps for `pytorch_lightning.Trainer`.
 - `warmup_steps`: defines number of warmup steps for model.
-- `job_type`: defines task type, must be one of `["train", "test", "predict"]`.
+- `job_type`: defines task type, must be one of `["train", "test", "predict", "optimize"]`.
 - `pretrained`: by default is `null`, change if you want to use one of nablaDFT's pretrained models.
 See [Pretrained models](#Pretrained-models) section.
 > NOTE: currently PhiSNet and SchNOrb model checkpoints can't be used with `pretrained` parameter.
@@ -108,15 +108,11 @@ Predictions will be stored in database `./{output_dir}/{model_name}_{dataset_nam
 Interactive example could be found [here](../examples/Inference%20example.ipynb).
 
 ## Optimize
-> WARNING: currently optimize pipeline under construction, please,
-> use [GOLF_schnetpack](https://github.com/AIRI-Institute/GOLF/blob/nabla2DFT-eval)
-> and [GOLF_PYG](https://github.com/AIRI-Institute/GOLF/blob/nabla2DFT-eval-dimenet)
-> for the optimization metrics reproduction.
-
 [Example for PyG model](../config/gemnet-oc_optim.yaml)  
 [Example for ASE](../config/schnet_optim.yaml)  
 `job_type: optimize` stands for molecule geometry optimization with pretrained model.
-Molecules from `input_db` parameter will be optimized using pretrained checkpoint from `ckpt_path`.
+Molecules from `input_db` parameter will be optimized using pretrained checkpoint from `ckpt_path` or from `pretrained`
+parameter.
 Currently only LBFGS optimizer supported.
 Results will be saved at `output_db` parameter path.
 
@@ -143,3 +139,9 @@ Table shows checkpoint names for each model trained on training splits:
 | **SchNOrb**            	 | SchNOrb_train_tiny            	 | SchNOrb_train_small            	 | SchNOrb_train_medium            	 | SchNOrb_train_large            	 |
 | **PhiSNet**            	 | PhiSNet_train_tiny            	 | PhiSNet_train_small            	 | PhiSNet_train_medium            	 | PhiSNet_train_large            	 |
 | **QHNet**              	 | QHNet_train_tiny              	 | QHNet_train_small              	 | QHNet_train_medium              	 | QHNet_train_large              	 |
+
+Table shows checkpoint names, which was subsequently fine-tuned on trajectory dataset.  
+
+| 	                                    | **dataset_train_medium_trajectories**        |
+|--------------------------------------|----------------------------------------------|
+| **PaiNN_train_large**              	 | PaiNN_train_large_traj_medium              	 |

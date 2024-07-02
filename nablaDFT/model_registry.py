@@ -68,6 +68,8 @@ class ModelRegistry:
             model_name (str): model checkpoint name. Available models can be listed with
                 :meth:nablaDFT.registry.ModelRegistry.list_models
         """
+        if "SchNorb" in model_name or "PhiSNet" in model_name:
+            raise NotImplementedError("SchNorb and PhiSNet pretrained models are not supported by pipeline")
         backbone_name = model_name.split("_")[0]
         model_cfg = self._pretrained_model_cfg[backbone_name]
         ckpt_path = self.default_ckpt_dir / model_cfg.model_name / f"{model_name}.ckpt"

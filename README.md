@@ -15,13 +15,26 @@
 
 
 This is the repository for nablaDFT Dataset and Benchmark. The current version is 2.0. The code and data from the initial publication are accessible here: [1.0 branch](https://github.com/AIRI-Institute/nablaDFT/tree/1.0). <br/>
-Electronic wave function calculation is a fundamental task of computational quantum chemistry. Knowledge of the wave function parameters allows one to compute physical and chemical properties of molecules and materials.<br/>
-In this work we: introduce a new curated large-scale dataset of electron structures of drug-like molecules, establish a novel benchmark for the estimation of molecular properties in the multi-molecule setting, and evaluate a wide range of methods with this benchmark.<br/>
-
-More details can be found in the [paper](https://pubs.rsc.org/en/content/articlelanding/2022/CP/D2CP03966D).
+Methods of computational quantum chemistry provide accurate approximations of molecular properties crucial for computer-aided drug discovery and other areas of chemical science. 
+However, high computational complexity limits the scalability of their applications. Neural network potentials (NNPs) are a promising alternative to quantum chemistry methods, but they require large and diverse datasets for training. 
+This work presents a new dataset and benchmark called $\nabla^2$ DFT that is based on the nablaDFT. It contains twice as much molecular structures, three times more conformations, new data types and tasks, and state-of-the-art models. 
+The dataset includes energies, forces, 17 molecular properties, Hamiltonian and overlap matrices, and a wavefunction object. All calculations were performed at the DFT level (ωB97X-D/def2-SVP) for each conformation. 
+Moreover, $\nabla^2$ DFT is the first dataset that contains relaxation trajectories for a substantial number of drug-like molecules. We also introduce a novel benchmark for evaluating NNPs in molecular property prediction, Hamiltonian prediction, and conformational optimization tasks. 
+Finally, we propose an extendable framework for training NNPs and implement 10 models within it.<br/>
+More details can be found in the [version 1 paper](https://pubs.rsc.org/en/content/articlelanding/2022/CP/D2CP03966D) and [version 2 paper](https://arxiv.org/abs/2406.14347).
 
 If you are using nablaDFT in your research paper, please cite us as
 ```
+@article{khrabrov2024nabla2dftuniversalquantumchemistry,
+      title={$\nabla^2$DFT: A Universal Quantum Chemistry Dataset of Drug-Like Molecules and a Benchmark for Neural Network Potentials}, 
+      author={Kuzma Khrabrov and Anton Ber and Artem Tsypin and Konstantin Ushenin and Egor Rumiantsev and Alexander Telepov and Dmitry Protasov and Ilya Shenbin and Anton Alekseev and Mikhail Shirokikh and Sergey Nikolenko and Elena Tutubalina and Artur Kadurin},
+      year={2024},
+      eprint={2406.14347},
+      archivePrefix={arXiv},
+      primaryClass={physics.chem-ph},
+      url={https://arxiv.org/abs/2406.14347}, 
+}
+
 @article{10.1039/D2CP03966D,
 author ="Khrabrov, Kuzma and Shenbin, Ilya and Ryabov, Alexander and Tsypin, Artem and Telepov, Alexander and Alekseev, Anton and Grishin, Alexander and Strashnov, Pavel and Zhilyaev, Petr and Nikolenko, Sergey and Kadurin, Artur",
 title  ="nablaDFT: Large-Scale Conformational Energy and Hamiltonian Prediction benchmark and dataset",
@@ -147,10 +160,6 @@ For task start run this command from repository root directory:
 python run.py --config-name <config-name>.yaml
 ```
 For the detailed run configuration please refer to [run configuration README](./nablaDFT/README.md).
-
-Currently, the optimization pipeline is under construction, please,
-use [GOLF_schnetpack](https://github.com/AIRI-Institute/GOLF/blob/nabla2DFT-eval)
-and [GOLF_PYG](https://github.com/AIRI-Institute/GOLF/blob/nabla2DFT-eval-dimenet) for the optimization metrics reproduction.
 
 ### Datamodules
 To create a dataset, we use interfaces from ASE, PyTorch Geometric and PyTorch Lightning.

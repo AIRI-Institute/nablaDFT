@@ -1,7 +1,7 @@
 name: SchNet  # model name, used for output database name
 dataset_name: test_opt # used for output database name
 job_type: optimize
-pretrained: SchNet_train_large # if True downloads checkpoint trained on the largest split
+pretrained: SchNet_train_large # name of pretrained split or 'null'
 ckpt_path: null # path to checkpoint for training resume or test run
 
 input_db: ./test_optim_database.db # relative path to input database
