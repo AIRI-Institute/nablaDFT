@@ -1,23 +1,27 @@
 {
   "databases": {
+    "dataset_train_full": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/hamiltonian_databases/train_full.db",
     "dataset_train_large": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/hamiltonian_databases/train_100k.db",
     "dataset_train_medium": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/hamiltonian_databases/train_10k.db",
     "dataset_train_small": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/hamiltonian_databases/train_5k.db",
     "dataset_train_tiny": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/hamiltonian_databases/train_2k.db",
     "dataset_test_structures": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/hamiltonian_databases/test_structures.db",
     "dataset_test_scaffolds": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/hamiltonian_databases/test_scaffolds.db",
+    "dataset_test_conformations_full": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/hamiltonian_databases/test_full_conformers.db",
     "dataset_test_conformations_large": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/hamiltonian_databases/test_100k_conformers.db",
     "dataset_test_conformations_medium": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/hamiltonian_databases/test_10k_conformers.db",
     "dataset_test_conformations_small": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/hamiltonian_databases/test_5k_conformers.db",
     "dataset_test_conformations_tiny": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/hamiltonian_databases/test_2k_conformers.db"
   },
   "etag": {
+    "dataset_train_full": "3e18346a7cfbc7205d553f3c07d428d5-5761",
     "dataset_train_large": "6c3fed0b67969a24c16035cbd06760fd-5283",
     "dataset_train_medium": "41f03a745d88afa8689f7a41e0afb54f-8153",
     "dataset_train_small": "5e3cfa36b3f97251432fd37dbfbd2b34-4543",
     "dataset_train_tiny": "068975858201ae70743d3d4427c55e47-1803",
     "dataset_test_structures": "0dc0b44de85afb6eb4786917cb96e224-5943",
     "dataset_test_scaffolds": "8278b49074aea9376f3a488c19298821",
+    "dataset_test_conformations_full": "4d3f63fc6d0de1cfc8ffd133882bfad7-7483",
     "dataset_test_conformations_large": "2d63e4da9e43776f7d777743d38ee048-7339",
     "dataset_test_conformations_medium": "54b7085e86fa09db8d2d6a475c6f93ea-1436",
     "dataset_test_conformations_small": "c7fc0b0586d981c10daaee3daa94076a-818",
