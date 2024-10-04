@@ -108,6 +108,7 @@ def write_predictions_to_db(input_db_path: Path, output_db_path: Path, predictio
                     data = {}
                 data["energy_pred"] = [float(energy[idx - 1])]
                 data["forces_pred"] = forces[force_idx : (force_idx + natoms)]
+                force_idx += natoms
                 out_db.write(row, data=data)
     logger.info(f"Write predictions to {output_db_path}")
 
