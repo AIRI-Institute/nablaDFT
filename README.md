@@ -688,48 +688,93 @@ We test the ability of the trained models to find low energy conformations.
   <tbody>
     <tr>
       <td><i>SchNet</i></td>
-      <td><i>39.07</i></td>
-      <td><i>40.95</i></td>
-      <td><i>36.60</i></td>
-      <td><i>80.25</i></td>
-      <td><i>42.4</i></td>
-      <td><i>38.25</i></td>
-      <td><i>47.65</i></td>
-      <td><i>6.05</i></td>
-      <td><i>0</i></td>
-      <td><i>0</i></td>
-      <td><i>0</i></td>
-      <td><i>3.50</i></td>
+      <td><i>38.56</i></td>
+      <td><i>39.75</i></td>
+      <td><i>36.50</i></td>
+      <td><i>75.51</i></td>
+      <td><i>39.6</i></td>
+      <td><i>34.85</i></td>
+      <td><i>45.82</i></td>
+      <td><i>0.8</i></td>
+      <td><i>0.</i></td>
+      <td><i>0.</i></td>
+      <td><i>0.</i></td>
+      <td><i>4.00</i></td>
     </tr>
     <tr>
       <td><i>PAINN</i></td>
-      <td><i>60.60</i></td>
-      <td><i>67.30</i></td>
-      <td><i>74.67</i></td>
-      <td><i>98.45</i></td>
-      <td><i>18.70</i></td>
-      <td><i>14.55</i></td>
-      <td><i>14.00</i></td>
-      <td><i>1.50</i></td>
+      <td><i>60.26</i></td>
+      <td><i>66.63</i></td>
+      <td><i>74.16</i></td>
+      <td><i>98.50</i></td>
+      <td><i>21.25</i></td>
+      <td><i>10.35</i></td>
+      <td><i>7.00</i></td>
+      <td><i>0.05</i></td>
       <td><i>0</i></td>
-      <td><i>0.12</i></td>
-      <td><i>2.33</i></td>
-      <td><i>77.36</i></td>
+      <td><i>0.11</i></td>
+      <td><i>2.60</i></td>
+      <td><i>77.09</i></td>
     </tr>
     <tr>
       <td><i>DimeNet++</i></td>
-      <td><i>33.80</i></td>
-      <td><i>89.30</i></td>
+      <td><i>32.27</i></td>
+      <td><i>89.16</i></td>
       <td><i>93.22</i></td>
-      <td><i>96.29</i></td>
-      <td><i>96.40</i></td>
-      <td><i>20.70</i></td>
-      <td><i>8.25</i></td>
-      <td><i>1.70</i></td>
+      <td><i>96.35</i></td>
+      <td><i>96.55</i></td>
+      <td><i>20.50</i></td>
+      <td><i>7.60</i></td>
+      <td><i>1.00</i></td>
       <td><i>0</i></td>
-      <td><i>12.55</i></td>
-      <td><i>33.52</i></td>
-      <td><i>55.14</i></td>
+      <td><i>13.02</i></td>
+      <td><i>34.04</i></td>
+      <td><i>55.71</i></td>
+    </tr>
+    <tr>
+      <td><i>EquiformerV2</i></td>
+      <td><i>64.41</i></td>
+      <td><i>76.11</i></td>
+      <td><i>75.24</i></td>
+      <td><i>86.10</i></td>
+      <td><i>92.75</i></td>
+      <td><i>84.55</i></td>
+      <td><i>84.75</i></td>
+      <td><i>76.10</i></td>
+      <td><i>6.90</i></td>
+      <td><i>12.62</i></td>
+      <td><i>16.38</i></td>
+      <td><i>32.01</i></td>
+    </tr>
+    <tr>
+      <td><i>eSCN</i></td>
+      <td><i>76.83</i></td>
+      <td><i>85.94</i></td>
+      <td><i>89.34</i></td>
+      <td><i>97.27</i></td>
+      <td><i>59.10</i></td>
+      <td><i>27.70</i></td>
+      <td><i>11.00</i></td>
+      <td><i>0.80</i></td>
+      <td><i>11.49</i></td>
+      <td><i>19.23</i></td>
+      <td><i>25.39</i></td>
+      <td><i>53.38</i></td>
+    </tr>
+    <tr>
+      <td><i>GemNet-OC</i></td>
+      <td><i>69.04</i></td>
+      <td><i>85.57</i></td>
+      <td><i>92.42</i></td>
+      <td><i>100.06</i></td>
+      <td><i>11.55</i></td>
+      <td><i>0.75</i></td>
+      <td><i>0.60</i></td>
+      <td><i>0.40</i></td>
+      <td><i>0.91</i></td>
+      <td><i>10.42</i></td>
+      <td><i>30.94</i></td>
+      <td><i>90.71</i></td>
     </tr>
   </tbody>
 </table>
