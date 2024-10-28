@@ -21,6 +21,11 @@ NUMPY_TO_TORCH = {
 
 
 @singledispatch
+def convert_nabla_hamiltonian(type_cls, data):
+    raise TypeError(f"Cannot convert {type(data)} to {type_cls}")
+
+
+@convert.register
 def convert_nabla_hamiltonian(type_cls: torch.Tensor, data: Dict[str, np.array]) -> Dict[torch.Tensor]:
     for key, value in data.items():
         np_dtype = value.dtype
@@ -28,7 +33,7 @@ def convert_nabla_hamiltonian(type_cls: torch.Tensor, data: Dict[str, np.array])
     return data
 
 
-@singledispatch
+@convert.register
 def convert_nabla_hamiltonian(type_cls: pyg.data.Data, data: Dict[np.array]) -> pyg.data.Data:
     data = convert_nabla_hamiltonian(torch.Tensor, data)
     return type_cls(**data)

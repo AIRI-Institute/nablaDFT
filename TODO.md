@@ -4,8 +4,11 @@
   - TODO: finalize convert functions.
   - TODO: make `pytorch_lightning.Datamodule` more generic interface instead of specific ones.
   - TODO: `torch.data.utils.Dataset` more generic interface instead of specific ones.
-  - TODO: `torch_geometric.data.Dataset` more generic interface instead of specific ones.s
+  - TODO: `torch_geometric.data.Dataset` more generic interface instead of specific ones.
   - TODO (future): benchmark LMDB database for energy and haniltonian split.
+
+  > NOTE: possibly delegate collate batches to different functions from frameworks (default_collate in PyTorch, Collater in PyG)
+  > NOTE: from torch_geometric.loader.Collater we need only case with BaseData. Next time we just need to add new collate function for our defined types.
 
 # Models
 
