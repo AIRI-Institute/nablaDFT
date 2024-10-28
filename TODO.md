@@ -9,6 +9,7 @@
 
   > NOTE: possibly delegate collate batches to different functions from frameworks (default_collate in PyTorch, Collater in PyG)
   > NOTE: from torch_geometric.loader.Collater we need only case with BaseData. Next time we just need to add new collate function for our defined types.
+  > NOTE: since only BaseData we care, just use collate from torch_geometric.data.collate
 
 # Models
 
