@@ -33,7 +33,7 @@ from torch.utils.data import DataLoader, Dataset, IterableDataset, random_split
 
 class LightningDataModule(PLDataModule):
     """
-    Wraps dataset for PyTorchLightning DataModule interface.
+    Dataset interface for PyTorchLightning.
 
     Attributes:
         dataset (Dataset): The wrapped dataset.
