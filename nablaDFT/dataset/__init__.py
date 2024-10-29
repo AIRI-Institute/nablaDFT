@@ -1,5 +1,3 @@
-from functools import partial
-
 import torch_geometric as pyg
 from torch.utils.data._utils.collate import collate_fn_map
 
@@ -26,8 +24,6 @@ __all__ = [
     HamiltonianDatabase,
     ASENablaDFT,
     PyGNablaDFTDataModule,
-    PyGHamiltonianDataModule,
     PyGHamiltonianNablaDFT,
-    PyGNablaDFT,
     dataset_registry,
 ]
