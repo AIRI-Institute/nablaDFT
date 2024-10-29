@@ -7,9 +7,8 @@
   - TODO: `torch_geometric.data.Dataset` more generic interface instead of specific ones.
   - TODO (future): benchmark LMDB database for energy and haniltonian split.
 
-  > NOTE: possibly delegate collate batches to different functions from frameworks (default_collate in PyTorch, Collater in PyG)
-  > NOTE: from torch_geometric.loader.Collater we need only case with BaseData. Next time we just need to add new collate function for our defined types.
-  > NOTE: since only BaseData we care, just use collate from torch_geometric.data.collate
+  > NOTE: possibly delegate collate batches to different functions from frameworks (default_collate in PyTorch, Collater in PyG) - will not work for schnetpack possibly.
+  > NOTE: possibly we should implement samplers for pytorch?
 
 # Models
 
