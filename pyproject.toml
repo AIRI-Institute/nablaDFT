@@ -1,3 +1,6 @@
+[project]
+requires-python = ">=3.9"
+
 [tool.ruff]
 src = ["nablaDFT"]
 exclude = [
@@ -20,7 +23,9 @@ line-length = 120
 indent-width = 4
 
 [tool.ruff.lint]
-select = ["E", "I", "T10"]
+select = ["F", "E", "W", "I", "N", "D", "A", "T", "PL", "NPY"]
+ignore = ["D107", "D102"]
+fixable = ["ALL"]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["E402"]
@@ -34,4 +39,4 @@ quote-style = "double"
 indent-style = "space"
 line-ending = "auto"
 docstring-code-format = true
-docstring-code-line-length = 40
+docstring-code-line-length = "dynamic"
