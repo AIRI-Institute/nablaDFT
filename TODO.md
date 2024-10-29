@@ -19,7 +19,7 @@
   - TODO: split all graph transformations and graph generation to separate transform module, prevents code duplication and strong binding of this logic into model.
 
 # Dependencies
-  - TODO: consider retrieving useful code fomr schnetpack and remove it from dependencies.
+  - TODO: consider retrieving useful code from schnetpack and remove it from dependencies.
 
 # Testing
   - TODO: incorporate nox for different python version tests.
