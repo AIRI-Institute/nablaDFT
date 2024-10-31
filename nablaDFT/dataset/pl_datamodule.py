@@ -1,4 +1,4 @@
-"""Module for working with nablaDFT datasets using PyTorch Lightning.
+"""Module for dataset's interfaces using PyTorch Lightning.
 
 Provides functionality for integrating datasets with PyTorch Lightning's DataModule interface.
 
@@ -10,7 +10,7 @@ Examples:
     )
 
     # Create a new LightningDataModule instance
-    datamodule = LightningDataModule(
+    >>> datamodule = LightningDataModule(
         dataset=my_dataset,
         train_size=0.9,
         num_workers=9,
@@ -18,17 +18,16 @@ Examples:
     )
 
     # Pass datamodule to pl.Trainer
-    trainer.fit(model=model, datamodule=datamodule)
-
+    >>> trainer.fit(model=model, datamodule=datamodule)
 """
 
 from typing import Dict, Optional
 
-from pytorch_lightning import LightningDataModule as PLDataModule
+from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, Dataset, IterableDataset, random_split
 
 
-class LightningDataModule(PLDataModule):
+class PLDataModule(LightningDataModule):
     """Dataset interface for PyTorchLightning.
 
     Attributes:
