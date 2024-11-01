@@ -1,36 +1,74 @@
-"""Module for dataset's interfaces using PyTorch Lightning.
+"""Module for dataset's interfaces using PyTorch.
 
-Provides functionality for integrating datasets with PyTorch Lightning's DataModule interface.
+Provides functionality for integrating datasets with PyTorch.
 
 Examples:
 --------
 .. code-block:: python
     from nablaDFT.dataset import (
-        PyGDataset,
+        TorchDataset,
     )
 
-    # Create a new PyGDataset instance
-    >>> pyg_dataset = LightningDataModule(
-        datasources=datasource,
-    )
-    >>> pyg_dataset[0]
+    >>> pass
+    >>> pass
 """
 
-from typing import Dict, List, Union
+from typing import Dict, List, Mapping, Union
 
 import torch
 from torch.utils.data import Dataset
 
+from .utils import _check_ds_len
+
 
 class TorchDataset(Dataset):
-    def __init__(self, datasources: Union[int, str]) -> None:
-        pass
+    """Dataset interface for PyTorch.
 
-    def __geitem__(self, idx) -> Dict[torch.Tensor]:
-        pass
+    Combines one or more DataSource objects into one dataset.
 
-    def __getitems__(self, idx) -> Dict[torch.Tensor]:
-        pass
+    ..note: size of datasource elements must be the same.
+
+    Args:
+        datasources (Union[Mapping, List[Mapping]]): datasources objects.
+    """
+
+    def __init__(self, datasources: Union[Mapping, List[Mapping]]) -> None:
+        _check_ds_len(datasources)
+        super().__init__()
+        if isinstance(datasources, str):
+            datasources = [datasources]
+        self.datasources = datasources
+
+    def __geitem__(self, idx: int) -> Dict[torch.Tensor]:
+        """Return single dataset element.
+
+        Args:
+            idx (int): element index.
+
+        Returns:
+            data (Doct[torch.Tensor]): dataset element.
+        """
+        data = {}
+        for datasource in self.datasources:
+            data.update(datasource[idx])
+        return data
+
+    def __getitems__(self, idx: Union[List[int], slice]) -> Dict[torch.Tensor]:
+        """Returns multiple dataset elements.
+
+        Datasources must support simultaneous access.
+
+        Args:
+            idx (List[int]): indexes to get.
+
+        Returns:
+            Dict[torch.Tensor]: data
+        """
+        data = {}
+        for datasource in self.datasources:
+            data.update(datasource[idx])
+        return data
 
     def __len__(self) -> int:
-        pass
+        """Returns length of dataset."""
+        return len(self.datasources[0])

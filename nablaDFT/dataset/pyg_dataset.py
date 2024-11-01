@@ -1,6 +1,6 @@
-"""Module for dataset's interfaces using PyTorch Lightning.
+"""Module for dataset's interfaces using PyTorch Geometric.
 
-Provides functionality for integrating datasets with PyTorch Lightning's DataModule interface.
+Provides functionality for integrating datasources with PyTorch Geometric Datasets.
 
 Examples:
 --------
@@ -9,11 +9,9 @@ Examples:
         PyGDataset,
     )
 
-    # Create a new PyGDataset instance
-    >>> pyg_dataset = LightningDataModule(
-        datasources=datasource,
-    )
-    >>> pyg_dataset[0]
+    # Create a new PyGDataset instance from datasource
+    >>> pass
+    >>> pass
 """
 
 from typing import List
@@ -21,10 +19,15 @@ from typing import List
 from torch_geometric.data import Dataset
 from torch_geometric.data.data import BaseData
 
+from .utils import _check_ds_len
+
 
 class PyGDataset(Dataset):
     def __init__(self, datasources: List) -> None:
+        _check_ds_len(datasources)
         super().__init__()
+        if isinstance(datasources, str):
+            datasources = [datasources]
         self.datasources = datasources
 
     def len(self) -> int:

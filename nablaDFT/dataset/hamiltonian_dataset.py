@@ -35,9 +35,7 @@ class HamiltonianDatabase:
             HamiltonianDatabase,
         )
 
-        database = HamiltonianDatabase(
-            "path-to-database.db"
-        )
+        database = HamiltonianDatabase("path-to-database.db")
         # get first row
         (
             Z,
@@ -298,9 +296,7 @@ class HamiltonianDataset(Dataset):
                 HamiltonianDataset,
             )
 
-            dataset = HamiltonianDataset(
-                "path-to-database.db"
-            )
+            dataset = HamiltonianDataset("path-to-database.db")
             dataloader = DataLoader(
                 dataset,
                 batch_size=4,
