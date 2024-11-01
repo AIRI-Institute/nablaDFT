@@ -2,11 +2,9 @@
 
   - TODO: delegate download process to dataset registry.
   - TODO: finalize convert functions.
-  - TODO: `torch_geometric.data.Dataset` more generic interface instead of specific ones.
   - TODO (future): benchmark LMDB database for energy and haniltonian split.
 
   > NOTE: possibly delegate collate batches to different functions from frameworks (default_collate in PyTorch, Collater in PyG) - will not work for schnetpack possibly.
-  > NOTE: possibly we should implement samplers for pytorch?
 
 # Models
 
