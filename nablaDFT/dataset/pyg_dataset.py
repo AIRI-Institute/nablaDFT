@@ -58,6 +58,11 @@ class PyGDataset(InMemoryDataset):
         if isinstance(datasources, str):
             datasources = [datasources]
         self.datasources = datasources
+        # initalize paths
+        self.raw_dir = self.datasources[0].path.dir
+        self.processed_dir = self.raw_dir
+        self.raw_file_names = self.datasources[0].path.name
+        self.processed_file_names = f"{self.datasources[0].path.name}_processed.pt"
         super().__init__(None, transform, pre_transform, pre_filter, False)
 
         for path in self.processed_paths:
@@ -91,21 +96,3 @@ class PyGDataset(InMemoryDataset):
         data, slices = self.collate(samples)
         torch.save((data, slices), self.processed_paths[0])
         logger.info(f"Saved processed dataset: {self.processed_paths[0]}")
-
-    @property
-    def raw_dir(self) -> str:
-        # TODO: need to overwrite this to prevent `/raw` subfolder creation
-        return self.raw_dir
-
-    @property
-    def processed_dir(self) -> str:
-        # TODO: need to overwrite this to prevent `/processed` subfolder creation
-        return self.processed_dir
-
-    @property
-    def raw_file_names(self) -> List[str]:
-        pass
-
-    @property
-    def processed_file_names(self) -> List[str]:
-        pass
