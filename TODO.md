@@ -2,8 +2,6 @@
 
   - TODO: delegate download process to dataset registry.
   - TODO: finalize convert functions.
-  - TODO: make `pytorch_lightning.Datamodule` more generic interface instead of specific ones.
-  - TODO: `torch.data.utils.Dataset` more generic interface instead of specific ones.
   - TODO: `torch_geometric.data.Dataset` more generic interface instead of specific ones.
   - TODO (future): benchmark LMDB database for energy and haniltonian split.
 

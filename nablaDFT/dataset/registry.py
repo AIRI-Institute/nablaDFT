@@ -1,5 +1,5 @@
 import json
-from typing import List, Optional
+from typing import List, Mapping, Optional
 
 import nablaDFT
 
@@ -64,6 +64,9 @@ class DatasetRegistry:
             return list(self.hamiltonian_datasets.keys())
         else:
             return None
+
+    def get_datasource(self, task_type: str, name: str) -> Mapping:
+        pass
 
 
 dataset_registry = DatasetRegistry()
