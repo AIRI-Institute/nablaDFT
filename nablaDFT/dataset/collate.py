@@ -1,9 +1,12 @@
 """Collate functions for combining samples into batches."""
 
+# TODO: current version will fail with torch.Dataset because it will try to collate squared matrices.
+
 from typing import Callable, Dict, List, Optional, Tuple, Type, Union
 
 import numpy as np
 import torch
+from torch.utils.data import default_convert
 from torch_geometric.data import Batch
 
 SQUARE_SHAPED_KEYS = [
@@ -62,5 +65,7 @@ def __collect_square_shaped_data(batch: List[Dict[str, np.ndarray]]) -> Dict[str
     if any(key_present):
         for idx, key in enumerate(SQUARE_SHAPED_KEYS):
             if key_present[idx]:
-                square_shaped_data[key] = [torch.from_numpy(batch[i][key]) for i in range(len(batch))]
+                square_shaped_data[key] = [
+                    torch.from_numpy(batch[i][key]) for i in range(len(batch))
+                ]  # or use default_convert ?
     return square_shaped_data

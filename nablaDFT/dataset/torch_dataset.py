@@ -56,7 +56,8 @@ class TorchDataset(Dataset):
     def __getitems__(self, idx: Union[List[int], slice]) -> Dict[torch.Tensor]:
         """Returns multiple dataset elements.
 
-        Datasources must support simultaneous access.
+        Datasources must support simultaneous access, otherwise call will be dispatched
+        to __getitem__().
 
         Args:
             idx (List[int]): indexes to get.
@@ -66,7 +67,10 @@ class TorchDataset(Dataset):
         """
         data = {}
         for datasource in self.datasources:
-            data.update(datasource[idx])
+            if hasattr(datasource, "__getitems__"):
+                data.update(datasource.__getitems__(idx))
+            else:
+                data.update(datasource[idx])
         return data
 
     def __len__(self) -> int:
