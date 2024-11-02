@@ -3,7 +3,7 @@
 import torch_geometric as pyg
 from torch.utils.data._utils.collate import default_collate_fn_map
 
-from .collate import collate_pyg
+from ._collate import collate_pyg
 from .hamiltonian_dataset import (  # database interface for Hamiltonian datasets
     HamiltonianDatabase,
     HamiltonianDataset,
