@@ -1,6 +1,9 @@
+"""Collection of utility classes and functions for chemistry-like datasets."""
+
 import torch_geometric as pyg
 from torch.utils.data._utils.collate import default_collate_fn_map
 
+from .collate import collate_pyg
 from .hamiltonian_dataset import (  # database interface for Hamiltonian datasets
     HamiltonianDatabase,
     HamiltonianDataset,
@@ -14,9 +17,7 @@ from .pyg_datasets import (  # PyTorch Geometric interfaces for datasets
 from .registry import dataset_registry  # dataset splits registry
 
 # TODO(aber): collate function should be added here
-default_collate_fn_map.update(
-    {pyg.data.data.BaseData: pyg.data.batch.Batch.from_data_list}
-)  # or use pyg.data.collate()?
+default_collate_fn_map.update({pyg.data.data.BaseData: collate_pyg})
 
 __all__ = [
     "HamiltonianDataset",
