@@ -1,4 +1,4 @@
-"""Module describes functionality for datasources.
+"""Module describes interfaces for datasources.
 
 Currently we use sqlite3 databases for energy, hamiltonian and overlap data.
 
@@ -9,14 +9,46 @@ import multiprocessing
 import os
 from enum import Enum
 from functools import cached_property
+from pathlib import Path
 from typing import Dict, List, Union
 
 import apsw  # way faster than sqlite3
+import ase
 import numpy as np
 
 
 class apswFlags(Enum):
     pass
+
+
+class EnergyDatabase:
+    """Database interface for energy data.
+
+    Wraps the
+    """
+
+    def __init__(self, filepath: Path):
+        self.filepath = filepath
+
+    def __getitem__(self, idx: int) -> float:
+        pass
+
+    def __getitems__(self, idx: Union[List[int], slice]) -> List[float]:
+        pass
+
+    def __setitem__(self, idx: Union[List[int], slice], value: float) -> None:
+        pass
+
+    def __delitem__(self, idx: Union[List[int], slice]) -> None:
+        pass
+
+    def _get_connection(self) -> ase.db.sqlite.SQLite3Database:
+        conn = ase.db.connect(self.filepath, type="db")
+        return conn
+
+    @cached_property
+    def metadata(self):
+        pass
 
 
 class SQLDatabase:
