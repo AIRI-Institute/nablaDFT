@@ -1,3 +1,9 @@
+"""Module describes functionality for datasources.
+
+Currently we use sqlite3 databases for energy, hamiltonian and overlap data.
+
+"""
+
 import math
 import multiprocessing
 import os
