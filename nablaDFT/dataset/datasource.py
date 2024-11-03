@@ -15,6 +15,7 @@ from typing import Dict, List, Union
 import apsw  # way faster than sqlite3
 import ase
 import numpy as np
+from ase import Atoms
 
 
 class apswFlags(Enum):
@@ -30,16 +31,16 @@ class EnergyDatabase:
     def __init__(self, filepath: Path):
         self.filepath = filepath
 
-    def __getitem__(self, idx: int) -> float:
+    def __getitem__(self, idx: int) -> Dict[str, Union[np.ndarray, float]]:
         pass
 
-    def __getitems__(self, idx: Union[List[int], slice]) -> List[float]:
+    def __getitems__(self, idx: Union[List[int], int]) -> List[Dict[str, Union[np.ndarray, float]]]:
         pass
 
-    def __setitem__(self, idx: Union[List[int], slice], value: float) -> None:
+    def __setitem__(self, idx: Union[List[int], int], value: Dict[str, Union[np.ndarray, float]]) -> None:
         pass
 
-    def __delitem__(self, idx: Union[List[int], slice]) -> None:
+    def __delitem__(self, idx: Union[List[int], int]) -> None:
         pass
 
     def _get_connection(self) -> ase.db.sqlite.SQLite3Database:
@@ -47,8 +48,12 @@ class EnergyDatabase:
         return conn
 
     @cached_property
-    def metadata(self):
-        pass
+    def metadata(self) -> Dict[str, str]:
+        return self._get_connection().metadata
+
+    @metadata.setter
+    def metadata(self, metadata: Dict[str, str]) -> None:
+        self._get_connection().metadata = metadata
 
 
 class SQLDatabase:
@@ -61,7 +66,7 @@ class SQLDatabase:
     def __getitems__(self, idx: Union[List[int], slice]) -> Dict:
         pass
 
-    def __setitem__(self, idx: Union[List[int], slice]) -> Dict:
+    def __setitem__(self, idx: Union[List[int], slice], values: Union[List[int], slice]) -> Dict:
         pass
 
     def __delitem__(self, idx: Union[List[int], slice]) -> None:
@@ -80,7 +85,12 @@ class SQLDatabase:
         pass
 
     @cached_property
-    def metadata(self) -> Dict:
+    def metadata(self) -> Dict[str, str]:
         cursor = self._get_connection(flags=apsw.SQLITE_OPEN_READONLY).cursor()
         data = cursor.execute("""SELECT * FROM metadata WHERE id=0""").fetchall()
         return data
+
+    @metadata.setter
+    def metadata(self, metadata: Dict[str, str]) -> None:
+        cursor = self._get_connection(flags=apsw.SQLITE_OPEN_READWRITE).cursor()
+        cursor.execute("""UPDATE metadata SET value=? WHERE id=0""", (metadata,))
