@@ -2,10 +2,10 @@
 
   - TODO: delegate download process to dataset registry.
   - TODO: finalize convert functions.
-  - TODO (future): benchmark LMDB database for energy and haniltonian split.
+  - TODO (future): benchmark LMDB database for energy and haьiltonian split.
 
-  > NOTE: possibly delegate collate batches to different functions from frameworks (default_collate in PyTorch, Collater in PyG) - will not work for schnetpack possibly.
-
+  - TODO: currently pyg dataset will not work for hamiltonian databases, so as torch dataset, fix that
+  
 # Models
 
   - TODO: delegate checkpoint download to model registry.
@@ -18,7 +18,6 @@
 
 # Testing
   - TODO: incorporate nox for different python version tests.
-
 
 # Setup
   - TODO: find the way to manage `torch` and `torch_geometric` dependencies on current CUDA version.

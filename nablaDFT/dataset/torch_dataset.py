@@ -53,7 +53,7 @@ class TorchDataset(Dataset):
             data.update(datasource[idx])
         return data
 
-    def __getitems__(self, idx: Union[List[int], slice]) -> Dict[torch.Tensor]:
+    def __getitems__(self, idx: Union[List[int], slice]) -> Dict[str, torch.Tensor]:
         """Returns multiple dataset elements.
 
         Datasources must support simultaneous access, otherwise call will be dispatched

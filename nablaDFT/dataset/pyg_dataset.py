@@ -15,13 +15,16 @@ Examples:
 """
 
 import logging
+import pathlib
 from typing import Callable, List, Union
 
 import torch
-import tqdm
 from torch_geometric.data import InMemoryDataset
+from torch_geometric.data.collate import collate
 from torch_geometric.data.data import BaseData, Data
+from tqdm import tqdm
 
+from ._collate import collate_pyg
 from .utils import _check_ds_len
 
 logger = logging.getLogger(__name__)
@@ -39,11 +42,29 @@ class PyGDataset(InMemoryDataset):
         dataset = PyGNablaDFT(datasource)
         sample = dataset[0]
 
+    .. note:: datasources must be in the same directory.
+
     Args:
         datasources (str): path to existing dataset directory or location for download.
         transform (Callable): callable data transform, called on every access to element.
         pre_transform (Callable): callable data transform, called on every element during process.
     """
+
+    @property
+    def raw_file_names(self) -> List[str]:
+        return [datasource.filepath.name for datasource in self.datasources]
+
+    @property
+    def processed_file_names(self) -> List[str]:
+        return [f"{datasource.filepath.stem}_processed.pt" for datasource in self.datasources]
+
+    @property
+    def raw_dir(self) -> List[pathlib.Path]:
+        return self.datasources[0].filepath.parent
+
+    @property
+    def processed_dir(self) -> List[pathlib.Path]:
+        return self.raw_dir / pathlib.Path("processed")
 
     def __init__(
         self,
@@ -52,17 +73,13 @@ class PyGDataset(InMemoryDataset):
         pre_transform: Callable = None,
         pre_filter: Callable = None,
     ) -> None:
+        if not isinstance(datasources, list):
+            datasources = [datasources]
         _check_ds_len(datasources)
         self.data_all, self.slices_all = [], []
         self.offsets = [0]
-        if isinstance(datasources, str):
-            datasources = [datasources]
         self.datasources = datasources
         # initalize paths
-        self.raw_dir = self.datasources[0].path.dir
-        self.processed_dir = self.raw_dir
-        self.raw_file_names = self.datasources[0].path.name
-        self.processed_file_names = f"{self.datasources[0].path.name}_processed.pt"
         super().__init__(None, transform, pre_transform, pre_filter, False)
 
         for path in self.processed_paths:
@@ -85,6 +102,10 @@ class PyGDataset(InMemoryDataset):
             data_dict = {}
             for datasource in self.datasources:
                 data_dict.update(datasource[idx])
+            keys = data_dict.keys()
+            # convert to torch.tensor
+            for key in keys:
+                data_dict[key] = torch.from_numpy(data_dict[key])
             samples.append(Data(**data_dict))
 
         if self.pre_filter is not None:
@@ -92,7 +113,6 @@ class PyGDataset(InMemoryDataset):
 
         if self.pre_transform is not None:
             samples = [self.pre_transform(data) for data in samples]
-
-        data, slices = self.collate(samples)
+        data, slices, _ = collate(samples[0].__class__, samples, increment=False, add_batch=False)
         torch.save((data, slices), self.processed_paths[0])
         logger.info(f"Saved processed dataset: {self.processed_paths[0]}")

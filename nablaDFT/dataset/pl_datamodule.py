@@ -52,7 +52,9 @@ class PLDataModule(LightningDataModule):
         kwargs.setdefault("num_workers", 0)
         kwargs.setdefault("pin_memory", True)
 
-        shuffle = isinstance(dataset, IterableDataset) | kwargs.get("sampler") | kwargs.get("batch_sampler")
+        shuffle = (
+            isinstance(dataset, IterableDataset) | kwargs.get("sampler", False) | kwargs.get("batch_sampler", False)
+        )
         kwargs.setdefault("shuffle", shuffle)
         kwargs.setdefault("persistent_workers", kwargs.get("num_workers", 0) > 0)
 
@@ -87,9 +89,9 @@ class PLDataModule(LightningDataModule):
     def test_dataloader(self) -> DataLoader:
         kwargs = self.kwargs.copy()
         kwargs["shuffle"] = False
-        return self._dataloader(self.dataset_val, **kwargs)
+        return self._dataloader(self.dataset_test, **kwargs)
 
     def predict_dataloader(self) -> DataLoader:
         kwargs = self.kwargs.copy()
         kwargs["shuffle"] = False
-        return self._dataloader(self.dataset_val, **kwargs)
+        return self._dataloader(self.dataset_predict, **kwargs)

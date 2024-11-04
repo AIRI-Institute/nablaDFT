@@ -21,8 +21,6 @@ class EnergyDatabase:
 
     Wraps the ASE sqlite3 database for training NNPs.
 
-    .. NOTE: indexing starts with 1.
-
     Args:
         filepath (pathlib.Path): path to existing database or path for new database.
         mapping (Dict[str, str]): mapping from column names in database to sample's keys.
@@ -30,8 +28,10 @@ class EnergyDatabase:
 
     type = "db"  # only sqlite3 databases
 
-    def __init__(self, filepath: pathlib.Path, metadata: Optional[DatasetMetadata] = None) -> None:
-        self.filepath = filepath
+    def __init__(self, filepath: Union[pathlib.Path, str], metadata: Optional[DatasetMetadata] = None) -> None:
+        if isinstance(filepath, str):
+            filepath = pathlib.Path(filepath)
+        self.filepath = filepath.absolute()
         self._metadata = metadata
 
         self._db: ase.db.sqlite.SQLite3Database = ase.db.connect(self.filepath, type=self.type)
@@ -45,17 +45,25 @@ class EnergyDatabase:
         Returns:
             data (Dict[str, Union[np.ndarray, float]]): unpacked element.
         """
-        atoms_row = self._db[idx]
-        data = {
-            "z": atoms_row.numbers,
-            "y": atoms_row.data["energy"][0],
-            "pos": atoms_row.positions,
-            "forces": atoms_row.data["forces"],
-        }
+        if isinstance(idx, int):
+            # NOTE: in ase databases indexing starts with 1.
+            # NOTE: make np arrays writeable
+            atoms_row = self._db[idx + 1]
+            data = {
+                "z": atoms_row.numbers.copy(),
+                "y": np.asarray(atoms_row.data["energy"][0]),
+                "pos": atoms_row.positions.copy(),
+                "forces": atoms_row.data["forces"].copy(),
+            }
         return data
 
+    def __len__(self) -> int:
+        """Returns number of rows in database."""
+        return len(self._db)
+
     def write(self, atoms: Atoms) -> None:
-        self._db.write(atoms)
+        with self._db as db:
+            db.write(atoms)
 
 
 class SQLDatabase:
