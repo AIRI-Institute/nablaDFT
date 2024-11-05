@@ -37,10 +37,12 @@ class PyGDataset(InMemoryDataset):
     .. code-block:: python
         from nablaDFT.dataset import PyGDataset
 
-        dataset = PyGNablaDFT(datasource)
-        sample = dataset[0]
+        >>> dataset = PyGNablaDFT(datasource)
+        >>> sample = dataset[0]
+        >>> Data(y=[...], pos[..., 3], forces[..., 3])
 
     .. note:: datasources must be in the same directory.
+    .. warn:: element index must belong to the same conformations/molecule in different data sources.
 
     Args:
         datasources (str): path to existing dataset directory or location for download.

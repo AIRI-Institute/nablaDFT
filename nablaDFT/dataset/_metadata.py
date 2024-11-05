@@ -28,7 +28,7 @@ nabla_overlap = {
 
 
 @dataclass
-class DatasetMetadata:
+class DatasetCard:
     """Describes dataset metadata.
 
     Args:
@@ -48,4 +48,4 @@ class DatasetMetadata:
     data_shapes: dict  # ???
 
     def __str__(self) -> str:
-        return f"DatasetMetadata(name={self.name}, desc={self.desc}, metadata={self.metadata})"
+        return f"DatasetCard(name={self.name}, desc={self.desc}, metadata={self.metadata})"

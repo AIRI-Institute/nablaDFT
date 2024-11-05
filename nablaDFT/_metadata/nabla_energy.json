@@ -3,6 +3,11 @@
     "desc": "nablaDFT dataset with molecule conformations derived from DFT with energy and atomic forces.",
     "doi": "10.48550/arXiv.2406.14347",
     "metadata": {
+        "units": {
+            "y": "Ha",
+            "pos": "Ang",
+            "forces": "Ha/bohr"
+        },
         "generation_method": {
             "name": "DFT",
             "method": "wB97X-D",
@@ -12,21 +17,21 @@
         }
     },
     "keys_map": {
-        "y": "",
-        "z": "",
-        "pos": "",
-        "forces": ""
+        "y": "data.energy",
+        "z": "systems.numbers",
+        "pos": "systems.positions",
+        "forces": "systems.data.forces"
     },
     "data_dtypes": {
-        "y": "",
-        "z": "",
-        "pos": "",
-        "forces": ""
+        "y": "float32",
+        "z": "int32",
+        "pos": "float32",
+        "forces": "float32"
     },
     "data_shapes": {
-        "y": "",
-        "z": "",
-        "pos": "",
-        "forces": ""
+        "y": null,
+        "z": null,
+        "pos": "(-1, 3)",
+        "forces": "matrix"
     }
 }

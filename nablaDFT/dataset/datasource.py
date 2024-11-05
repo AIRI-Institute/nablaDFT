@@ -1,22 +1,34 @@
-"""Module describes interfaces for datasources.
+"""Module describes interfaces for datasources, used for model training.
 
-Currently we use sqlite3 databases for energy, hamiltonian and overlap data.
+Examples:
+--------
+.. code-block:: python
+    from nablaDFT.dataset import (
+        DataSource,
+    )
 
+    >>> datasource = EnergyDatabase("path/to/database")
+    >>> datasource[0]
+    >>> {
+    'z': array([...], dtype=int32),
+    'y': array(...),
+    'pos': array([...]),
+    'forces': array([...]),
+    }
 """
 
 import pathlib
 from functools import cached_property
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import apsw  # way faster than sqlite3
 import ase
 import numpy as np
 from ase import Atoms
 
-from ._metadata import DatasetMetadata
+from ._metadata import DatasetCard
 
 
-# TODO: flag deprecated
 class EnergyDatabase:
     """Database interface for energy data.
 
@@ -29,12 +41,16 @@ class EnergyDatabase:
 
     type = "db"  # only sqlite3 databases
 
-    def __init__(self, filepath: Union[pathlib.Path, str]) -> None:
+    def __init__(self, filepath: Union[pathlib.Path, str], metadata: Optional[DatasetCard] = None) -> None:
         if isinstance(filepath, str):
             filepath = pathlib.Path(filepath)
         self.filepath = filepath.absolute()
 
         self._db: ase.db.sqlite.SQLite3Database = ase.db.connect(self.filepath, type=self.type)
+
+        # parse sample schema and metadata
+        if metadata is not None:
+            pass
 
     def __getitem__(self, idx: int) -> Dict[str, np.ndarray]:
         """Returns unpacked element from ASE database.
@@ -74,8 +90,19 @@ class SQLite3Database:
         filepath (pathlib.Path): path to existing database or path for new database.
     """
 
-    def __init__(self, filepath: pathlib.Path, data_schema: Dict, flags=apsw.SQLITE_OPEN_READONLY) -> None:
-        self.filepath = filepath
+    def __init__(self, filepath: Union[pathlib.Path, str], metadata: Optional[DatasetCard] = None) -> None:
+        if isinstance(filepath, str):
+            filepath = pathlib.Path(filepath)
+        self.filepath = filepath.absolute()
+        self._connections = {}
+
+        # parse sample schema and metadata
+        if metadata is not None:
+            self.name = metadata.name
+            self.metadata = metadata.metadata
+            self.key_map = _parse_schema(metadata.keys_map)
+            self.dtypes = _parse_dtypes(metadata.data_dtypes)
+            self.shapes = _parse_shapes(metadata.data_shapes)
 
     def __getitem__(self, idx: int) -> Dict:
         # SELECT keys FROM data WHERE id=[]
@@ -133,27 +160,26 @@ class CSVFile:
         pass
 
 
-def _blob(array: np.ndarray) -> memoryview:
+def _blob(array: np.ndarray, dtype: np.dtype) -> memoryview:
     """Convert numpy array to buffer object.
 
     Args:
         array (np.ndarray): array to convert.
+        dtype (np.dtype): array's dtype to save.
 
     Returns:
         memoryview: buffer object.
     """
     if array is None:
         return None
-    if array.dtype == np.float64:
-        array = array.astype(np.float32)
-    if array.dtype == np.int64:
-        array = array.astype(np.int32)
+    if array.dtype == dtype:
+        array = array.astype(dtype)
     if not np.little_endian:
         array = array.byteswap()
     return memoryview(np.ascontiguousarray(array))
 
 
-def _deblob(buf: memoryview, dtype=np.float32, shape=None) -> np.ndarray:
+def _deblob(buf: memoryview, dtype: Optional[np.dtype] = np.float32, shape: Optional[Tuple] = None) -> np.ndarray:
     """Convert buffer object to numpy array.
 
     Args:
@@ -171,3 +197,22 @@ def _deblob(buf: memoryview, dtype=np.float32, shape=None) -> np.ndarray:
         array = array.byteswap()
     array.shape = shape
     return array
+
+
+def _parse_schema(mapping: Dict[str, str]) -> Tuple[List]:
+    """Returns parsed mapping from datasource keys to sample keys."""
+    sample_keys, tables, columns = [], [], []
+    for key, value in mapping.items():
+        sample_keys.append(key)
+        table, column = value.split(".")
+        tables.append(table)
+        columns.append(column)
+    return sample_keys, tables, columns
+
+
+def _parse_dtypes(dtypes_dict: Dict[str, str]) -> Dict[str, np.dtype]:
+    pass
+
+
+def _parse_shapes(dtypes_dict: Dict[str, str]) -> Dict[str, tuple]:
+    pass
