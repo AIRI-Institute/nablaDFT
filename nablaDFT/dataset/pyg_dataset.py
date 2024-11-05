@@ -10,8 +10,7 @@ Examples:
     )
 
     # Create a new PyGDataset instance from datasource
-    >>> pass
-    >>> pass
+    >>> dataset = PyGDataset(datasource)
 """
 
 import logging
@@ -24,7 +23,6 @@ from torch_geometric.data.collate import collate
 from torch_geometric.data.data import BaseData, Data
 from tqdm import tqdm
 
-from ._collate import collate_pyg
 from .utils import _check_ds_len
 
 logger = logging.getLogger(__name__)

@@ -6,7 +6,7 @@ Currently we use sqlite3 databases for energy, hamiltonian and overlap data.
 
 import pathlib
 from functools import cached_property
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Union
 
 import apsw  # way faster than sqlite3
 import ase
@@ -16,6 +16,7 @@ from ase import Atoms
 from ._metadata import DatasetMetadata
 
 
+# TODO: flag deprecated
 class EnergyDatabase:
     """Database interface for energy data.
 
@@ -28,15 +29,14 @@ class EnergyDatabase:
 
     type = "db"  # only sqlite3 databases
 
-    def __init__(self, filepath: Union[pathlib.Path, str], metadata: Optional[DatasetMetadata] = None) -> None:
+    def __init__(self, filepath: Union[pathlib.Path, str]) -> None:
         if isinstance(filepath, str):
             filepath = pathlib.Path(filepath)
         self.filepath = filepath.absolute()
-        self._metadata = metadata
 
         self._db: ase.db.sqlite.SQLite3Database = ase.db.connect(self.filepath, type=self.type)
 
-    def __getitem__(self, idx: int) -> Dict[str, Union[np.ndarray, float]]:
+    def __getitem__(self, idx: int) -> Dict[str, np.ndarray]:
         """Returns unpacked element from ASE database.
 
         Args:
@@ -45,16 +45,15 @@ class EnergyDatabase:
         Returns:
             data (Dict[str, Union[np.ndarray, float]]): unpacked element.
         """
-        if isinstance(idx, int):
-            # NOTE: in ase databases indexing starts with 1.
-            # NOTE: make np arrays writeable
-            atoms_row = self._db[idx + 1]
-            data = {
-                "z": atoms_row.numbers.copy(),
-                "y": np.asarray(atoms_row.data["energy"][0]),
-                "pos": atoms_row.positions.copy(),
-                "forces": atoms_row.data["forces"].copy(),
-            }
+        # NOTE: in ase databases indexing starts with 1.
+        # NOTE: make np arrays writeable
+        atoms_row = self._db[idx + 1]
+        data = {
+            "z": atoms_row.numbers.copy(),
+            "y": np.asarray(atoms_row.data["energy"][0]),
+            "pos": atoms_row.positions.copy(),
+            "forces": atoms_row.data["forces"].copy(),
+        }
         return data
 
     def __len__(self) -> int:
@@ -66,7 +65,7 @@ class EnergyDatabase:
             db.write(atoms)
 
 
-class SQLDatabase:
+class SQLite3Database:
     """Database interface for sqlite3 databases.
 
     Wraps sqlite3 database for training Hamiltonian-like models.
@@ -79,6 +78,7 @@ class SQLDatabase:
         self.filepath = filepath
 
     def __getitem__(self, idx: int) -> Dict:
+        # SELECT keys FROM data WHERE id=[]
         pass
 
     def __getitems__(self, idx: Union[List[int], slice]) -> Dict:

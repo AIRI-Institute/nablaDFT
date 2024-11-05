@@ -67,7 +67,7 @@ class TorchDataset(Dataset):
         """
         data = {}
         for datasource in self.datasources:
-            if hasattr(datasource, "__getitems__"):
+            if hasattr(datasource, "__getitems__"):  # WTF???
                 data.update(datasource.__getitems__(idx))
             else:
                 data.update(datasource[idx])

@@ -1,0 +1,22 @@
+{
+    "name": "nablaDFT_hamiltonian",
+    "desc": "nablaDFT dataset with molecule conformations derived from DFT with energy and atomic forces.",
+    "doi": "10.48550/arXiv.2406.14347",
+    "metadata": {
+        "generation_method": {
+            "name": "DFT",
+            "method": "wB97X-D",
+            "basis": "def2-SVP",
+            "software": "psi4",
+            "software_version": "some_version"
+        }
+    },
+    "keys_map": {
+        "y": "",
+        "z": "",
+        "pos": "",
+        "forces": ""
+    },
+    "data_dtypes": {},
+    "data_shapes": {}
+}

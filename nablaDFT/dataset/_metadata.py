@@ -45,4 +45,7 @@ class DatasetMetadata:
     metadata: dict
     keys_map: dict
     data_dtypes: dict
-    data_shapes: dict
+    data_shapes: dict  # ???
+
+    def __str__(self) -> str:
+        return f"DatasetMetadata(name={self.name}, desc={self.desc}, metadata={self.metadata})"
