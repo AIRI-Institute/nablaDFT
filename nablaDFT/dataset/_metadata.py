@@ -1,5 +1,7 @@
 """Module defines mapping between column names in various datasources."""
 
+import json
+import pprint
 from dataclasses import dataclass
 
 # out-key: table.key
@@ -32,7 +34,6 @@ class DatasetCard:
     """Describes dataset metadata.
 
     Args:
-        name (str) - dataset name.
         desc (str) - dataset description. Could be empty.
         metadata (dict) - dataset metadata. Could be empty. Must contain calculation methods.
         keys_map (dict) - mapping from column names in database to sample's keys.
@@ -40,12 +41,20 @@ class DatasetCard:
         data_shapes (dict) - mapping from column names in database to data shape (e.g. (-1, 3)).
     """
 
-    name: str
-    desc: str
+    # TODO: make part of fields optional?
+    # TODO: introduce units field, make it mandatory.
+    desc: dict
     metadata: dict
     keys_map: dict
     data_dtypes: dict
-    data_shapes: dict  # ???
+    data_shapes: dict
 
     def __str__(self) -> str:
-        return f"DatasetCard(name={self.name}, desc={self.desc}, metadata={self.metadata})"
+        desc = pprint.pformat(self.desc)
+        metadata = pprint.pformat(self.metadata)
+        return f"{desc}\n{metadata}"
+
+    @classmethod
+    def from_json(cls, filepath: str):
+        with open(filepath, "r") as fin:
+            return DatasetCard(json.loads(fin.read()))

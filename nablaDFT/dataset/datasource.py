@@ -33,6 +33,7 @@ class EnergyDatabase:
     """Database interface for energy data.
 
     Wraps the ASE sqlite3 database for training NNPs.
+    For historical reasons we use ASE databases for energy datasets.
 
     Args:
         filepath (pathlib.Path): path to existing database or path for new database.
@@ -134,30 +135,6 @@ class SQLite3Database:
         cursor = self._get_connection(flags=apsw.SQLITE_OPEN_READONLY).cursor()
         data = cursor.execute("""SELECT * FROM metadata WHERE id=0""").fetchall()
         return data
-
-
-class CSVFile:
-    def __init__(self):
-        pass
-
-    def __getitem__(self, idx: int):
-        pass
-
-    def __getitems__(self, idx: Union[List[int], int]):
-        pass
-
-    def __setitem__(self, idx: Union[List[int], int], value: Dict[str, Union[np.ndarray, float]]):
-        pass
-
-    def __delitem__(self, idx: Union[List[int], int]):
-        pass
-
-    def __len__(self) -> int:
-        pass
-
-    @cached_property
-    def metadata(self) -> Dict[str, str]:
-        pass
 
 
 def _blob(array: np.ndarray, dtype: np.dtype) -> memoryview:

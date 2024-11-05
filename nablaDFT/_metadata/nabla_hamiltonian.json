@@ -3,6 +3,11 @@
     "desc": "nablaDFT dataset with molecule conformations derived from DFT with Hamiltonians.",
     "doi": "10.48550/arXiv.2406.14347",
     "metadata": {
+        "units": {
+            "y": "Hartree",
+            "pos": "Bohr",
+            "forces": "Hartree/Bohr"
+        },
         "generation_method": {
             "name": "DFT",
             "method": "wB97X-D",

@@ -1,10 +1,11 @@
  # Dataflow
 
+  - TODO: finalize DatasetCard.
+  - TODO: make SQLite3Database work with metadata (shapes, key maps).
+  - TODO: write tests for datasources and dataset interfaces.
   - TODO: delegate download process to dataset registry.
-  - TODO: finalize convert functions.
+  - TODO: currently pyg dataset will not work for hamiltonian databases, so as torch dataset, fix that.
   - TODO (future): benchmark LMDB database for energy and haьiltonian split.
-
-  - TODO: currently pyg dataset will not work for hamiltonian databases, so as torch dataset, fix that
   
 # Models
 
