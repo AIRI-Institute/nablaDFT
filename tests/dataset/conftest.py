@@ -4,7 +4,7 @@ from pathlib import Path
 
 import nablaDFT
 import pytest
-from nablaDFT.dataset.split import TestSplit
+from nablaDFT.data.split import TestSplit
 
 BATCH_SIZE = 8
 NUM_WORKERS = 4

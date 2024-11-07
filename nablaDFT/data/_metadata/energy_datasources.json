@@ -1,0 +1,8 @@
+{
+    "nablaDFT_train_tiny": {
+        "type_cls": "EnergyDatabase",
+        "url": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/train_2k_v2_formation_energy_w_forces.db",
+        "etag": "1b01555922f5ca11231bc8ab7d687ae7-7",
+        "metadata": "nabla_energy.json"
+    }
+}

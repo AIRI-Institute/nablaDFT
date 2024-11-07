@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import pytest
-from nablaDFT.dataset import ASENablaDFT, PyGNablaDFT
+from nablaDFT.data import ASENablaDFT, PyGNablaDFT
 
 
 @pytest.mark.download

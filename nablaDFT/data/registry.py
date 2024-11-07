@@ -1,7 +1,24 @@
 import json
+import logging
+from pathlib import Path
 from typing import List, Mapping, Optional
 
 import nablaDFT
+
+logger = logging.getLogger()
+
+
+class _DatasourceRegistry:
+    def __init__(self) -> None:
+        pass
+
+    def _get_url(self) -> str:
+        pass
+
+    def _download(self, name: str, path: Path) -> None:
+        if path.exists():
+            logger.info(f"{name} already downloaded and saved in {path}")
+            return
 
 
 class DatasetRegistry:
@@ -65,8 +82,17 @@ class DatasetRegistry:
         else:
             return None
 
-    def get_datasource(self, task_type: str, name: str) -> Mapping:
-        pass
-
 
 dataset_registry = DatasetRegistry()
+
+
+def load_datasource():
+    pass
+
+
+def list_datasource():
+    pass
+
+
+def _get_datasource_builder(type_cls: str):
+    pass

@@ -11,7 +11,7 @@ from ase.db import connect
 from torch_geometric.data import Data, Dataset, InMemoryDataset
 from tqdm import tqdm
 
-from nablaDFT.dataset.registry import dataset_registry
+from nablaDFT.data.registry import dataset_registry
 from nablaDFT.utils import download_file
 
 from .hamiltonian_dataset import HamiltonianDatabase

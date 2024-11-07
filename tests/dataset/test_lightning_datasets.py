@@ -2,7 +2,7 @@ from math import ceil
 
 import pytest
 import torch
-from nablaDFT.dataset import PyGHamiltonianDataModule, PyGNablaDFTDataModule
+from nablaDFT.data import PyGHamiltonianDataModule, PyGNablaDFTDataModule
 
 from .assertions import assert_shapes_hamiltonian
 

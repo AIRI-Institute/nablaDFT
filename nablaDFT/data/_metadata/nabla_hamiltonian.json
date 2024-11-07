@@ -6,7 +6,8 @@
         "units": {
             "y": "Hartree",
             "pos": "Bohr",
-            "forces": "Hartree/Bohr"
+            "forces": "Hartree/Bohr",
+            "H": "Hartree"
         },
         "generation_method": {
             "name": "DFT",

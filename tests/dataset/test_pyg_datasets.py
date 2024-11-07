@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 import torch
-from nablaDFT.dataset import HamiltonianDataset, PyGHamiltonianNablaDFT, PyGNablaDFT
+from nablaDFT.data import HamiltonianDataset, PyGHamiltonianNablaDFT, PyGNablaDFT
 from torch.utils.data import DataLoader
 
 

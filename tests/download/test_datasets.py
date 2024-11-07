@@ -2,7 +2,7 @@ import os
 from urllib import request as request
 
 import pytest
-from nablaDFT.dataset import dataset_registry
+from nablaDFT.data import dataset_registry
 from nablaDFT.utils.download import file_validation, get_file_size
 
 

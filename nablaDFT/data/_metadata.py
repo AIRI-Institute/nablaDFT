@@ -4,30 +4,6 @@ import json
 import pprint
 from dataclasses import dataclass
 
-# out-key: table.key
-nabla_energy = {
-    "y": "_data.energy",
-    "forces": "_data.forces",
-    "z": "numbers",
-    "pos": "pos",
-}
-
-nabla_hamiltonian = {
-    "y": "data.E",
-    "forces": "data.F",
-    "z": "data.Z",
-    "pos": "data.R",
-    "H": "data.H",
-}
-
-nabla_overlap = {
-    "y": "data.E",
-    "forces": "data.F",
-    "z": "data.Z",
-    "pos": "data.R",
-    "S": "data.S",
-}
-
 
 @dataclass
 class DatasetCard:

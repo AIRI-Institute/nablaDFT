@@ -1,7 +1,7 @@
 from math import ceil
 
 import pytest
-from nablaDFT.dataset import ASENablaDFT
+from nablaDFT.data import ASENablaDFT
 
 from .assertions import assert_shapes_spk
 
