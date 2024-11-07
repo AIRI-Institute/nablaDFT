@@ -1,7 +1,7 @@
 import hashlib
 from pathlib import Path
 from typing import Optional
-from urllib import request as request
+from urllib import request
 
 from tqdm import tqdm
 
@@ -32,7 +32,7 @@ def file_validation(downloaded_file, gt_hash) -> bool:
 
 
 def get_file_size(url: str) -> int:
-    """Returns file size in bytes
+    """Returns file size in bytes.
 
     Args:
         url (str): url of file to download
@@ -44,11 +44,12 @@ def get_file_size(url: str) -> int:
 
 
 def tqdm_download_hook(t):
-    """Wraps TQDM progress bar instance"""
+    """Wraps TQDM progress bar instance."""
     last_block = [0]
 
     def update_to(blocks_count: int, block_size: int, total_size: int):
-        """Adds progress bar for request.urlretrieve() method
+        """Adds progress bar for request.urlretrieve() method.
+
         Args:
             - blocks_count (int): transferred blocks count.
             - block_size (int): size of block in bytes.
