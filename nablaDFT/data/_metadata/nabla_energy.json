@@ -15,20 +15,7 @@
             "method": "wB97X-D",
             "basis": "def2-SVP",
             "software": "psi4",
-            "software_version": "some_version"
+            "software_version": "1.4"
         }
-    },
-    "keys_map": {},
-    "data_dtypes": {
-        "y": "float32",
-        "z": "int32",
-        "pos": "float32",
-        "forces": "float32"
-    },
-    "data_shapes": {
-        "y": null,
-        "z": null,
-        "pos": "(-1, 3)",
-        "forces": "(-1, 3)"
     }
 }

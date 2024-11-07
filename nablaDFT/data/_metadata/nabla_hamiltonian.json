@@ -32,9 +32,8 @@
         "H": "float32"
     },
     "data_shapes": {
-        "y": null,
-        "z": null,
         "pos": "(-1, 3)",
-        "forces": "(-1, 3)"
+        "forces": "(-1, 3)",
+        "H": "(-1, -1)"
     }
 }
