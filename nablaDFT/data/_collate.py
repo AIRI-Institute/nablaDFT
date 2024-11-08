@@ -33,7 +33,11 @@ def _collate_pyg_batch(
 
     The only purpose of this function: dispatch collate_fn call for pyg.data.Data objects.
     """
-    pyg_batch = Batch.from_data_list(batch)
+    pyg_batch = Batch.from_data_list(batch, exclude_keys=SQUARE_SHAPED_KEYS)
+    squared_shape_data, square_slices, square_incs = __collect_square_shaped_data(batch)
+    pyg_batch.update(squared_shape_data)
+    pyg_batch._slice_dict.update(square_slices)
+    pyg_batch._inc_dict.update(square_incs)
     return pyg_batch
 
 
@@ -42,26 +46,21 @@ def collate_pyg(
     *,
     increment: bool = False,
     add_batch: bool = False,
-    return_slices: bool = False,
     collate_fn_map: Optional[Dict[Union[Type, Tuple[Type, ...]], Callable]] = None,
 ):
-    """Collates list of torch_geometric.data.Data objects into torch.geometric.data.Batch object.
+    """Collates list of torch_geometric.data.Data objects for pytorch_geometric.data.InMemoryDataset format.
 
     Supports data attributes with different squared shape.
     Function signature is the same as torch.utils.data.dataloader.default_collate.
 
     Args:
         batch (List[Data]): a single batch to be collated.
-        return_slices (bool): whether to return a dictionary of slices in addition to the collated batch.
         collate_fn_map: Optional dictionary mapping from element type to the corresponding collate function.
             If the element type isn't present in this dictionary,
             this function will go through each key of the dictionary in the insertion order to
             invoke the corresponding collate function if the element type is a subclass of the key.
-
-    Returns:
-        pyg_batch (torch_geometric.data.Batch): collated batch.
     """
-    pyg_batch, slice_dict, _ = collate(
+    pyg_batch, slice_dict, inc_dict = collate(
         batch[0].__class__,
         data_list=batch,
         increment=increment,
@@ -69,17 +68,14 @@ def collate_pyg(
         exclude_keys=SQUARE_SHAPED_KEYS,
     )
     # collate square-shape elements and add to batch
-    squared_shape_data, square_shape_slices = __collect_square_shaped_data(batch, return_slices=True)
+    squared_shape_data, square_slices, square_incs = __collect_square_shaped_data(batch)
     pyg_batch.update(squared_shape_data)
-    slice_dict.update(square_shape_slices)
-    if return_slices:
-        return pyg_batch, slice_dict
-    return pyg_batch
+    slice_dict.update(square_slices)
+    inc_dict.update(square_incs)
+    return pyg_batch, slice_dict, inc_dict
 
 
-def __collect_square_shaped_data(
-    batch: List[Dict[str, np.ndarray]], return_slices: bool = False
-) -> Dict[str, torch.Tensor]:
+def __collect_square_shaped_data(batch: List[Dict[str, np.ndarray]]) -> Dict[str, torch.Tensor]:
     """Collects square shaped data from a batch of data.
 
     Args:
@@ -92,12 +88,12 @@ def __collect_square_shaped_data(
     elem = batch[0]
     square_shaped_data = {}
     slices_dict = {}
+    inc_dict = {}
     key_present = [key in elem.keys() for key in SQUARE_SHAPED_KEYS]
     if any(key_present):
         for idx, key in enumerate(SQUARE_SHAPED_KEYS):
             if key_present[idx]:
                 square_shaped_data[key] = [default_convert(batch[i][key]) for i in range(len(batch))]
-                slices_dict[key] = torch.arange(0, len(batch), dtype=torch.long)
-    if return_slices:
-        return square_shaped_data, slices_dict
-    return square_shaped_data
+                slices_dict[key] = torch.arange(0, len(batch) + 1, dtype=torch.long)
+                inc_dict[key] = torch.zeros(len(batch), dtype=torch.long)
+    return square_shaped_data, slices_dict, inc_dict

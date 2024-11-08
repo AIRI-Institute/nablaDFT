@@ -9,6 +9,7 @@ Examples:
         PyGDataset,
     )
 
+    >>> datasource = EnergyDatabase("path-to-database")
     # Create a new PyGDataset instance from datasource
     >>> dataset = PyGDataset(datasource)
 """
@@ -23,6 +24,7 @@ from torch_geometric.data.collate import collate
 from torch_geometric.data.data import BaseData, Data
 from tqdm import tqdm
 
+from ._collate import collate_pyg
 from .utils import _check_ds_len
 
 logger = logging.getLogger(__name__)
@@ -113,6 +115,6 @@ class PyGDataset(InMemoryDataset):
 
         if self.pre_transform is not None:
             samples = [self.pre_transform(data) for data in samples]
-        data, slices, _ = collate(samples[0].__class__, samples, increment=False, add_batch=False)
+        data, slices, _ = collate_pyg(samples, increment=False, add_batch=False)
         torch.save((data, slices), self.processed_paths[0])
         logger.info(f"Saved processed dataset: {self.processed_paths[0]}")

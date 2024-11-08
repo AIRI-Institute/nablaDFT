@@ -6,9 +6,10 @@ Examples:
 --------
 .. code-block:: python
     from nablaDFT.dataset import (
-        LightningDataModule,
+        LightningDataModule, EnergyDatabase, TorchDataset,
     )
-
+    >>> datasource = EnergyDatabase("path-to-database")
+    >>> dataset = TorchDataset(datasource)
     # Create a new LightningDataModule instance
     >>> datamodule = LightningDataModule(
         dataset=my_dataset,

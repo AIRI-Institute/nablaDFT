@@ -1,4 +1,4 @@
-"""Module describes interfaces for datasources, used for model training.
+"""Module describes interfaces for datasources, used for model training and EDA.
 
 Examples:
 --------
@@ -28,6 +28,7 @@ from ase import Atoms
 
 from ._convert import np_from_buf
 from ._metadata import DatasetCard
+from .utils import _slice_to_list
 
 
 class EnergyDatabase:
@@ -111,18 +112,16 @@ class SQLite3Database:
         # check if `data` table exists
         self._connections = {}
         if "data" not in self._get_tables_list():
-            raise KeyError("Table `data` not found in database")
+            raise ValueError("Table `data` not found in database")
 
+        # initialize metadata
+        self.desc = None
+        self.metadata = None
+        self._keys_map = None
+        self._dtypes = {}
+        self._shapes = {}
         # parse sample schema and metadata
-        if metadata is not None:
-            self.desc = metadata.desc
-            self.metadata = metadata.metadata
-            if metadata._keys_map:
-                self._keys_map = metadata._keys_map
-            else:
-                self._keys_map = self._get_table_schema("data")
-            self._dtypes = metadata._data_dtypes
-            self._shapes = metadata._data_shapes
+        self._parse_metadata(metadata)
 
     def __getitem__(
         self, idx: Union[int, List[int], slice]
@@ -138,11 +137,11 @@ class SQLite3Database:
         if isinstance(idx, int):
             query = self._construct_select(idx)
             cursor = self._get_connection(flags=apsw.SQLITE_OPEN_READONLY).cursor()
-            raw_data = self._unpack(cursor.execute(query, (str(idx),)).fetchone())
+            raw_data = self._unpack(cursor.execute(query).fetchone())
             data = {key: raw_data[self._keys_map[-1][i]] for i, key in enumerate(self._keys_map[0])}
+            return data
         else:
-            data = self.__getitems__(idx)
-        return data
+            return self.__getitems__(idx)
 
     def __getitems__(self, idx: Union[List[int], slice]) -> List[Dict[str, np.ndarray]]:
         """Returns unpacked elements from sqlite3 database.
@@ -151,22 +150,25 @@ class SQLite3Database:
             idx (Union[List[int], slice]): indexes of rows to return.
 
         Returns:
-            data (Dict[str, np.ndarray]): list of unpacked elements.
+            data (List[Dict[str, np.ndarray]]): list of unpacked elements.
         """
         if isinstance(idx, slice):
-            idx = list(range(idx.start, idx.stop, idx.step))
+            idx = _slice_to_list(idx)
         cursor = self._get_connection(flags=apsw.SQLITE_OPEN_READONLY).cursor()
         query = self._construct_select(idx)
-        raw_data = [self._unpack(chunk) for chunk in cursor.execute(query, str(idx)[1:-1]).fetchall()]
-        data = [{key: data_chunk[i] for i, key in enumerate(self._keys_map[0])} for data_chunk in raw_data]
+        raw_data = [self._unpack(chunk) for chunk in cursor.execute(query).fetchall()]
+        data = [
+            {sample_key: data_chunk[db_key] for sample_key, db_key in zip(self._keys_map[0], self._keys_map[-1])}
+            for data_chunk in raw_data
+        ]
         return data
 
     def __len__(self) -> int:
         """Returns number of rows in database."""
         cursor = self._get_connection(flags=apsw.SQLITE_OPEN_READONLY).cursor()
-        return cursor.execute("""SELECT COUNT(*) FROM data""").fetchone()
+        return cursor.execute("""SELECT COUNT(*) FROM data""").fetchone()[0]
 
-    def _get_connection(self, flags=apsw.SQLITE_OPEN_READONLY) -> None:
+    def _get_connection(self, flags=apsw.SQLITE_OPEN_READONLY) -> apsw.Connection:
         key = multiprocessing.current_process().name
         if key not in self._connections.keys():
             self._connections[key] = apsw.Connection(str(self.filepath), flags=flags)
@@ -188,12 +190,15 @@ class SQLite3Database:
             )
         return data_dict
 
-    def _get_table_schema(self, table_name: str) -> Dict[str, str]:
+    def _get_table_schema(self, table_name: str) -> List:
         """Returns table schema from sqlite3 database."""
         keys, columns = [], []
         conn = self._get_connection(flags=apsw.SQLITE_OPEN_READONLY)
         schema = conn.pragma(f"table_info({table_name})")
         for entry in schema:
+            # TODO: delete this when we delete core hamiltonian column
+            if entry[1] in ["id", "C"]:
+                continue
             keys.append(entry[1])
             columns.append(entry[1])
         tables = [table_name for _ in range(len(columns))]
@@ -209,6 +214,16 @@ class SQLite3Database:
         keys = ", ".join(f"{table}.{column}" for table, column in zip(tables, columns))
         tables = ", ".join(f"{table}" for table in set(tables))
         if isinstance(idx, int):
-            return f"SELECT {keys} FROM {tables} WHERE id=?"
+            return f"SELECT {keys} FROM {tables} WHERE id={idx}"
         else:
-            return f"SELECT {keys} FROM {tables} WHERE id IN (?)"
+            return f"SELECT {keys} FROM {tables} WHERE id IN ({str(idx)[1:-1]})"
+
+    def _parse_metadata(self, metadata: DatasetCard) -> None:
+        if metadata is None:
+            self._keys_map = self._get_table_schema("data")
+        else:
+            self.desc = metadata.desc
+            self.metadata = metadata.metadata
+            self._keys_map = metadata._keys_map
+            self._dtypes = metadata._data_dtypes
+            self._shapes = metadata._data_shapes

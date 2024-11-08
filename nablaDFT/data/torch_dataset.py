@@ -5,12 +5,11 @@ Provides functionality for integrating datasets with PyTorch.
 Examples:
 --------
 .. code-block:: python
-    from nablaDFT.dataset import (
-        TorchDataset,
+    from nablaDFT.data import (
+        TorchDataset, EnergyDatabase,
     )
-
-    >>> pass
-    >>> pass
+    >>> datasource = EnergyDatabase("path-to-database")
+    >>> dataset = TorchDataset(datasource)
 """
 
 from typing import Dict, List, Mapping, Union
@@ -39,7 +38,7 @@ class TorchDataset(Dataset):
             datasources = [datasources]
         self.datasources = datasources
 
-    def __geitem__(self, idx: int) -> Dict[torch.Tensor]:
+    def __geitem__(self, idx: int) -> Dict[str, torch.Tensor]:
         """Return single dataset element.
 
         Args:

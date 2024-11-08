@@ -3,9 +3,18 @@ from typing import Optional, Tuple
 
 import numpy as np
 
-# Maps database key to numpy array default shape
+# Maps nablaDFT database key to numpy array default shape
 _default_shapes = {"R": (-1, 3), "F": (-1, 3)}
-_default_dtypes = {"Z": np.int32, "E": np.float32, "F": np.float32, "R": np.float32}
+# Maps nablaDFT database key to numpy array default dtype
+_default_dtypes = {
+    "Z": np.dtype("int32"),  # atoms numbers
+    "E": np.dtype("float32"),  # energy
+    "F": np.dtype("float32"),  # atomic forces
+    "R": np.dtype("float32"),  # atom coordinates
+    "H": np.dtype("float32"),  # hamiltonian matrix
+    "S": np.dtype("float32"),  # overlap matrix
+    "C": np.dtype("float32"),  # core hamiltonian matrix
+}
 
 
 def _np_to_blob(array: np.ndarray, dtype: np.dtype) -> memoryview:
@@ -35,6 +44,7 @@ def _matrix_from_bytes(buf: bytes, dtype: np.dtype, **kwargs) -> np.ndarray:
     Args:
         buf (memoryview): buffer object to convert.
         dtype (np.dtype): dtype of array.
+        kwargs (Dict[Any]): optional key-word args.
     """
     elem_num = int(math.sqrt(len(buf) / dtype.itemsize))
     return _blob_to_np(buf=buf, dtype=dtype, shape=(elem_num, elem_num))
@@ -68,14 +78,16 @@ from_buf_map = {"H": _matrix_from_bytes, "S": _matrix_from_bytes, "C": _matrix_f
 
 
 def np_from_buf(buf: bytes, key: str, **kwargs) -> np.ndarray:
-    # skip floats and integers
-    if not isinstance(buf, bytes):
-        return buf
-    if from_buf_map.get(key):
-        return from_buf_map[key](buf, **kwargs)
-    # use default shape or from kwargs
     shape = kwargs.pop("shape", None)
     dtype = kwargs.pop("dtype", np.float32)
     if shape is None:
         shape = _default_shapes.get(key)
+    if dtype is None:
+        dtype = _default_dtypes.get(key)
+    # floats and integers must be converted to 0-dimensional np.arrays
+    if isinstance(buf, int) or isinstance(buf, float):
+        return np.array(buf, dtype=dtype)
+    # use default shape or from kwargs
+    if from_buf_map.get(key):
+        return from_buf_map[key](buf, dtype=dtype, **kwargs)
     return _blob_to_np(buf, shape=shape, dtype=dtype, **kwargs)
