@@ -17,9 +17,8 @@ Examples:
     }
 """
 
-import math
+import multiprocessing
 import pathlib
-from ast import literal_eval
 from typing import Dict, List, Optional, Tuple, Union
 
 import apsw  # way faster than sqlite3
@@ -27,6 +26,7 @@ import ase
 import numpy as np
 from ase import Atoms
 
+from ._convert import np_from_buf
 from ._metadata import DatasetCard
 
 
@@ -52,7 +52,7 @@ class EnergyDatabase:
 
         # parse sample schema and metadata
         if metadata is not None:
-            self.name = metadata.name
+            self.desc = metadata.desc
             self.metadata = metadata.metadata
 
     def __getitem__(self, idx: int) -> Dict[str, np.ndarray]:
@@ -85,17 +85,9 @@ class EnergyDatabase:
         atoms = Atoms(data=data_field, **values)
         self._db.write(atoms)
 
-    @property
-    def metadata(self) -> Dict[str, str]:
-        return str(self.metadata)
-
-    @metadata.setter
-    def metadata(self, metadata: Dict[str, str]) -> None:
-        self.metadata = metadata
-
 
 class SQLite3Database:
-    """Database interface for sqlite3 databases.
+    """Read-only database interface for sqlite3 databases.
 
     Wraps sqlite3 database with square-shaped data, like Hamiltonian and Overlap matrices
     for model training.
@@ -113,122 +105,110 @@ class SQLite3Database:
         if filepath.suffix != self.type:
             raise ValueError(f"Invalid file type: {filepath.suffix}")
         self.filepath = filepath.absolute()
+        if not self.filepath.exists():
+            raise FileNotFoundError(f"Database not found: {self.filepath}")
+
+        # check if `data` table exists
         self._connections = {}
+        if "data" not in self._get_tables_list():
+            raise KeyError("Table `data` not found in database")
 
         # parse sample schema and metadata
         if metadata is not None:
-            self.name = metadata.name
+            self.desc = metadata.desc
             self.metadata = metadata.metadata
-            self.key_map = _parse_schema(metadata.keys_map)
-            self.dtypes = _parse_dtypes(metadata.data_dtypes)
-            self.shapes = _parse_shapes(metadata.data_shapes)
+            if metadata._keys_map:
+                self._keys_map = metadata._keys_map
+            else:
+                self._keys_map = self._get_table_schema("data")
+            self._dtypes = metadata._data_dtypes
+            self._shapes = metadata._data_shapes
 
-    def __getitem__(self, idx: int) -> Dict:
-        # SELECT keys FROM data WHERE id=[]
-        pass
+    def __getitem__(
+        self, idx: Union[int, List[int], slice]
+    ) -> Union[Dict[str, np.ndarray], List[Dict[str, np.ndarray]]]:
+        """Returns unpacked element from sqlite3 database.
 
-    def __getitems__(self, idx: Union[List[int], slice]) -> Dict:
-        pass
+        Args:
+            idx (Union[int, List[int], slice]): row index of row to return.
 
-    def __setitem__(self, idx: Union[List[int], slice], values: Union[List[int], slice]) -> Dict:
-        pass
+        Returns:
+            data (Dict[str, np.ndarray]): unpacked element.
+        """
+        if isinstance(idx, int):
+            query = self._construct_select(idx)
+            cursor = self._get_connection(flags=apsw.SQLITE_OPEN_READONLY).cursor()
+            raw_data = self._unpack(cursor.execute(query, (str(idx),)).fetchone())
+            data = {key: raw_data[self._keys_map[-1][i]] for i, key in enumerate(self._keys_map[0])}
+        else:
+            data = self.__getitems__(idx)
+        return data
 
-    def __delitem__(self, idx: Union[List[int], slice]) -> None:
-        pass
+    def __getitems__(self, idx: Union[List[int], slice]) -> List[Dict[str, np.ndarray]]:
+        """Returns unpacked elements from sqlite3 database.
+
+        Args:
+            idx (Union[List[int], slice]): indexes of rows to return.
+
+        Returns:
+            data (Dict[str, np.ndarray]): list of unpacked elements.
+        """
+        if isinstance(idx, slice):
+            idx = list(range(idx.start, idx.stop, idx.step))
+        cursor = self._get_connection(flags=apsw.SQLITE_OPEN_READONLY).cursor()
+        query = self._construct_select(idx)
+        raw_data = [self._unpack(chunk) for chunk in cursor.execute(query, str(idx)[1:-1]).fetchall()]
+        data = [{key: data_chunk[i] for i, key in enumerate(self._keys_map[0])} for data_chunk in raw_data]
+        return data
 
     def __len__(self) -> int:
-        pass
+        """Returns number of rows in database."""
+        cursor = self._get_connection(flags=apsw.SQLITE_OPEN_READONLY).cursor()
+        return cursor.execute("""SELECT COUNT(*) FROM data""").fetchone()
 
-    def _insert(self, idx: int, data: Dict) -> None:
-        pass
+    def _get_connection(self, flags=apsw.SQLITE_OPEN_READONLY) -> None:
+        key = multiprocessing.current_process().name
+        if key not in self._connections.keys():
+            self._connections[key] = apsw.Connection(str(self.filepath), flags=flags)
+            self._connections[key].setbusytimeout(300000)  # 5 minute timeout
+        return self._connections[key]
 
-    def _insert_many(self, idx: int, data: Dict) -> None:
-        pass
+    def _unpack(self, data: Tuple[memoryview]) -> Dict[str, np.ndarray]:
+        """Unpacks data from sqlite3 database."""
+        # retrieve column names
+        data_dict = {}
+        for idx, key in enumerate(self._keys_map[-1]):
+            dtype = self._dtypes.get(f"{self._keys_map[1][idx]}.{self._keys_map[2][idx]}", None)
+            shape = self._shapes.get(f"{self._keys_map[1][idx]}.{self._keys_map[2][idx]}", None)
+            data_dict[key] = np_from_buf(
+                data[idx],
+                key,
+                dtype=dtype,
+                shape=shape,
+            )
+        return data_dict
 
-    def _get_connection(self) -> None:
-        pass
+    def _get_table_schema(self, table_name: str) -> Dict[str, str]:
+        """Returns table schema from sqlite3 database."""
+        keys, columns = [], []
+        conn = self._get_connection(flags=apsw.SQLITE_OPEN_READONLY)
+        schema = conn.pragma(f"table_info({table_name})")
+        for entry in schema:
+            keys.append(entry[1])
+            columns.append(entry[1])
+        tables = [table_name for _ in range(len(columns))]
+        return [keys, tables, columns]
 
-    @property
-    def metadata(self) -> Dict[str, str]:
-        return str(self.metadata)
+    def _get_tables_list(self) -> List[str]:
+        cursor = self._get_connection(flags=apsw.SQLITE_OPEN_READONLY).cursor()
+        tables_list = [info[1] for info in cursor.execute("SELECT * FROM sqlite_master WHERE type='table'").fetchall()]
+        return tables_list
 
-    @metadata.setter
-    def metadata(self, metadata: Dict[str, str]) -> None:
-        self.metadata = metadata
-
-
-def _blob(array: np.ndarray, dtype: np.dtype) -> memoryview:
-    """Convert numpy array to buffer object.
-
-    Args:
-        array (np.ndarray): array to convert.
-        dtype (np.dtype): array's dtype to save.
-
-    Returns:
-        memoryview: buffer object.
-    """
-    if array is None:
-        return None
-    if array.dtype == dtype:
-        array = array.astype(dtype)
-    if not np.little_endian:
-        array = array.byteswap()
-    return memoryview(np.ascontiguousarray(array))
-
-
-def _deblob(buf: memoryview, dtype: Optional[np.dtype] = np.float32, shape: Optional[Tuple] = None) -> np.ndarray:
-    """Convert buffer object to numpy array.
-
-    Args:
-        buf (memoryview): buffer object to convert.
-        dtype (np.dtype, optional): dtype of array. Default is np.float32.
-        shape (tuple, optional): shape of array. Default is None.
-
-    Returns:
-        np.ndarray: numpy array with data.
-    """
-    if buf is None:
-        return np.zeros(shape)
-    array = np.frombuffer(buf, dtype)
-    if not np.little_endian:
-        array = array.byteswap()
-    array.shape = shape
-    return array
-
-
-def _parse_schema(mapping: Dict[str, str]) -> Tuple[List]:
-    """Returns parsed mapping from datasource keys to sample keys."""
-    sample_keys, tables, columns = [], [], []
-    for key, value in mapping.items():
-        sample_keys.append(key)
-        table, column = value.split(".")
-        tables.append(table)
-        columns.append(column)
-    return sample_keys, tables, columns
-
-
-def _parse_dtypes(dtypes: Dict[str, str]) -> Dict[str, np.dtype]:
-    dtypes = {}
-    for key, value in dtypes.items():
-        dtypes[key] = np.dtype(value)
-    return dtypes
-
-
-def _parse_shapes(shapes: Dict[str, str]) -> Dict[str, tuple]:
-    shapes = {}
-    for key, value in shapes.items():
-        shapes[key] = literal_eval(value)
-    return shapes
-
-
-def _matrix_from_bytes(buf: memoryview, dtype: np.dtype) -> np.ndarray:
-    """Helper function creates numpy square matrix from bytes.
-
-    Shape of matrix infered from buffer size and dtype.
-
-    Args:
-        buf (memoryview): buffer object to convert.
-        dtype (np.dtype): dtype of array.
-    """
-    elem_num = math.sqrt(len(buf) / dtype.itemsize)
-    return _deblob(buf=buf, dtype=dtype, shape=(elem_num, elem_num))
+    def _construct_select(self, idx: Union[int, List[int], slice]) -> str:
+        _, tables, columns = self._keys_map
+        keys = ", ".join(f"{table}.{column}" for table, column in zip(tables, columns))
+        tables = ", ".join(f"{table}" for table in set(tables))
+        if isinstance(idx, int):
+            return f"SELECT {keys} FROM {tables} WHERE id=?"
+        else:
+            return f"SELECT {keys} FROM {tables} WHERE id IN (?)"

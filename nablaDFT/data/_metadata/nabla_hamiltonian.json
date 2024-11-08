@@ -1,7 +1,9 @@
 {
-    "name": "nablaDFT_hamiltonian",
-    "desc": "nablaDFT dataset with molecule conformations derived from DFT with Hamiltonians.",
-    "doi": "10.48550/arXiv.2406.14347",
+    "desc": {
+        "name": "nablaDFT_hamiltonian",
+        "desc": "nablaDFT dataset with molecule conformations derived from DFT with Hamiltonians.",
+        "doi": "10.48550/arXiv.2406.14347"
+    },
     "metadata": {
         "units": {
             "y": "Hartree",
@@ -17,23 +19,18 @@
             "software_version": "some_version"
         }
     },
-    "keys_map": {
+    "_keys_map": {
         "y": "data.E",
         "z": "data.Z",
         "pos": "data.R",
         "forces": "data.F",
         "H": "data.H"
     },
-    "data_dtypes": {
-        "y": "float32",
-        "z": "int32",
-        "pos": "float32",
-        "forces": "float32",
-        "H": "float32"
-    },
-    "data_shapes": {
-        "pos": "(-1, 3)",
-        "forces": "(-1, 3)",
-        "H": "(-1, -1)"
+    "_data_dtypes": {
+        "data.E": "float32",
+        "data.Z": "int32",
+        "data.R": "float32",
+        "data.F": "float32",
+        "data.H": "float32"
     }
 }
