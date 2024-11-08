@@ -28,7 +28,7 @@ def _collate_pyg_batch(
     batch: List[Data],
     *,
     collate_fn_map: Optional[Dict[Union[Type, Tuple[Type, ...]], Callable]] = None,
-):
+) -> Batch:
     """Collates list of torch_geometric.data.Data objects into torch.geometric.data.Batch object.
 
     The only purpose of this function: dispatch collate_fn call for pyg.data.Data objects.
@@ -47,7 +47,7 @@ def collate_pyg(
     increment: bool = False,
     add_batch: bool = False,
     collate_fn_map: Optional[Dict[Union[Type, Tuple[Type, ...]], Callable]] = None,
-):
+) -> List[Dict[str, torch.Tensor]]:
     """Collates list of torch_geometric.data.Data objects for pytorch_geometric.data.InMemoryDataset format.
 
     Supports data attributes with different squared shape.
@@ -75,7 +75,7 @@ def collate_pyg(
     return pyg_batch, slice_dict, inc_dict
 
 
-def __collect_square_shaped_data(batch: List[Dict[str, np.ndarray]]) -> Dict[str, torch.Tensor]:
+def __collect_square_shaped_data(batch: List[Dict[str, np.ndarray]]) -> List[Dict[str, torch.Tensor]]:
     """Collects square shaped data from a batch of data.
 
     Args:

@@ -20,7 +20,6 @@ from typing import Callable, List, Union
 
 import torch
 from torch_geometric.data import InMemoryDataset
-from torch_geometric.data.collate import collate
 from torch_geometric.data.data import BaseData, Data
 from tqdm import tqdm
 

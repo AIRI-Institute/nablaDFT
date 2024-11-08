@@ -3,15 +3,9 @@
   - TODO: finalize DatasetCard.
   - TODO: write tests for datasources and dataset interfaces.
   - TODO: delegate download process to dataset registry.
-  - TODO: currently pyg dataset will not work for hamiltonian databases, so as torch dataset, fix that.
+  - TODO: somehow split in-memory and from disk datasets.
   - TODO (future): benchmark LMDB database for energy and haьiltonian split.
 
-For EDA purposes maybe use:
-```python
-conn = apsw.Connection(filename)
-tables_list = [info[1] for info in conn.execute("SELECT * FROM sqlite_master WHERE type='table'").fetchall()]
-data_schema = conn.pragme("table_info(data)")
-```
   
 # Models
 

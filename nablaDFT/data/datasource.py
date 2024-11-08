@@ -56,7 +56,7 @@ class EnergyDatabase:
             self.desc = metadata.desc
             self.metadata = metadata.metadata
 
-    def __getitem__(self, idx: int) -> Dict[str, np.ndarray]:
+    def __getitem__(self, idx: Union[int, slice, List[int]]) -> Dict[str, np.ndarray]:
         """Returns unpacked element from ASE database.
 
         Args:
@@ -67,13 +67,18 @@ class EnergyDatabase:
         """
         # NOTE: in ase databases indexing starts with 1.
         # NOTE: make np arrays writeable
-        atoms_row = self._db[idx + 1]
-        data = {
-            "z": atoms_row.numbers.copy(),
-            "y": np.asarray(atoms_row.data["energy"][0]),
-            "pos": atoms_row.positions.copy(),
-            "forces": atoms_row.data["forces"].copy(),
-        }
+        if isinstance(idx, int):
+            atoms_row = self._db[idx + 1]
+            data = {
+                "z": atoms_row.numbers.copy(),
+                "y": np.asarray(atoms_row.data["energy"][0]),
+                "pos": atoms_row.positions.copy(),
+                "forces": atoms_row.data["forces"].copy(),
+            }
+        else:
+            if isinstance(idx, slice):
+                idx = _slice_to_list(idx)
+            data = [self.__getitem__(i) for i in idx]
         return data
 
     def __len__(self) -> int:
