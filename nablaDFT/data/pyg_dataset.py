@@ -16,9 +16,12 @@ Examples:
 
 import logging
 import pathlib
-from typing import Callable, List, Union
+from typing import Callable, Dict, List, Union
 
+import numpy as np
 import torch
+from torch import Tensor
+from torch.utils.data import default_convert
 from torch_geometric.data import InMemoryDataset
 from torch_geometric.data.data import BaseData, Data
 from tqdm import tqdm
@@ -27,6 +30,9 @@ from ._collate import collate_pyg
 from .utils import _check_ds_len
 
 logger = logging.getLogger(__name__)
+
+
+IndexType = Union[slice, Tensor, np.ndarray, List]
 
 
 class PyGDataset(InMemoryDataset):
@@ -50,6 +56,13 @@ class PyGDataset(InMemoryDataset):
         transform (Callable): callable data transform, called on every access to element.
         pre_transform (Callable): callable data transform, called on every element during process.
     """
+
+    @property
+    def has_process(self):
+        # prevent processing dataset if in_memory param is False or None
+        if self.in_memory:
+            return True
+        return False
 
     @property
     def raw_file_names(self) -> List[str]:
@@ -77,25 +90,13 @@ class PyGDataset(InMemoryDataset):
         if not isinstance(datasources, list):
             datasources = [datasources]
         _check_ds_len(datasources)
-        self.data_all, self.slices_all = [], []
-        self.offsets = [0]
         self.datasources = datasources
-        # initalize paths
         super().__init__(None, transform, pre_transform, pre_filter, False)
 
         for path in self.processed_paths:
             data, slices = torch.load(path)
-            self.data_all.append(data)
-            self.slices_all.append(slices)
-            self.offsets.append(len(slices[list(slices.keys())[0]]) - 1 + self.offsets[-1])
-
-    def get(self, idx) -> BaseData:
-        data_idx = 0
-        while data_idx < len(self.data_all) - 1 and idx >= self.offsets[data_idx + 1]:
-            data_idx += 1
-        self.data = self.data_all[data_idx]
-        self.slices = self.slices_all[data_idx]
-        return super(PyGDataset, self).get(idx - self.offsets[data_idx])
+            self.data = data
+            self.slices = slices
 
     def process(self):
         samples = []
@@ -103,11 +104,7 @@ class PyGDataset(InMemoryDataset):
             data_dict = {}
             for datasource in self.datasources:
                 data_dict.update(datasource[idx])
-            keys = data_dict.keys()
-            # convert to torch.tensor
-            for key in keys:
-                data_dict[key] = torch.from_numpy(data_dict[key])
-            samples.append(Data(**data_dict))
+            samples.append(self._data_from_sample(data_dict))
 
         if self.pre_filter is not None:
             samples = [data for data in samples if self.pre_filter(data)]
@@ -117,3 +114,34 @@ class PyGDataset(InMemoryDataset):
         data, slices, _ = collate_pyg(samples, increment=False, add_batch=False)
         torch.save((data, slices), self.processed_paths[0])
         logger.info(f"Saved processed dataset: {self.processed_paths[0]}")
+
+    def __getitem__(self, idx) -> BaseData:
+        # TODO: Do we need to appopriate describe case of several indices for in_memory=False???
+        if self.in_memory:
+            super().get(idx)
+        else:
+            if (
+                isinstance(idx, (int, np.integer))
+                or (isinstance(idx, Tensor) and idx.dim() == 0)
+                or (isinstance(idx, np.ndarray) and np.isscalar(idx))
+            ):
+                data = {}
+                for datasource in self.datasources:
+                    data.update(datasource[idx])
+                    data = self._data_from_sample(data)
+                    data = data if self.transform is None else self.transform(data)
+                    return data
+
+    def _data_from_sample(self, sample: Dict[str, Union[np.ndarray, torch.Tensor]]) -> BaseData:
+        for key in sample.keys():
+            sample[key] = default_convert(sample[key])
+        return Data(**sample)
+
+
+"""
+    def get(self, idx) -> BaseData:
+        data_idx = 0
+        self.data = self.data_all[data_idx]
+        self.slices = self.slices_all[data_idx]
+        return super(PyGDataset, self).get(idx - self.offsets[data_idx])
+"""

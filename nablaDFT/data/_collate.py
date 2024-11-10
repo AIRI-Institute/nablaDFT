@@ -75,7 +75,9 @@ def collate_pyg(
     return pyg_batch, slice_dict, inc_dict
 
 
-def __collect_square_shaped_data(batch: List[Dict[str, np.ndarray]]) -> List[Dict[str, torch.Tensor]]:
+def __collect_square_shaped_data(
+    batch: List[Dict[str, Union[np.ndarray, torch.Tensor]]],
+) -> List[Dict[str, torch.Tensor]]:
     """Collects square shaped data from a batch of data.
 
     Args:
