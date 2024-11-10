@@ -117,6 +117,7 @@ class PyGDataset(InMemoryDataset):
 
     def __getitem__(self, idx) -> BaseData:
         # TODO: Do we need to appopriate describe case of several indices for in_memory=False???
+        # TODO: split function for readability for two cases: in_memory and other
         if self.in_memory:
             super().get(idx)
         else:
