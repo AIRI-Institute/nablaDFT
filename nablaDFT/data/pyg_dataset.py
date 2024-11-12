@@ -20,19 +20,19 @@ from typing import Callable, Dict, List, Union
 
 import numpy as np
 import torch
-from torch import Tensor
-from torch.utils.data import default_convert
 from torch_geometric.data import InMemoryDataset
-from torch_geometric.data.data import BaseData, Data
+from torch_geometric.data.data import BaseData
 from tqdm import tqdm
 
 from ._collate import collate_pyg
-from .utils import _check_ds_len
+from ._convert import to_pyg_data
+from .utils import check_ds_len, merge_samples, slice_to_list
 
 logger = logging.getLogger(__name__)
 
 
-IndexType = Union[slice, Tensor, np.ndarray, List]
+IndexType = Union[int, slice, torch.Tensor, np.ndarray, List]
+SampleType = Union[torch.Tensor, np.ndarray]
 
 
 class PyGDataset(InMemoryDataset):
@@ -59,10 +59,8 @@ class PyGDataset(InMemoryDataset):
 
     @property
     def has_process(self):
-        # prevent processing dataset if in_memory param is False or None
-        if self.in_memory:
-            return True
-        return False
+        # prevents processing dataset if in_memory param is False
+        return self.in_memory
 
     @property
     def raw_file_names(self) -> List[str]:
@@ -83,20 +81,23 @@ class PyGDataset(InMemoryDataset):
     def __init__(
         self,
         datasources: Union[str, List[str]],
+        in_memory: bool = True,
         transform: Callable = None,
         pre_transform: Callable = None,
         pre_filter: Callable = None,
     ) -> None:
         if not isinstance(datasources, list):
             datasources = [datasources]
-        _check_ds_len(datasources)
+        check_ds_len(datasources)
         self.datasources = datasources
+        self.in_memory = in_memory
         super().__init__(None, transform, pre_transform, pre_filter, False)
 
-        for path in self.processed_paths:
-            data, slices = torch.load(path)
-            self.data = data
-            self.slices = slices
+        if in_memory:
+            for path in self.processed_paths:
+                data, slices = torch.load(path)
+                self.data = data
+                self.slices = slices
 
     def process(self):
         samples = []
@@ -104,7 +105,7 @@ class PyGDataset(InMemoryDataset):
             data_dict = {}
             for datasource in self.datasources:
                 data_dict.update(datasource[idx])
-            samples.append(self._data_from_sample(data_dict))
+            samples.append(to_pyg_data(data_dict))
 
         if self.pre_filter is not None:
             samples = [data for data in samples if self.pre_filter(data)]
@@ -115,34 +116,40 @@ class PyGDataset(InMemoryDataset):
         torch.save((data, slices), self.processed_paths[0])
         logger.info(f"Saved processed dataset: {self.processed_paths[0]}")
 
-    def __getitem__(self, idx) -> BaseData:
-        # TODO: Do we need to appopriate describe case of several indices for in_memory=False???
-        # TODO: split function for readability for two cases: in_memory and other
+    def __getitem__(self, idx: IndexType) -> BaseData:
+        """Retrieve elements from dataset."""
         if self.in_memory:
-            super().get(idx)
+            return super().get(idx)  # just call get from InMemoryDataset
         else:
             if (
                 isinstance(idx, (int, np.integer))
-                or (isinstance(idx, Tensor) and idx.dim() == 0)
+                or (isinstance(idx, torch.Tensor) and idx.dim() == 0)
                 or (isinstance(idx, np.ndarray) and np.isscalar(idx))
             ):
                 data = {}
                 for datasource in self.datasources:
                     data.update(datasource[idx])
-                    data = self._data_from_sample(data)
+                    data = to_pyg_data(data)
                     data = data if self.transform is None else self.transform(data)
                     return data
+            else:
+                return self.__getitems__(idx)
 
-    def _data_from_sample(self, sample: Dict[str, Union[np.ndarray, torch.Tensor]]) -> BaseData:
-        for key in sample.keys():
-            sample[key] = default_convert(sample[key])
-        return Data(**sample)
+    def __getitems__(self, idxs: Union[slice, List[int]]) -> List[Dict[str, torch.Tensor]]:
+        """Method for multiple samples retrieval.
 
+        Used by pytorch fetcher.
+        """
+        if isinstance(idxs, slice):
+            idxs = slice_to_list(idxs)
+        if len(self.datasources) == 0:
+            return self.datasources[0][idxs]
+        else:
+            raw_data = [datasource[idxs] for datasource in self.datasources]
+            data = to_pyg_data(merge_samples(raw_data))
+            data = [sample if self.transform is None else self.transform(sample) for sample in data]
+            return data
 
-"""
-    def get(self, idx) -> BaseData:
-        data_idx = 0
-        self.data = self.data_all[data_idx]
-        self.slices = self.slices_all[data_idx]
-        return super(PyGDataset, self).get(idx - self.offsets[data_idx])
-"""
+    def __len__(self):
+        """Returns length of dataset."""
+        return len(self.datasources[0])

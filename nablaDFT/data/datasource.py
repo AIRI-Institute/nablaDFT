@@ -28,7 +28,7 @@ from ase import Atoms
 
 from ._convert import np_from_buf
 from ._metadata import DatasetCard
-from .utils import _slice_to_list
+from .utils import slice_to_list
 
 
 class EnergyDatabase:
@@ -77,7 +77,7 @@ class EnergyDatabase:
             }
         else:
             if isinstance(idx, slice):
-                idx = _slice_to_list(idx)
+                idx = slice_to_list(idx)
             data = [self.__getitem__(i) for i in idx]
         return data
 
@@ -158,7 +158,7 @@ class SQLite3Database:
             data (List[Dict[str, np.ndarray]]): list of unpacked elements.
         """
         if isinstance(idx, slice):
-            idx = _slice_to_list(idx)
+            idx = slice_to_list(idx)
         cursor = self._get_connection(flags=apsw.SQLITE_OPEN_READONLY).cursor()
         query = self._construct_select(idx)
         raw_data = [self._unpack(chunk) for chunk in cursor.execute(query).fetchall()]

@@ -1,7 +1,12 @@
 import math
-from typing import Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
+import torch
+from torch.utils.data import default_convert
+from torch_geometric.data import Data
+
+SampleType = Union[np.ndarray, torch.Tensor]
 
 # Maps nablaDFT database key to numpy array default shape
 _default_shapes = {"R": (-1, 3), "F": (-1, 3)}
@@ -63,13 +68,14 @@ def _blob_to_np(buf: bytes, dtype: Optional[np.dtype] = np.float32, shape: Optio
     """
     if buf is None:
         return np.zeros(shape)
-    array = np.frombuffer(buf, dtype)
+    array = np.frombuffer(buf, dtype).copy()
     if not np.little_endian:
         array = array.byteswap()
     if shape is not None:
         array.shape = shape
     else:
         array.shape = (array.size,)
+    array.setflags(write=1)
     return array
 
 
@@ -86,8 +92,17 @@ def np_from_buf(buf: bytes, key: str, **kwargs) -> np.ndarray:
         dtype = _default_dtypes.get(key)
     # floats and integers must be converted to 0-dimensional np.arrays
     if isinstance(buf, int) or isinstance(buf, float):
-        return np.array(buf, dtype=dtype)
+        return np.array(buf, dtype=dtype).copy()
     # use default shape or from kwargs
     if from_buf_map.get(key):
         return from_buf_map[key](buf, dtype=dtype, **kwargs)
-    return _blob_to_np(buf, shape=shape, dtype=dtype, **kwargs)
+    arr = _blob_to_np(buf, shape=shape, dtype=dtype, **kwargs)
+    return arr
+
+
+def to_pyg_data(sample: Union[List[Dict[str, SampleType]], Dict[str, SampleType]]) -> Union[List[Data], Data]:
+    """Convert single or list of samples to torch.geometric.data.Data object."""
+    if isinstance(sample, List):
+        return [Data(**default_convert(data)) for data in sample]
+    else:
+        return Data(**default_convert(sample))
