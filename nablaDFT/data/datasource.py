@@ -148,7 +148,9 @@ class SQLite3Database:
         else:
             return self.__getitems__(idx)
 
-    def __getitems__(self, idx: Union[List[int], slice]) -> List[Dict[str, np.ndarray]]:
+    def __getitems__(
+        self, idx: Union[List[int], slice]
+    ) -> List[Dict[str, np.ndarray]]:  # TODO: rename to get_many()???
         """Returns unpacked elements from sqlite3 database.
 
         Args:
@@ -167,6 +169,12 @@ class SQLite3Database:
             for data_chunk in raw_data
         ]
         return data
+
+    def __setitem__(self, data: Dict[str, np.ndarray]) -> None:
+        pass
+
+    def __delitem__(self, idx) -> None:
+        pass
 
     def __len__(self) -> int:
         """Returns number of rows in database."""
@@ -194,6 +202,15 @@ class SQLite3Database:
                 shape=shape,
             )
         return data_dict
+
+    def _pack(self, data: Dict[str, np.ndarray]) -> None:
+        pass
+
+    def _insert(self, data) -> None:
+        pass
+
+    def _update(self, data, idx) -> None:
+        pass
 
     def _get_table_schema(self, table_name: str) -> List:
         """Returns table schema from sqlite3 database."""
@@ -223,8 +240,15 @@ class SQLite3Database:
         else:
             return f"SELECT {keys} FROM {tables} WHERE id IN ({str(idx)[1:-1]})"
 
+    def _construct_insert(self):
+        pass
+
+    def _construct_update(self):
+        pass
+
     def _parse_metadata(self, metadata: DatasetCard) -> None:
         if metadata is None:
+            # use full table `data`
             self._keys_map = self._get_table_schema("data")
         else:
             self.desc = metadata.desc
