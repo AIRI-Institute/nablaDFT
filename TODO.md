@@ -3,8 +3,7 @@
   - TODO: finalize DatasetCard.
   - TODO: write tests for datasources and dataset interfaces.
   - TODO: delegate download process to dataset registry.
-  - TODO: somehow split in-memory and from disk datasets.
-  - TODO (future): benchmark LMDB database for energy and haьiltonian split.
+  - TODO (future): benchmark LMDB database for energy and hamiltonian split.
 
   
 # Models

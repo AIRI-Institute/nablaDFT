@@ -124,7 +124,6 @@ class SQLite3Database:
         self.metadata = None
         self._keys_map = None
         self._dtypes = {}
-        self._shapes = {}
         # parse sample schema and metadata
         self._parse_metadata(metadata)
 
