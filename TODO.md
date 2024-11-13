@@ -3,6 +3,7 @@
   - TODO: finalize DatasetCard.
   - TODO: write tests for datasources and dataset interfaces.
   - TODO: delegate download process to dataset registry.
+  - TODO: add retry to download
   - TODO (future): benchmark LMDB database for energy and hamiltonian split.
 
   

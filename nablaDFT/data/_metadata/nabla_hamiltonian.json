@@ -1,7 +1,6 @@
 {
     "desc": {
         "name": "nablaDFT_hamiltonian",
-        "desc": "nablaDFT dataset with molecule conformations derived from DFT with Hamiltonians.",
         "doi": "10.48550/arXiv.2406.14347"
     },
     "metadata": {

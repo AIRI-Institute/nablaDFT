@@ -3,11 +3,9 @@
 Examples:
 --------
 .. code-block:: python
-    from nablaDFT.dataset import (
-        DataSource,
-    )
+    from nablaDFT.data import EnergyDatabase
 
-    >>> datasource = EnergyDatabase("path/to/database")
+    >>> datasource = EnergyDatabase("path-to-database")
     >>> datasource[0]
     >>> {
     'z': array([...], dtype=int32),
@@ -15,11 +13,20 @@ Examples:
     'pos': array([...]),
     'forces': array([...]),
     }
+
+Create new DataBase with the same schema as in downloaded datasource:
+.. code-block:: python
+    >>> from nablaDFT.data import SQLite3Database
+    >>> datasource = SQLite3Database("path-to-database")
+    >>> metadata = datasource.metadata
+    >>> new_datasource = SQLite3Database("path-to-new-database", schema=schema)
+    >>> new_datasource[idx] = datasource[0]  # write sample to new database
 """
 
+import logging
 import multiprocessing
 import pathlib
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import apsw  # way faster than sqlite3
 import ase
@@ -29,6 +36,8 @@ from ase import Atoms
 from ._convert import np_from_buf
 from ._metadata import DatasetCard
 from .utils import slice_to_list
+
+logger = logging.getLogger(__name__)
 
 
 class EnergyDatabase:
@@ -111,22 +120,25 @@ class SQLite3Database:
         if filepath.suffix != self.type:
             raise ValueError(f"Invalid file type: {filepath.suffix}")
         self.filepath = filepath.absolute()
-        if not self.filepath.exists():
-            raise FileNotFoundError(f"Database not found: {self.filepath}")
-
-        # check if `data` table exists
-        self._connections = {}
-        if "data" not in self._get_tables_list():
-            raise ValueError("Table `data` not found in database")
-
         # initialize metadata
-        self.desc = None
-        self.metadata = None
-        self._keys_map = None
-        self._dtypes = {}
-        self._shapes = {}
-        # parse sample schema and metadata
-        self._parse_metadata(metadata)
+        self.desc: Dict[str, str] = None
+        self.metadata: Dict[Any, Any] = None
+        self._keys_map: Tuple[List[str], List[str], List[str]] = None
+        self._dtypes: Dict[str, str] = {}
+        self._shapes: Dict[str, str] = {}
+
+        self._connections = {}
+
+        if not self.filepath.exists():
+            logger.info(f"Creating new database: {filepath}")
+            self._create(filepath, metadata)
+            # raise FileNotFoundError(f"Database not found: {self.filepath}")
+        else:
+            # check if `data` table exists
+            if "data" not in self._get_tables_list():
+                raise ValueError("Table `data` not found in database")
+            # parse sample schema and metadata
+            self._parse_metadata(metadata)
 
     def __getitem__(
         self, idx: Union[int, List[int], slice]
@@ -141,16 +153,14 @@ class SQLite3Database:
         """
         if isinstance(idx, int):
             query = self._construct_select(idx)
-            cursor = self._get_connection(flags=apsw.SQLITE_OPEN_READONLY).cursor()
+            cursor = self._get_connection().cursor()
             raw_data = self._unpack(cursor.execute(query).fetchone())
             data = {key: raw_data[self._keys_map[-1][i]] for i, key in enumerate(self._keys_map[0])}
             return data
         else:
-            return self.__getitems__(idx)
+            return self._get_many(idx)
 
-    def __getitems__(
-        self, idx: Union[List[int], slice]
-    ) -> List[Dict[str, np.ndarray]]:  # TODO: rename to get_many()???
+    def _get_many(self, idx: Union[List[int], slice]) -> List[Dict[str, np.ndarray]]:
         """Returns unpacked elements from sqlite3 database.
 
         Args:
@@ -161,7 +171,7 @@ class SQLite3Database:
         """
         if isinstance(idx, slice):
             idx = slice_to_list(idx)
-        cursor = self._get_connection(flags=apsw.SQLITE_OPEN_READONLY).cursor()
+        cursor = self._get_connection().cursor()
         query = self._construct_select(idx)
         raw_data = [self._unpack(chunk) for chunk in cursor.execute(query).fetchall()]
         data = [
@@ -170,7 +180,26 @@ class SQLite3Database:
         ]
         return data
 
-    def __setitem__(self, data: Dict[str, np.ndarray]) -> None:
+    def _create(self, filepath: pathlib.Path, metadata: DatasetCard):
+        if metadata is None:
+            raise ValueError(f"Can't create table {filepath} without metadata")
+        cursor = self._get_connection().cursor()
+        col_types = [self._to_sql_type(data_type) for data_type in self._dtypes]
+        tables, db_keys = self._keys_map[1:]
+        sql_schema = {}  # {'table': {'col_name': 'sql_type'}}
+        for idx, table in enumerate(tables):
+            if sql_schema.get(table):
+                sql_schema[table].append({db_keys[idx]: col_types[idx]})
+            else:
+                sql_schema[table] = [db_keys[idx]]
+        for table_name in sql_schema.keys():
+            table_schema = ",\n".join(
+                [f" {col_name} {col_type}" for col_name, col_type in zip(sql_schema[table].items())]
+            )
+            query = f"CREATE TABLE IF NOT EXISTS {table_name} \n (id INTEGER NOT NULL PRIMARY KEY,\n {table_schema})"
+            cursor.execute(query)
+
+    def __setitem__(self, idx, data: Dict[str, np.ndarray]) -> None:
         pass
 
     def __delitem__(self, idx) -> None:
@@ -178,10 +207,10 @@ class SQLite3Database:
 
     def __len__(self) -> int:
         """Returns number of rows in database."""
-        cursor = self._get_connection(flags=apsw.SQLITE_OPEN_READONLY).cursor()
+        cursor = self._get_connection().cursor()
         return cursor.execute("""SELECT COUNT(*) FROM data""").fetchone()[0]
 
-    def _get_connection(self, flags=apsw.SQLITE_OPEN_READONLY) -> apsw.Connection:
+    def _get_connection(self, flags=apsw.SQLITE_OPEN_READWRITE) -> apsw.Connection:
         key = multiprocessing.current_process().name
         if key not in self._connections.keys():
             self._connections[key] = apsw.Connection(str(self.filepath), flags=flags)
@@ -215,7 +244,7 @@ class SQLite3Database:
     def _get_table_schema(self, table_name: str) -> List:
         """Returns table schema from sqlite3 database."""
         keys, columns = [], []
-        conn = self._get_connection(flags=apsw.SQLITE_OPEN_READONLY)
+        conn = self._get_connection()
         schema = conn.pragma(f"table_info({table_name})")
         for entry in schema:
             # TODO: delete this when we delete core hamiltonian column
@@ -227,7 +256,7 @@ class SQLite3Database:
         return [keys, tables, columns]
 
     def _get_tables_list(self) -> List[str]:
-        cursor = self._get_connection(flags=apsw.SQLITE_OPEN_READONLY).cursor()
+        cursor = self._get_connection().cursor()
         tables_list = [info[1] for info in cursor.execute("SELECT * FROM sqlite_master WHERE type='table'").fetchall()]
         return tables_list
 
@@ -244,6 +273,9 @@ class SQLite3Database:
         pass
 
     def _construct_update(self):
+        pass
+
+    def _to_sql_type(self):  # ???
         pass
 
     def _parse_metadata(self, metadata: DatasetCard) -> None:
