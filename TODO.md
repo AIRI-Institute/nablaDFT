@@ -6,6 +6,8 @@
   - TODO: add retry to download
   - TODO (future): benchmark LMDB database for energy and hamiltonian split.
 
+  - TODO: do not forget to update schema for hamiltonian databases.
+
   
 # Models
 

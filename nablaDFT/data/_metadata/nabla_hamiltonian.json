@@ -18,18 +18,19 @@
             "software_version": "some_version"
         }
     },
-    "_keys_map": {
-        "y": "data.E",
-        "z": "data.Z",
-        "pos": "data.R",
-        "forces": "data.F",
-        "H": "data.H"
-    },
+    "columns": ["E", "Z", "R", "F", "H"],
     "_data_dtypes": {
-        "data.E": "float32",
-        "data.Z": "int32",
-        "data.R": "float32",
-        "data.F": "float32",
-        "data.H": "float32"
+        "E": "float32",
+        "Z": "int32",
+        "R": "float32",
+        "F": "float32",
+        "H": "float32"
+    },
+    "_keys_map": {
+        "y": "E",
+        "z": "Z",
+        "pos": "R",
+        "forces": "F",
+        "H": "H"
     }
 }

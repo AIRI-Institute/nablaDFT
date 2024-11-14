@@ -33,8 +33,8 @@ import ase
 import numpy as np
 from ase import Atoms
 
-from ._convert import np_from_buf
-from ._metadata import DatasetCard
+from ._convert import np_from_bytes, np_to_bytes
+from ._metadata import DatasourceCard
 from .utils import slice_to_list
 
 logger = logging.getLogger(__name__)
@@ -53,7 +53,7 @@ class EnergyDatabase:
 
     type = "db"  # only sqlite3 databases
 
-    def __init__(self, filepath: Union[pathlib.Path, str], metadata: Optional[DatasetCard] = None) -> None:
+    def __init__(self, filepath: Union[pathlib.Path, str], metadata: Optional[DatasourceCard] = None) -> None:
         if isinstance(filepath, str):
             filepath = pathlib.Path(filepath)
         self.filepath = filepath.absolute()
@@ -102,10 +102,9 @@ class EnergyDatabase:
 
 
 class SQLite3Database:
-    """Read-only database interface for sqlite3 databases.
+    """Database interface for sqlite3 databases.
 
-    Wraps sqlite3 database with square-shaped data, like Hamiltonian and Overlap matrices
-    for model training.
+    Wraps sqlite3 database, retrieves elements from `data` table.
 
     Args:
         filepath (pathlib.Path): path to existing database or path for new database.
@@ -114,7 +113,7 @@ class SQLite3Database:
 
     type = ".db"
 
-    def __init__(self, filepath: Union[pathlib.Path, str], metadata: Optional[DatasetCard] = None) -> None:
+    def __init__(self, filepath: Union[pathlib.Path, str], metadata: Optional[DatasourceCard] = None) -> None:
         if isinstance(filepath, str):
             filepath = pathlib.Path(filepath)
         if filepath.suffix != self.type:
@@ -123,7 +122,8 @@ class SQLite3Database:
         # initialize metadata
         self.desc: Dict[str, str] = None
         self.metadata: Dict[Any, Any] = None
-        self._keys_map: Tuple[List[str], List[str], List[str]] = None
+        self.columns: List[str] = []
+        self._keys_map: Dict[str, str] = {}
         self._dtypes: Dict[str, str] = {}
         self._shapes: Dict[str, str] = {}
 
@@ -132,7 +132,6 @@ class SQLite3Database:
         if not self.filepath.exists():
             logger.info(f"Creating new database: {filepath}")
             self._create(filepath, metadata)
-            # raise FileNotFoundError(f"Database not found: {self.filepath}")
         else:
             # check if `data` table exists
             if "data" not in self._get_tables_list():
@@ -154,8 +153,10 @@ class SQLite3Database:
         if isinstance(idx, int):
             query = self._construct_select(idx)
             cursor = self._get_connection().cursor()
-            raw_data = self._unpack(cursor.execute(query).fetchone())
-            data = {key: raw_data[self._keys_map[-1][i]] for i, key in enumerate(self._keys_map[0])}
+            data = self._unpack(cursor.execute(query).fetchone())
+            # rename keys if needed
+            if self._keys_map != self.columns:
+                data = {new_key: data[old_key] for new_key, old_key in self._keys_map.items()}
             return data
         else:
             return self._get_many(idx)
@@ -173,37 +174,28 @@ class SQLite3Database:
             idx = slice_to_list(idx)
         cursor = self._get_connection().cursor()
         query = self._construct_select(idx)
-        raw_data = [self._unpack(chunk) for chunk in cursor.execute(query).fetchall()]
-        data = [
-            {sample_key: data_chunk[db_key] for sample_key, db_key in zip(self._keys_map[0], self._keys_map[-1])}
-            for data_chunk in raw_data
-        ]
+        data = [self._unpack(chunk) for chunk in cursor.execute(query).fetchall()]
+        if self._keys_map != self.columns:
+            data = [
+                {new_key: data_chunk[old_key] for new_key, old_key in self._keys_map.items()} for data_chunk in data
+            ]
         return data
 
-    def _create(self, filepath: pathlib.Path, metadata: DatasetCard):
+    def _create(self, filepath: pathlib.Path, metadata: DatasourceCard):
         if metadata is None:
-            raise ValueError(f"Can't create table {filepath} without metadata")
+            raise ValueError(f"Can't create table {filepath} without metadata.")
+        if metadata._dtypes is None:
+            raise ValueError("Data types not specified.")
+        if metadata._shapes is None:
+            raise ValueError("Data shapes not specified.")
         cursor = self._get_connection().cursor()
-        col_types = [self._to_sql_type(data_type) for data_type in self._dtypes]
-        tables, db_keys = self._keys_map[1:]
-        sql_schema = {}  # {'table': {'col_name': 'sql_type'}}
-        for idx, table in enumerate(tables):
-            if sql_schema.get(table):
-                sql_schema[table].append({db_keys[idx]: col_types[idx]})
-            else:
-                sql_schema[table] = [db_keys[idx]]
-        for table_name in sql_schema.keys():
-            table_schema = ",\n".join(
-                [f" {col_name} {col_type}" for col_name, col_type in zip(sql_schema[table].items())]
-            )
-            query = f"CREATE TABLE IF NOT EXISTS {table_name} \n (id INTEGER NOT NULL PRIMARY KEY,\n {table_schema})"
-            cursor.execute(query)
-
-    def __setitem__(self, idx, data: Dict[str, np.ndarray]) -> None:
-        pass
-
-    def __delitem__(self, idx) -> None:
-        pass
+        col_types = [self._to_sql_type(data_type) for data_type in metadata._dtypes]
+        table_schema = ",\n".join(
+            [f" {col_name} {col_type}" for col_name, col_type in zip(metadata.columns, col_types)]
+        )
+        query = f"CREATE TABLE IF NOT EXISTS data \n (id INTEGER NOT NULL PRIMARY KEY,\n {table_schema})"
+        cursor.execute(query)
+        self._parse_metadata(metadata)
 
     def __len__(self) -> int:
         """Returns number of rows in database."""
@@ -217,43 +209,42 @@ class SQLite3Database:
             self._connections[key].setbusytimeout(300000)  # 5 minute timeout
         return self._connections[key]
 
-    def _unpack(self, data: Tuple[memoryview]) -> Dict[str, np.ndarray]:
+    def _unpack(self, data: Tuple[bytes]) -> Dict[str, np.ndarray]:
         """Unpacks data from sqlite3 database."""
-        # retrieve column names
         data_dict = {}
-        for idx, key in enumerate(self._keys_map[-1]):
-            dtype = self._dtypes.get(f"{self._keys_map[1][idx]}.{self._keys_map[2][idx]}", None)
-            shape = self._shapes.get(f"{self._keys_map[1][idx]}.{self._keys_map[2][idx]}", None)
-            data_dict[key] = np_from_buf(
+        for idx, col in enumerate(self.columns):
+            dtype = self._dtypes.get(col, None)
+            shape = self._shapes.get(col, None)
+            data_dict[col] = np_from_bytes(
                 data[idx],
-                key,
+                col,
                 dtype=dtype,
                 shape=shape,
             )
         return data_dict
 
     def _pack(self, data: Dict[str, np.ndarray]) -> None:
-        pass
+        for key in data.keys():
+            data[key] = np_to_bytes(data[key])
+        return data
 
     def _insert(self, data) -> None:
-        pass
+        raise NotImplementedError
 
     def _update(self, data, idx) -> None:
-        pass
+        raise NotImplementedError
 
     def _get_table_schema(self, table_name: str) -> List:
         """Returns table schema from sqlite3 database."""
-        keys, columns = [], []
+        columns = []
         conn = self._get_connection()
         schema = conn.pragma(f"table_info({table_name})")
         for entry in schema:
             # TODO: delete this when we delete core hamiltonian column
             if entry[1] in ["id", "C"]:
                 continue
-            keys.append(entry[1])
             columns.append(entry[1])
-        tables = [table_name for _ in range(len(columns))]
-        return [keys, tables, columns]
+        return columns
 
     def _get_tables_list(self) -> List[str]:
         cursor = self._get_connection().cursor()
@@ -261,30 +252,34 @@ class SQLite3Database:
         return tables_list
 
     def _construct_select(self, idx: Union[int, List[int], slice]) -> str:
-        _, tables, columns = self._keys_map
-        keys = ", ".join(f"{table}.{column}" for table, column in zip(tables, columns))
-        tables = ", ".join(f"{table}" for table in set(tables))
         if isinstance(idx, int):
-            return f"SELECT {keys} FROM {tables} WHERE id={idx}"
+            return f"SELECT {self.columns} FROM data WHERE id={idx}"
         else:
-            return f"SELECT {keys} FROM {tables} WHERE id IN ({str(idx)[1:-1]})"
+            return f"SELECT {self.columns} FROM data WHERE id IN ({str(idx)[1:-1]})"
 
     def _construct_insert(self):
-        pass
+        raise NotImplementedError
 
     def _construct_update(self):
-        pass
+        raise NotImplementedError
 
-    def _to_sql_type(self):  # ???
-        pass
+    def _to_sql_type(self, data_type: str):
+        raise NotImplementedError
 
-    def _parse_metadata(self, metadata: DatasetCard) -> None:
+    def _parse_metadata(self, metadata: DatasourceCard) -> None:
         if metadata is None:
             # use full table `data`
             self._keys_map = self._get_table_schema("data")
+            self.columns = self._keys_map
         else:
             self.desc = metadata.desc
             self.metadata = metadata.metadata
+            self.columns = metadata.columns
             self._keys_map = metadata._keys_map
-            self._dtypes = metadata._data_dtypes
-            self._shapes = metadata._data_shapes
+            self._dtypes = metadata._dtypes
+            self._shapes = metadata._shapes
+
+    @property
+    def units(self):
+        units = self.metadata.metadata("units", None)
+        return units

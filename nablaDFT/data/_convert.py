@@ -22,7 +22,7 @@ _default_dtypes = {
 }
 
 
-def _np_to_blob(array: np.ndarray, dtype: np.dtype) -> memoryview:
+def np_to_bytes(array: np.ndarray, dtype: np.dtype) -> memoryview:
     """Convert numpy array to buffer object.
 
     Args:
@@ -83,7 +83,7 @@ def _blob_to_np(buf: bytes, dtype: Optional[np.dtype] = np.float32, shape: Optio
 from_buf_map = {"H": _matrix_from_bytes, "S": _matrix_from_bytes, "C": _matrix_from_bytes}
 
 
-def np_from_buf(buf: bytes, key: str, **kwargs) -> np.ndarray:
+def np_from_bytes(buf: bytes, key: str, **kwargs) -> np.ndarray:
     shape = kwargs.pop("shape", None)
     dtype = kwargs.pop("dtype", np.float32)
     if shape is None:
