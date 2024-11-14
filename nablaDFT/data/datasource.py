@@ -26,6 +26,7 @@ Create new DataBase with the same schema as in downloaded datasource:
 import logging
 import multiprocessing
 import pathlib
+from operator import itemgetter
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import apsw  # way faster than sqlite3
@@ -38,6 +39,9 @@ from ._metadata import DatasourceCard
 from .utils import slice_to_list
 
 logger = logging.getLogger(__name__)
+
+
+sqlite3_datatypes_map = {float: "REAL", int: "INTEGER", str: "TEXT"}
 
 
 class EnergyDatabase:
@@ -130,7 +134,6 @@ class SQLite3Database:
         self._connections = {}
 
         if not self.filepath.exists():
-            logger.info(f"Creating new database: {filepath}")
             self._create(filepath, metadata)
         else:
             # check if `data` table exists
@@ -138,6 +141,7 @@ class SQLite3Database:
                 raise ValueError("Table `data` not found in database")
             # parse sample schema and metadata
             self._parse_metadata(metadata)
+        logger.info(f"Created new database: {filepath}")
 
     def __getitem__(
         self, idx: Union[int, List[int], slice]
@@ -155,11 +159,34 @@ class SQLite3Database:
             cursor = self._get_connection().cursor()
             data = self._unpack(cursor.execute(query).fetchone())
             # rename keys if needed
-            if self._keys_map != self.columns:
+            if self._keys_map != self.columns and self._keys_map:
                 data = {new_key: data[old_key] for new_key, old_key in self._keys_map.items()}
             return data
         else:
             return self._get_many(idx)
+
+    def write(self, data: Union[Dict[str, np.ndarray], List[Dict[str, np.ndarray]]]):
+        if isinstance(data, dict):
+            self._insert(data)
+        elif isinstance(data, list):
+            self._insert_many(data)
+        else:
+            raise TypeError(f"Expected Dict or List[Dict], got {type(data)}")
+
+    def update(
+        self, data: Union[Dict[str, np.ndarray], List[Dict[str, np.ndarray]]], idx: Union[int, slice, List[int]]
+    ):
+        if isinstance(data, dict):
+            data = [data]
+        self._check_data_keys(data)
+        self._update(data, idx)
+
+    def delete(self, idx: Union[int, slice, List]):
+        if isinstance(idx, slice):
+            idx = slice_to_list(idx)
+        query = self._construct_delete(idx)
+        with self._get_connection() as conn:
+            conn.execute(query)
 
     def _get_many(self, idx: Union[List[int], slice]) -> List[Dict[str, np.ndarray]]:
         """Returns unpacked elements from sqlite3 database.
@@ -175,7 +202,8 @@ class SQLite3Database:
         cursor = self._get_connection().cursor()
         query = self._construct_select(idx)
         data = [self._unpack(chunk) for chunk in cursor.execute(query).fetchall()]
-        if self._keys_map != self.columns:
+        # rename keys if needed
+        if self._keys_map != self.columns and self._keys_map:
             data = [
                 {new_key: data_chunk[old_key] for new_key, old_key in self._keys_map.items()} for data_chunk in data
             ]
@@ -188,13 +216,7 @@ class SQLite3Database:
             raise ValueError("Data types not specified.")
         if metadata._shapes is None:
             raise ValueError("Data shapes not specified.")
-        cursor = self._get_connection().cursor()
-        col_types = [self._to_sql_type(data_type) for data_type in metadata._dtypes]
-        table_schema = ",\n".join(
-            [f" {col_name} {col_type}" for col_name, col_type in zip(metadata.columns, col_types)]
-        )
-        query = f"CREATE TABLE IF NOT EXISTS data \n (id INTEGER NOT NULL PRIMARY KEY,\n {table_schema})"
-        cursor.execute(query)
+        self._create_table("data", metadata._dtypes, metadata.columns)
         self._parse_metadata(metadata)
 
     def __len__(self) -> int:
@@ -202,10 +224,10 @@ class SQLite3Database:
         cursor = self._get_connection().cursor()
         return cursor.execute("""SELECT COUNT(*) FROM data""").fetchone()[0]
 
-    def _get_connection(self, flags=apsw.SQLITE_OPEN_READWRITE) -> apsw.Connection:
+    def _get_connection(self) -> apsw.Connection:
         key = multiprocessing.current_process().name
         if key not in self._connections.keys():
-            self._connections[key] = apsw.Connection(str(self.filepath), flags=flags)
+            self._connections[key] = apsw.Connection(str(self.filepath))
             self._connections[key].setbusytimeout(300000)  # 5 minute timeout
         return self._connections[key]
 
@@ -228,11 +250,47 @@ class SQLite3Database:
             data[key] = np_to_bytes(data[key])
         return data
 
-    def _insert(self, data) -> None:
-        raise NotImplementedError
+    def _insert(self, data: Dict[str, np.ndarray]) -> None:
+        if list(data.keys()) != self.columns:
+            no_keys = set(self.columns) - set(data.keys())
+            raise ValueError(f"No key in data: {no_keys}")
+        query = self._construct_insert("data")
+        idx: Tuple = (len(self),)
+        # take data in columns order and add id
+        data: Tuple = idx + itemgetter(*self.columns)(data)
+        # write and commit
+        with self._get_connection() as conn:
+            conn.execute(query, data)
 
-    def _update(self, data, idx) -> None:
-        raise NotImplementedError
+    def _insert_many(self, data: List[Dict[str, np.ndarray]]) -> None:
+        for idx, sample in enumerate(data):
+            if list(sample.keys()) != self.columns:
+                no_keys = set(self.columns) - set(data.keys())
+                raise ValueError(f"No key in data at index {idx}: {no_keys}")
+        query = self._construct_insert("data")
+        idx = tuple(range(len(self), len(self) + len(data)))
+        data: Tuple[Tuple] = tuple([(idx[i],) + itemgetter(*self.columns)(sample) for i, sample in enumerate(data)])
+        with self._get_connection() as conn:
+            conn.executemany(query, data)
+
+    def _update(
+        self, data: Union[Dict[str, np.ndarray], List[Dict[str, np.ndarray]]], idx: Union[int, slice, List]
+    ) -> None:
+        if isinstance(idx, slice):
+            slice_to_list(slice)
+        # check data keys consistency
+        self._create_table("temp", self._dtypes, self.columns)
+        query = self._construct_insert("temp")
+        if isinstance(idx, int):
+            idx = (idx,)
+        else:
+            idx = tuple(idx)
+        data: Tuple[Tuple] = tuple([(idx[i],) + itemgetter(*self.columns)(sample) for i, sample in enumerate(data)])
+        cols_map = ",\n".join([f"data.{col} = temp.{col}" for col in self.columns])
+        with self._get_connection() as conn:
+            conn.executemany(query, data)
+            conn.execute(f"""UPDATE data JOIN temp ON data.id = temp.id SET {cols_map}""")
+            conn.execute("""DROP TABLE temp""")
 
     def _get_table_schema(self, table_name: str) -> List:
         """Returns table schema from sqlite3 database."""
@@ -252,19 +310,43 @@ class SQLite3Database:
         return tables_list
 
     def _construct_select(self, idx: Union[int, List[int], slice]) -> str:
+        cols = ", ".join(self.columns)
         if isinstance(idx, int):
-            return f"SELECT {self.columns} FROM data WHERE id={idx}"
+            return f"SELECT {cols} FROM data WHERE id={idx}"
         else:
-            return f"SELECT {self.columns} FROM data WHERE id IN ({str(idx)[1:-1]})"
+            return f"SELECT {cols} FROM data WHERE id IN ({str(idx)[1:-1]})"
 
-    def _construct_insert(self):
-        raise NotImplementedError
+    def _construct_delete(self, idx: Union[int, List[int], slice]) -> str:
+        if isinstance(idx, int):
+            return f"DELETE FROM data WHERE id={idx}"
+        else:
+            return f"DELETE FROM data WHERE id IN ({str(idx)[1:-1]})"
 
-    def _construct_update(self):
-        raise NotImplementedError
+    def _construct_insert(self, table_name: str):
+        cols = ", ".join(self.columns)
+        query = f"""INSERT INTO {table_name} (id, {cols})
+                    VALUES ({", ".join(["?" for _ in range(len(self.columns) + 1)])})
+                """
+        return query
+
+    def _create_table(self, name: str, dtypes: Dict[str, str], columns: List[str]):
+        col_types = [self._to_sql_type(data_type) for data_type in dtypes]
+        table_schema = ",\n".join([f" {col_name} {col_type}" for col_name, col_type in zip(columns, col_types)])
+        query = f"CREATE TABLE IF NOT EXISTS {name} \n (id INTEGER NOT NULL PRIMARY KEY,\n {table_schema})"
+        with self._get_connection() as conn:
+            conn.execute(query)
+
+    def _check_data_keys(self, data: List[Dict[str, np.ndarray]]):
+        for i, sample in enumerate(data):
+            if list(sample.keys()) != self.columns:
+                no_keys = set(self.columns) - set(data.keys())
+                raise ValueError(f"No key in data at index {i}: {no_keys}")
 
     def _to_sql_type(self, data_type: str):
-        raise NotImplementedError
+        sqlite3_datatype = sqlite3_datatypes_map.get(data_type, None)
+        if sqlite3_datatype is None:
+            sqlite3_datatype = "BLOB"
+        return sqlite3_datatype
 
     def _parse_metadata(self, metadata: DatasourceCard) -> None:
         if metadata is None:
@@ -281,5 +363,5 @@ class SQLite3Database:
 
     @property
     def units(self):
-        units = self.metadata.metadata("units", None)
+        units = self.metadata.metadata.get("units", None)
         return units

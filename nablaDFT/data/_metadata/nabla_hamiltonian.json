@@ -19,7 +19,7 @@
         }
     },
     "columns": ["E", "Z", "R", "F", "H"],
-    "_data_dtypes": {
+    "_dtypes": {
         "E": "float32",
         "Z": "int32",
         "R": "float32",

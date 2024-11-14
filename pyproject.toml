@@ -16,7 +16,8 @@ exclude = [
     "dist",
     "site-packages",
     "venv",
-    "nablaDFT/phisnet"
+    "nablaDFT/phisnet",
+    "nablaDFT/tests"
 ]
 extend-include = ["*.ipynb"]
 line-length = 120
