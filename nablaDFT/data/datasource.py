@@ -167,6 +167,7 @@ class SQLite3Database:
             return self._get_many(idx)
 
     def write(self, data: Union[Dict[str, np.ndarray], List[Dict[str, np.ndarray]]]):
+        self._check_data_keys(data)
         if isinstance(data, dict):
             self._insert(data)
         elif isinstance(data, list):
@@ -217,9 +218,11 @@ class SQLite3Database:
     def _create(self, filepath: pathlib.Path, metadata: DatasourceCard):
         if metadata is None:
             raise ValueError(f"Can't create table {filepath} without metadata.")
-        if metadata._dtypes is None:
+        if not metadata.columns:
+            raise ValueError("Column names not specified.")
+        if not metadata._dtypes:
             raise ValueError("Data types not specified.")
-        if metadata._shapes is None:
+        if not metadata._shapes:
             raise ValueError("Data shapes not specified.")
         self._create_table("data", metadata._dtypes, metadata.columns)
         self._parse_metadata(metadata)
@@ -253,9 +256,6 @@ class SQLite3Database:
         return bytes_dict
 
     def _insert(self, data: Dict[str, np.ndarray], table: str = "data") -> None:
-        if [*data.keys()] != self.columns:
-            no_keys = set(self.columns) - set(data.keys())
-            raise ValueError(f"No key in data: {no_keys}")
         data = self._pack(data)
         query = self._construct_insert(table)
         idx: Tuple = (len(self),)
@@ -270,10 +270,6 @@ class SQLite3Database:
         data: List[Dict[str, np.ndarray]],
         table_name: str = "data",
     ) -> None:
-        for idx, sample in enumerate(data):
-            if list(sample.keys()) != self.columns:
-                no_keys = set(self.columns) - set(data.keys())
-                raise ValueError(f"No key in data at index {idx}: {no_keys}")
         data = [self._pack(sample) for sample in data]
         query = self._construct_insert(table_name)
         data_len = len(data)
@@ -349,9 +345,11 @@ class SQLite3Database:
             conn.execute(query)
 
     def _check_data_keys(self, data: List[Dict[str, np.ndarray]]):
+        if not isinstance(data, list):
+            data = [data]
         for i, sample in enumerate(data):
-            if list(sample.keys()) != self.columns:
-                no_keys = set(self.columns) - set(data.keys())
+            if [*sample.keys()] != self.columns:
+                no_keys = set(self.columns) - set(sample.keys())
                 raise ValueError(f"No key in data at index {i}: {no_keys}")
 
     def _to_sql_type(self, data_type: str):

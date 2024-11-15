@@ -3,7 +3,6 @@
 import json
 from ast import literal_eval
 from dataclasses import dataclass, field
-from itertools import chain
 from typing import Dict, List, Tuple, Union
 
 import numpy as np
@@ -16,7 +15,7 @@ class DatasourceCard:
     Args:
         desc (Optional[Dict]) - dataset description.
         metadata (Optional[Dict]) - dataset metadata.
-        columns (Optional[Dict]) - columns from `data` table.
+        columns (Optional[Dict]) - columns in Datasource.
         _keys_map (Optional[Dict]) - mapping from column names in database to sample's keys.
         _data_dtypes (Optional[Dict]) - mapping from column names in database to data type (e.g. np.float32).
         _data_shapes (Optional[Dict]) - mapping from column names in database to data shape (e.g. (-1, 3)).

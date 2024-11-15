@@ -1,3 +1,4 @@
+import shutil
 from pathlib import Path
 
 import numpy as np
@@ -124,7 +125,7 @@ def test_sqlite_db_create(monkeypatch, tmp_path):
         "columns": ["E", "R", "F", "Z"],
         "_shapes": {"R": (-1, 3), "F": (-1, 3)},
     }
-    new_db = SQLite3Database(Path(tmp_path) / "temp.db", DatasourceCard(**metadata))
+    new_db = SQLite3Database("test.db", DatasourceCard(**metadata))
     assert "data" in new_db._get_tables_list()
     assert len(new_db) == 0
     assert new_db.columns == metadata["columns"]
@@ -137,8 +138,51 @@ def test_sqlite_db_create(monkeypatch, tmp_path):
         "_keys_map": {"y": "E", "pos": "R", "forces": "F", "numbers": "Z"},
         "_shapes": {"R": (-1, 3), "F": (-1, 3)},
     }
-    new_db = SQLite3Database(Path(tmp_path) / "temp.db", DatasourceCard(**metadata))
+    new_db = SQLite3Database("test.db", DatasourceCard(**metadata))
     assert new_db._keys_map == metadata["_keys_map"]
+    monkeypatch.undo()
+
+
+@pytest.mark.data
+def test_sqlite_db_create_fails(monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)
+    # no metadata
+    with pytest.raises(ValueError):
+        SQLite3Database("test.db")
+    # dtypes not specified
+    metadata = {
+        "columns": ["E", "R", "F", "Z"],
+        "_shapes": {"R": (-1, 3), "F": (-1, 3)},
+    }
+    with pytest.raises(ValueError):
+        SQLite3Database("test.db", DatasourceCard(**metadata))
+    # shapes not specified
+    metadata = {
+        "columns": ["E", "R", "F", "Z"],
+        "_dtypes": {"E": np.float32, "R": np.float32, "F": np.float32, "Z": np.int32},
+    }
+    with pytest.raises(ValueError):
+        SQLite3Database("test.db", DatasourceCard(**metadata))
+    # columns not specified
+    metadata = {
+        "_dtypes": {"E": np.float32, "R": np.float32, "F": np.float32, "Z": np.int32},
+        "_shapes": {"R": (-1, 3), "F": (-1, 3)},
+    }
+    with pytest.raises(ValueError):
+        SQLite3Database("test.db", DatasourceCard(**metadata))
+    monkeypatch.undo()
+
+
+@pytest.mark.data
+def test_sqlite_db_open_fail(monkeypatch, tmp_path, datapath_hamiltonian):
+    monkeypatch.chdir(tmp_path)
+    shutil.copy(datapath_hamiltonian, Path(tmp_path) / "test.db")
+    temp_db = SQLite3Database(Path(tmp_path) / "test.db")
+    with temp_db._get_connection() as conn:
+        conn.execute("DROP TABLE data")
+    # reopen db, check exception
+    with pytest.raises(ValueError):
+        SQLite3Database(Path(tmp_path) / "test.db")
     monkeypatch.undo()
 
 
@@ -150,7 +194,7 @@ def test_sqlite_db_insert(monkeypatch, tmp_path):
         "columns": ["E", "R", "F", "Z"],
         "_shapes": {"R": (-1, 3), "F": (-1, 3)},
     }
-    new_db = SQLite3Database(Path(tmp_path) / "temp.db", DatasourceCard(**metadata))
+    new_db = SQLite3Database("test.db", DatasourceCard(**metadata))
     new_data = [
         {
             "E": np.random.rand(1),
@@ -177,6 +221,28 @@ def test_sqlite_db_insert(monkeypatch, tmp_path):
 
 
 @pytest.mark.data
+def test_sqlite_db_insert_update_fail(monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)
+    metadata = {
+        "_dtypes": {"E": np.float32, "R": np.float32, "F": np.float32, "Z": np.int32},
+        "columns": ["E", "R", "F", "Z"],
+        "_shapes": {"R": (-1, 3), "F": (-1, 3)},
+    }
+    new_db = SQLite3Database("test.db", DatasourceCard(**metadata))
+    new_data = {
+        "E": np.random.rand(1),
+        "R": np.random.rand(25, 3),
+        "Z": np.random.randint(1, size=25),
+    }
+    with pytest.raises(ValueError):
+        new_db.write(new_data)
+    with pytest.raises(ValueError):
+        new_db.update(new_data, 0)
+    # insufficient keys
+    monkeypatch.undo()
+
+
+@pytest.mark.data
 def test_sqlite_db_update(monkeypatch, tmp_path):
     monkeypatch.chdir(tmp_path)
     metadata = {
@@ -184,7 +250,7 @@ def test_sqlite_db_update(monkeypatch, tmp_path):
         "columns": ["E", "R", "F", "Z"],
         "_shapes": {"R": (-1, 3), "F": (-1, 3)},
     }
-    new_db = SQLite3Database(Path(tmp_path) / "temp.db", DatasourceCard(**metadata))
+    new_db = SQLite3Database("test.db", DatasourceCard(**metadata))
     new_data = [
         {
             "E": np.random.rand(1),
@@ -247,7 +313,7 @@ def test_sqlite_db_delete(monkeypatch, tmp_path):
         "columns": ["E", "R", "F", "Z"],
         "_shapes": {"R": (-1, 3), "F": (-1, 3)},
     }
-    new_db = SQLite3Database(Path(tmp_path) / "temp.db", DatasourceCard(**metadata))
+    new_db = SQLite3Database("test.db", DatasourceCard(**metadata))
     new_data = [
         {
             "E": np.random.rand(1),

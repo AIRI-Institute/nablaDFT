@@ -1,13 +1,13 @@
- # Dataflow
+# TESTS
+  - TODO: write tests for DatasourceCard.
+  - TODO: write tests for convert functions.
+  - TODO: write tests for PyGDataset and PLDataModule.
 
-  - TODO: finalize DatasetCard.
-  - TODO: write tests for datasources and dataset interfaces.
+ # Dataflow
   - TODO: delegate download process to dataset registry.
   - TODO: add retry to download
   - TODO (future): benchmark LMDB database for energy and hamiltonian split.
-
   - TODO: do not forget to update schema for hamiltonian databases.
-
   
 # Models
 
