@@ -22,7 +22,7 @@ _default_dtypes = {
 }
 
 
-def np_to_bytes(array: np.ndarray, dtype: np.dtype) -> memoryview:
+def np_to_bytes(array: np.ndarray, dtype: np.dtype) -> bytes:
     """Convert numpy array to buffer object.
 
     Args:
@@ -34,11 +34,12 @@ def np_to_bytes(array: np.ndarray, dtype: np.dtype) -> memoryview:
     """
     if array is None:
         return None
-    if array.dtype == dtype:
+    # explicitly check that elements class is the same as desired dtype
+    if array.dtype.type != dtype:
         array = array.astype(dtype)
     if not np.little_endian:
         array = array.byteswap()
-    return memoryview(np.ascontiguousarray(array))
+    return array.tobytes()
 
 
 def _matrix_from_bytes(buf: bytes, dtype: np.dtype, **kwargs) -> np.ndarray:
@@ -91,7 +92,7 @@ def np_from_bytes(buf: bytes, key: str, **kwargs) -> np.ndarray:
     if dtype is None:
         dtype = _default_dtypes.get(key)
     # floats and integers must be converted to 0-dimensional np.arrays
-    if isinstance(buf, int) or isinstance(buf, float):
+    if isinstance(buf, int) or isinstance(buf, float) or isinstance(buf, str):
         return np.array(buf, dtype=dtype).copy()
     # use default shape or from kwargs
     if from_buf_map.get(key):

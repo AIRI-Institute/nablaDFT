@@ -3,6 +3,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 from nablaDFT.data import EnergyDatabase, SQLite3Database
+from nablaDFT.data._convert import _default_dtypes, _default_shapes
 from nablaDFT.data._metadata import DatasourceCard
 
 
@@ -47,6 +48,8 @@ def test_sqlite_db_get(hamiltonian_metadata: DatasourceCard, datapath_hamiltonia
     for key in sample.keys():
         dtype = np.dtype(db._dtypes[db._keys_map[key]])
         assert sample[key].dtype == dtype
+        if db._shapes.get(key, None):
+            assert sample[key].shape == _default_shapes[key]
     # slicing
     samples = db[:5]
     assert isinstance(samples, list)
@@ -56,6 +59,8 @@ def test_sqlite_db_get(hamiltonian_metadata: DatasourceCard, datapath_hamiltonia
         for key in sample.keys():
             dtype = np.dtype(db._dtypes[db._keys_map[key]])
             assert sample[key].dtype == dtype
+            if db._shapes.get(key, None):
+                assert sample[key].shape == _default_shapes[key]
     # indexing with list
     samples = db[[2, 15, 8]]
     assert isinstance(samples, list)
@@ -65,6 +70,8 @@ def test_sqlite_db_get(hamiltonian_metadata: DatasourceCard, datapath_hamiltonia
         for key in sample.keys():
             dtype = np.dtype(db._dtypes[db._keys_map[key]])
             assert sample[key].dtype == dtype
+            if db._shapes.get(key, None):
+                assert sample[key].shape == _default_shapes[key]
 
 
 @pytest.mark.data
@@ -73,3 +80,106 @@ def test_sqlite_db_get_no_meta(datapath_hamiltonian):
     db = SQLite3Database(datapath_hamiltonian)
     # check that columns is all cols from data table
     assert db.columns == ["Z", "R", "E", "F", "H", "S"]
+    assert [*db._keys_map.keys()] == [*db._keys_map.values()]
+    sample = db[0]
+    assert isinstance(sample, dict)
+    assert sample.keys() == db._keys_map.keys()
+    for key in sample.keys():
+        dtype = np.dtype(_default_dtypes.get(key, None))
+        assert sample[key].dtype == dtype
+        if _default_shapes.get(key, None):
+            # check axis number
+            assert len(sample[key].shape) == len(_default_shapes[key])
+    # slicing
+    samples = db[:5]
+    assert isinstance(samples, list)
+    assert len(samples) == 5
+    for sample in samples:
+        assert sample.keys() == db._keys_map.keys()
+        for key in sample.keys():
+            dtype = np.dtype(_default_dtypes.get(key, None))
+            assert sample[key].dtype == dtype
+            if _default_shapes.get(key, None):
+                assert len(sample[key].shape) == len(_default_shapes[key])
+    # indexing with list
+    samples = db[[2, 15, 8]]
+    assert isinstance(samples, list)
+    assert len(samples) == 3
+    for sample in samples:
+        assert sample.keys() == db._keys_map.keys()
+        for key in sample.keys():
+            dtype = np.dtype(_default_dtypes.get(key, None))
+            assert sample[key].dtype == dtype
+            if _default_shapes.get(key, None):
+                assert len(sample[key].shape) == len(_default_shapes[key])
+
+
+@pytest.mark.data
+def test_sqlite_db_create(monkeypatch, tmp_path):
+    """Test database creation from minimal metadata."""
+    monkeypatch.chdir(tmp_path)
+    # case 1
+    metadata = {
+        "_dtypes": _default_dtypes,
+        "columns": ["E", "R", "F", "Z"],
+        "_shapes": {"R": (-1, 3), "F": (-1, 3)},
+    }
+    new_db = SQLite3Database(Path(tmp_path) / "temp.db", DatasourceCard(**metadata))
+    assert "data" in new_db._get_tables_list()
+    assert len(new_db) == 0
+    assert new_db.columns == metadata["columns"]
+    assert [*new_db._keys_map.keys()] == [*new_db._keys_map.values()]
+    assert new_db._keys_map == {key: key for key in metadata["columns"]}
+    # case 2
+    metadata = {
+        "_dtypes": _default_dtypes,
+        "columns": ["E", "R", "F", "Z"],
+        "_keys_map": {"y": "E", "pos": "R", "forces": "F", "numbers": "Z"},
+        "_shapes": {"R": (-1, 3), "F": (-1, 3)},
+    }
+    new_db = SQLite3Database(Path(tmp_path) / "temp.db", DatasourceCard(**metadata))
+    assert new_db._keys_map == metadata["_keys_map"]
+    monkeypatch.undo()
+
+
+@pytest.mark.data
+def test_sqlite_db_insert(monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)
+    metadata = {
+        "_dtypes": {"E": np.float32, "R": np.float32, "F": np.float32, "Z": np.int32},
+        "columns": ["E", "R", "F", "Z"],
+        "_shapes": {"R": (-1, 3), "F": (-1, 3)},
+    }
+    new_db = SQLite3Database(Path(tmp_path) / "temp.db", DatasourceCard(**metadata))
+    new_data = [
+        {
+            "E": np.random.rand(1),  # .astype("float32"),
+            "R": np.random.rand(25, 3),  # .astype("float32"),
+            "F": np.random.rand(25, 3),  # .astype("float32"),
+            "Z": np.random.randint(1, size=25),  # .astype("int32"),
+        }
+        for _ in range(10)
+    ]
+    # write single dict
+    new_db.write(new_data[0])
+    assert len(new_db) == 1
+    sample = new_db[0]
+    for key in new_data[0].keys():
+        assert np.allclose(new_data[0][key], sample[key])
+    # write list of dicts
+    new_db.write(new_data)
+    assert len(new_db) == 11
+    for i in range(11):
+        sample = new_db[i]
+        for key in new_data[0].keys():
+            assert np.allclose(new_data[i][key], sample[key])
+
+
+@pytest.mark.data
+def test_sqlite_db_update(monkeypatch, tmp_path):
+    pass
+
+
+@pytest.mark.data
+def test_sqlite_db_delete(monkeypatch, tmp_path):
+    pass

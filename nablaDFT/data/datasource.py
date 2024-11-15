@@ -26,6 +26,7 @@ Create new DataBase with the same schema as in downloaded datasource:
 import logging
 import multiprocessing
 import pathlib
+from copy import deepcopy
 from operator import itemgetter
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -125,11 +126,11 @@ class SQLite3Database:
         self.filepath = filepath.absolute()
         # initialize metadata
         self.desc: Dict[str, str] = None
-        self.metadata: Dict[Any, Any] = None
+        self.metadata: Dict[str, Any] = None
         self.columns: List[str] = []
         self._keys_map: Dict[str, str] = {}
-        self._dtypes: Dict[str, str] = {}
-        self._shapes: Dict[str, str] = {}
+        self._dtypes: Dict[str, np.dtype] = {}
+        self._shapes: Dict[str, tuple] = {}
 
         self._connections = {}
 
@@ -159,7 +160,7 @@ class SQLite3Database:
             cursor = self._get_connection().cursor()
             data = self._unpack(cursor.execute(query).fetchone())
             # rename keys if needed
-            if self._keys_map != self.columns and self._keys_map:
+            if self._keys_map != self.columns:
                 data = {new_key: data[old_key] for new_key, old_key in self._keys_map.items()}
             return data
         else:
@@ -203,7 +204,7 @@ class SQLite3Database:
         query = self._construct_select(idx)
         data = [self._unpack(chunk) for chunk in cursor.execute(query).fetchall()]
         # rename keys if needed
-        if self._keys_map != self.columns and self._keys_map:
+        if self._keys_map != self.columns:
             data = [
                 {new_key: data_chunk[old_key] for new_key, old_key in self._keys_map.items()} for data_chunk in data
             ]
@@ -245,15 +246,18 @@ class SQLite3Database:
             )
         return data_dict
 
-    def _pack(self, data: Dict[str, np.ndarray]) -> None:
+    def _pack(self, data: Dict[str, np.ndarray]) -> Dict[str, bytes]:
+        bytes_dict = {}
         for key in data.keys():
-            data[key] = np_to_bytes(data[key])
-        return data
+            dtype = self._dtypes.get(key, None)
+            bytes_dict[key] = np_to_bytes(data[key], dtype=dtype)
+        return bytes_dict
 
     def _insert(self, data: Dict[str, np.ndarray]) -> None:
-        if list(data.keys()) != self.columns:
+        if [*data.keys()] != self.columns:
             no_keys = set(self.columns) - set(data.keys())
             raise ValueError(f"No key in data: {no_keys}")
+        data = self._pack(data)
         query = self._construct_insert("data")
         idx: Tuple = (len(self),)
         # take data in columns order and add id
@@ -267,8 +271,10 @@ class SQLite3Database:
             if list(sample.keys()) != self.columns:
                 no_keys = set(self.columns) - set(data.keys())
                 raise ValueError(f"No key in data at index {idx}: {no_keys}")
+        data = [self._pack(sample) for sample in data]
         query = self._construct_insert("data")
         idx = tuple(range(len(self), len(self) + len(data)))
+        # take data in columns order and add id
         data: Tuple[Tuple] = tuple([(idx[i],) + itemgetter(*self.columns)(sample) for i, sample in enumerate(data)])
         with self._get_connection() as conn:
             conn.executemany(query, data)
@@ -351,13 +357,16 @@ class SQLite3Database:
     def _parse_metadata(self, metadata: DatasourceCard) -> None:
         if metadata is None:
             # use full table `data`
-            self._keys_map = self._get_table_schema("data")
-            self.columns = self._keys_map
+            self.columns = self._get_table_schema("data")
+            self._keys_map = {key: key for key in self.columns}
         else:
             self.desc = metadata.desc
             self.metadata = metadata.metadata
             self.columns = metadata.columns
-            self._keys_map = metadata._keys_map
+            if metadata._keys_map:
+                self._keys_map = metadata._keys_map
+            else:
+                self._keys_map = {key: key for key in self.columns}
             self._dtypes = metadata._dtypes
             self._shapes = metadata._shapes
 
@@ -365,3 +374,8 @@ class SQLite3Database:
     def units(self):
         units = self.metadata.metadata.get("units", None)
         return units
+
+    @property
+    def method(self):
+        method = self.metadata.metadata.get("method", None)
+        return method

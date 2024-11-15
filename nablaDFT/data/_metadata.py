@@ -3,7 +3,8 @@
 import json
 from ast import literal_eval
 from dataclasses import dataclass, field
-from typing import Dict, List, Tuple
+from itertools import chain
+from typing import Dict, List, Tuple, Union
 
 import numpy as np
 
@@ -41,18 +42,33 @@ class DatasourceCard:
 
 
 # move to _metadata.py
-def _parse_dtypes(dtypes_desc: Dict[str, str]) -> Dict[str, np.dtype]:
+def _parse_dtypes(dtypes_desc: Dict[str, Union[str, np.dtype]]) -> Dict[str, np.dtype]:
     """Returns dtypes from metadata mapping from sample keys to numpy dtypes."""
     dtypes = {}
     for key, value in dtypes_desc.items():
-        dtypes[key] = np.dtype(value)
+        if isinstance(value, str):
+            if value in ["str", "int", "float"]:
+                dtypes[key] = value
+            else:
+                dtypes[key] = np.dtype(value)
+        elif isinstance(value, np.dtype):
+            dtypes[key] = value
+        elif issubclass(value, np.generic):
+            dtypes[key] = value
+        else:
+            raise ValueError(f"Expected scalar numpy, string, int or float, got {type(value)}")
     return dtypes
 
 
 # move to _metadata.py
-def _parse_shapes(shapes_desc: Dict[str, str]) -> Dict[str, tuple]:
+def _parse_shapes(shapes_desc: Dict[str, Union[str, tuple]]) -> Dict[str, tuple]:
     """Returns shapes from metadata mapping from sample keys to numpy dtypes."""
     shapes = {}
     for key, value in shapes_desc.items():
-        shapes[key] = literal_eval(value)
+        if isinstance(value, str):
+            shapes[key] = literal_eval(value)
+        elif isinstance(value, tuple):
+            shapes[key] = value
+        else:
+            raise ValueError(f"Expected tuple or string, got {type(value)}")
     return shapes
