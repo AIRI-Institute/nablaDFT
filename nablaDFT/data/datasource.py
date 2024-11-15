@@ -210,6 +210,10 @@ class SQLite3Database:
             ]
         return data
 
+    def __len__(self) -> int:
+        """Returns number of rows in database."""
+        return self._table_len("data")
+
     def _create(self, filepath: pathlib.Path, metadata: DatasourceCard):
         if metadata is None:
             raise ValueError(f"Can't create table {filepath} without metadata.")
@@ -219,11 +223,6 @@ class SQLite3Database:
             raise ValueError("Data shapes not specified.")
         self._create_table("data", metadata._dtypes, metadata.columns)
         self._parse_metadata(metadata)
-
-    def __len__(self) -> int:
-        """Returns number of rows in database."""
-        cursor = self._get_connection().cursor()
-        return cursor.execute("""SELECT COUNT(*) FROM data""").fetchone()[0]
 
     def _get_connection(self) -> apsw.Connection:
         key = multiprocessing.current_process().name
@@ -253,12 +252,12 @@ class SQLite3Database:
             bytes_dict[key] = np_to_bytes(data[key], dtype=dtype)
         return bytes_dict
 
-    def _insert(self, data: Dict[str, np.ndarray]) -> None:
+    def _insert(self, data: Dict[str, np.ndarray], table: str = "data") -> None:
         if [*data.keys()] != self.columns:
             no_keys = set(self.columns) - set(data.keys())
             raise ValueError(f"No key in data: {no_keys}")
         data = self._pack(data)
-        query = self._construct_insert("data")
+        query = self._construct_insert(table)
         idx: Tuple = (len(self),)
         # take data in columns order and add id
         data: Tuple = idx + itemgetter(*self.columns)(data)
@@ -266,14 +265,20 @@ class SQLite3Database:
         with self._get_connection() as conn:
             conn.execute(query, data)
 
-    def _insert_many(self, data: List[Dict[str, np.ndarray]]) -> None:
+    def _insert_many(
+        self,
+        data: List[Dict[str, np.ndarray]],
+        table_name: str = "data",
+    ) -> None:
         for idx, sample in enumerate(data):
             if list(sample.keys()) != self.columns:
                 no_keys = set(self.columns) - set(data.keys())
                 raise ValueError(f"No key in data at index {idx}: {no_keys}")
         data = [self._pack(sample) for sample in data]
-        query = self._construct_insert("data")
-        idx = tuple(range(len(self), len(self) + len(data)))
+        query = self._construct_insert(table_name)
+        data_len = len(data)
+        table_len = self._table_len(table_name)
+        idx = tuple(range(table_len, table_len + data_len))
         # take data in columns order and add id
         data: Tuple[Tuple] = tuple([(idx[i],) + itemgetter(*self.columns)(sample) for i, sample in enumerate(data)])
         with self._get_connection() as conn:
@@ -283,7 +288,7 @@ class SQLite3Database:
         self, data: Union[Dict[str, np.ndarray], List[Dict[str, np.ndarray]]], idx: Union[int, slice, List]
     ) -> None:
         if isinstance(idx, slice):
-            slice_to_list(slice)
+            idx = slice_to_list(idx)
         # check data keys consistency
         self._create_table("temp", self._dtypes, self.columns)
         query = self._construct_insert("temp")
@@ -291,11 +296,12 @@ class SQLite3Database:
             idx = (idx,)
         else:
             idx = tuple(idx)
+        data = [self._pack(sample) for sample in data]
         data: Tuple[Tuple] = tuple([(idx[i],) + itemgetter(*self.columns)(sample) for i, sample in enumerate(data)])
-        cols_map = ",\n".join([f"data.{col} = temp.{col}" for col in self.columns])
+        cols_map = ",\n".join([f"{col} = temp.{col}" for col in self.columns])
         with self._get_connection() as conn:
             conn.executemany(query, data)
-            conn.execute(f"""UPDATE data JOIN temp ON data.id = temp.id SET {cols_map}""")
+            conn.execute(f"""UPDATE data\nSET\n{cols_map}\nFROM temp WHERE data.id == temp.id""")
             conn.execute("""DROP TABLE temp""")
 
     def _get_table_schema(self, table_name: str) -> List:
@@ -369,6 +375,10 @@ class SQLite3Database:
                 self._keys_map = {key: key for key in self.columns}
             self._dtypes = metadata._dtypes
             self._shapes = metadata._shapes
+
+    def _table_len(self, table_name: str):
+        cursor = self._get_connection().cursor()
+        return cursor.execute(f"""SELECT COUNT(*) FROM {table_name}""").fetchone()[0]
 
     @property
     def units(self):

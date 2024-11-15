@@ -153,10 +153,10 @@ def test_sqlite_db_insert(monkeypatch, tmp_path):
     new_db = SQLite3Database(Path(tmp_path) / "temp.db", DatasourceCard(**metadata))
     new_data = [
         {
-            "E": np.random.rand(1),  # .astype("float32"),
-            "R": np.random.rand(25, 3),  # .astype("float32"),
-            "F": np.random.rand(25, 3),  # .astype("float32"),
-            "Z": np.random.randint(1, size=25),  # .astype("int32"),
+            "E": np.random.rand(1),
+            "R": np.random.rand(25, 3),
+            "F": np.random.rand(25, 3),
+            "Z": np.random.randint(1, size=25),
         }
         for _ in range(10)
     ]
@@ -167,19 +167,104 @@ def test_sqlite_db_insert(monkeypatch, tmp_path):
     for key in new_data[0].keys():
         assert np.allclose(new_data[0][key], sample[key])
     # write list of dicts
-    new_db.write(new_data)
-    assert len(new_db) == 11
-    for i in range(11):
+    new_db.write(new_data[1:])
+    assert len(new_db) == 10
+    for i in range(10):
         sample = new_db[i]
         for key in new_data[0].keys():
             assert np.allclose(new_data[i][key], sample[key])
+    monkeypatch.undo()
 
 
 @pytest.mark.data
 def test_sqlite_db_update(monkeypatch, tmp_path):
-    pass
+    monkeypatch.chdir(tmp_path)
+    metadata = {
+        "_dtypes": {"E": np.float32, "R": np.float32, "F": np.float32, "Z": np.int32},
+        "columns": ["E", "R", "F", "Z"],
+        "_shapes": {"R": (-1, 3), "F": (-1, 3)},
+    }
+    new_db = SQLite3Database(Path(tmp_path) / "temp.db", DatasourceCard(**metadata))
+    new_data = [
+        {
+            "E": np.random.rand(1),
+            "R": np.random.rand(25, 3),
+            "F": np.random.rand(25, 3),
+            "Z": np.random.randint(1, size=25),
+        }
+        for _ in range(10)
+    ]
+    new_db.write(new_data)
+    update_data = {
+        "E": np.random.rand(1),
+        "R": np.random.rand(25, 3),
+        "F": np.random.rand(25, 3),
+        "Z": np.random.randint(1, size=25),
+    }
+    # update single row
+    new_db.update(update_data, 4)
+    sample = new_db[4]
+    for key in sample.keys():
+        assert np.allclose(sample[key], update_data[key])
+    # update with slice
+    update_data = [
+        {
+            "E": np.random.rand(1),
+            "R": np.random.rand(25, 3),
+            "F": np.random.rand(25, 3),
+            "Z": np.random.randint(1, size=25),
+        }
+        for _ in range(3)
+    ]
+    new_db.update(update_data, slice(0, 3, 1))
+    for i in [0, 1, 2]:
+        sample = new_db[i]
+        for key in sample.keys():
+            assert np.allclose(sample[key], update_data[i][key])
+    # update with list idx
+    update_data = [
+        {
+            "E": np.random.rand(1),
+            "R": np.random.rand(25, 3),
+            "F": np.random.rand(25, 3),
+            "Z": np.random.randint(1, size=25),
+        }
+        for _ in range(3)
+    ]
+    new_db.update(update_data, [3, 4, 5])
+    for i, idx in enumerate([3, 4, 5]):
+        sample = new_db[idx]
+        for key in sample.keys():
+            assert np.allclose(sample[key], update_data[i][key])
+    monkeypatch.undo()
 
 
 @pytest.mark.data
 def test_sqlite_db_delete(monkeypatch, tmp_path):
-    pass
+    monkeypatch.chdir(tmp_path)
+    metadata = {
+        "_dtypes": {"E": np.float32, "R": np.float32, "F": np.float32, "Z": np.int32},
+        "columns": ["E", "R", "F", "Z"],
+        "_shapes": {"R": (-1, 3), "F": (-1, 3)},
+    }
+    new_db = SQLite3Database(Path(tmp_path) / "temp.db", DatasourceCard(**metadata))
+    new_data = [
+        {
+            "E": np.random.rand(1),
+            "R": np.random.rand(25, 3),
+            "F": np.random.rand(25, 3),
+            "Z": np.random.randint(1, size=25),
+        }
+        for _ in range(10)
+    ]
+    new_db.write(new_data)
+    # delete one row
+    new_db.delete(9)
+    assert len(new_db) == 9
+    # delete slice
+    new_db.delete(slice(5, 9, 1))
+    assert len(new_db) == 5
+    # delete with index list
+    new_db.delete([0, 1, 2, 3, 4])
+    assert len(new_db) == 0
+    monkeypatch.undo()
