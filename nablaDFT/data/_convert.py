@@ -103,7 +103,7 @@ def np_from_bytes(buf: bytes, key: str, **kwargs) -> np.ndarray:
 
 def to_pyg_data(sample: Union[List[Dict[str, SampleType]], Dict[str, SampleType]]) -> Union[List[Data], Data]:
     """Convert single or list of samples to torch.geometric.data.Data object."""
-    if isinstance(sample, List):
+    if isinstance(sample, list):
         return [Data(**default_convert(data)) for data in sample]
     else:
         return Data(**default_convert(sample))

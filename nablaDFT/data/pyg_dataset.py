@@ -142,8 +142,8 @@ class PyGDataset(InMemoryDataset):
         """
         if isinstance(idxs, slice):
             idxs = slice_to_list(idxs)
-        if len(self.datasources) == 0:
-            return self.datasources[0][idxs]
+        if len(self.datasources) == 1:
+            return to_pyg_data(self.datasources[0][idxs])
         else:
             raw_data = [datasource[idxs] for datasource in self.datasources]
             data = to_pyg_data(merge_samples(raw_data))

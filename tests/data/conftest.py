@@ -2,6 +2,7 @@ from pathlib import Path
 
 import nablaDFT
 import pytest
+from nablaDFT.data import EnergyDatabase, SQLite3Database
 from nablaDFT.data._metadata import DatasourceCard
 
 
@@ -27,3 +28,13 @@ def datapath_energy():
 def datapath_hamiltonian():
     datapath = Path(nablaDFT.__path__[0]) / "../tests/test_data/hamiltonian.db"
     return datapath
+
+
+@pytest.fixture()
+def test_energy_db(datapath_energy, energy_metadata):
+    return EnergyDatabase(datapath_energy, energy_metadata)
+
+
+@pytest.fixture()
+def test_hamiltonian_db(datapath_hamiltonian, hamiltonian_metadata):
+    return SQLite3Database(datapath_hamiltonian, hamiltonian_metadata)

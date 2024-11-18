@@ -4,7 +4,7 @@ import torch_geometric as pyg
 from torch.utils.data._utils.collate import default_collate_fn_map
 
 from ._collate import _collate_pyg_batch
-from .datasource import EnergyDatabase, SQLite3Database
+from .datasource import Datasource, EnergyDatabase, SQLite3Database
 from .hamiltonian_dataset import (
     HamiltonianDatabase,
     HamiltonianDataset,
@@ -37,4 +37,6 @@ __all__ = [
     "TorchDataset",
     "PyGDataset",
     "PLDataModule",
+    # umbrella type for typing
+    "Datasource",
 ]

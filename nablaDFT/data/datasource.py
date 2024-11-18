@@ -26,7 +26,6 @@ Create new DataBase with the same schema as in downloaded datasource:
 import logging
 import multiprocessing
 import pathlib
-from copy import deepcopy
 from operator import itemgetter
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -57,6 +56,7 @@ class EnergyDatabase:
     """
 
     type = "db"  # only sqlite3 databases
+    _keys_map = {"z": "z", "pos": "pos", "forces": "forces", "y": "y"}
 
     def __init__(self, filepath: Union[pathlib.Path, str], metadata: Optional[DatasourceCard] = None) -> None:
         if isinstance(filepath, str):
@@ -387,3 +387,6 @@ class SQLite3Database:
     def method(self):
         method = self.metadata.metadata.get("method", None)
         return method
+
+
+Datasource = Union[EnergyDatabase, SQLite3Database]

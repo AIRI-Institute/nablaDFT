@@ -18,7 +18,7 @@ SQUARE_SHAPED_KEYS = [
 ]
 """Keys with data presented in square matrix form.
 
-Keys will be separated differently by collate functions to preventing
+Keys will be separated from batch by collate functions to prevent
 attempts to concatenate (torch_geometric) or stack (torch) square matrices
 with different shapes.
 """
