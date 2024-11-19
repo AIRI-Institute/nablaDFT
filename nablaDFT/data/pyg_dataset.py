@@ -68,7 +68,8 @@ class PyGDataset(InMemoryDataset):
 
     @property
     def processed_file_names(self) -> List[str]:
-        return [f"{datasource.filepath.stem}_processed.pt" for datasource in self.datasources]
+        name = "_".join([datasource.filepath.stem for datasource in self.datasources])
+        return [f"{name}_processed.pt"]
 
     @property
     def raw_dir(self) -> List[pathlib.Path]:

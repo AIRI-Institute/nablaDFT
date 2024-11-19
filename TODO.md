@@ -1,7 +1,8 @@
 # TESTS
   - TODO: write tests for DatasourceCard.
   - TODO: write tests for convert functions.
-  - TODO: write tests for PyGDataset and PLDataModule.
+  - TODO: write tests for PLDataModule.
+  - TODO: PyGDataset(in_memory=True) doesn't work for multi-index get!!! i think it's time to implement get in PyGDataset
 
  # Dataflow
   - TODO: delegate download process to dataset registry.
