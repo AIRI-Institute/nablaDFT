@@ -31,7 +31,7 @@ from .utils import check_ds_keys_map, check_ds_len, merge_samples, slice_to_list
 logger = logging.getLogger(__name__)
 
 
-IndexType = Union[int, slice, torch.Tensor, np.ndarray, List]
+IndexType = Union[int, slice, List]
 SampleType = Union[torch.Tensor, np.ndarray]
 
 
@@ -94,12 +94,12 @@ class PyGDataset(InMemoryDataset):
         self.datasources = datasources
         self.in_memory = in_memory
         super().__init__(None, transform, pre_transform, pre_filter, False)
-
+        # TODO: just drop data and slices, instead separate each element and save it to data_list
+        # TODO: sampling will be easy with data_list
         if in_memory:
-            for path in self.processed_paths:
-                data, slices = torch.load(path)
-                self.data = data
-                self.slices = slices
+            data, slices = torch.load(self.processed_paths[0])
+            self.data = data
+            self.slices = slices
 
     def process(self):
         samples = []
@@ -114,43 +114,46 @@ class PyGDataset(InMemoryDataset):
 
         if self.pre_transform is not None:
             samples = [self.pre_transform(data) for data in samples]
+        # TODO: maybe we even do not need to collate?
+        # TODO: instead just fill self.data_list
         data, slices, _ = collate_pyg(samples, increment=False, add_batch=False)
         torch.save((data, slices), self.processed_paths[0])
         logger.info(f"Saved processed dataset: {self.processed_paths[0]}")
 
     def __getitem__(self, idx: IndexType) -> BaseData:
         """Retrieve elements from dataset."""
-        if self.in_memory:
-            return super().get(idx)  # just call get from InMemoryDataset
-        else:
-            if (
-                isinstance(idx, (int, np.integer))
-                or (isinstance(idx, torch.Tensor) and idx.dim() == 0)
-                or (isinstance(idx, np.ndarray) and np.isscalar(idx))
-            ):
+        if isinstance(idx, int):
+            if self.in_memory:
+                # TODO: make this self.data_list[idx]
+                return super().get(idx)  # just call get from InMemoryDataset
+            else:
                 data = {}
                 for datasource in self.datasources:
                     data.update(datasource[idx])
                     data = to_pyg_data(data)
                     data = data if self.transform is None else self.transform(data)
                     return data
-            else:
-                return self.__getitems__(idx)
+        else:
+            return self.__getitems__(idx)
 
     def __getitems__(self, idxs: Union[slice, List[int]]) -> List[Dict[str, torch.Tensor]]:
         """Method for multiple samples retrieval.
 
         Used by pytorch fetcher.
         """
+        # TODO: write multi-index for in_memory with data_list
         if isinstance(idxs, slice):
             idxs = slice_to_list(idxs)
-        if len(self.datasources) == 1:
-            return to_pyg_data(self.datasources[0][idxs])
+        if self.in_memory:
+            pass
         else:
-            raw_data = [datasource[idxs] for datasource in self.datasources]
-            data = to_pyg_data(merge_samples(raw_data))
-            data = [sample if self.transform is None else self.transform(sample) for sample in data]
-            return data
+            if len(self.datasources) == 1:
+                return to_pyg_data(self.datasources[0][idxs])
+            else:
+                raw_data = [datasource[idxs] for datasource in self.datasources]
+                data = to_pyg_data(merge_samples(raw_data))
+                data = [sample if self.transform is None else self.transform(sample) for sample in data]
+                return data
 
     def __len__(self):
         """Returns length of dataset."""
