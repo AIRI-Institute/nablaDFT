@@ -46,7 +46,6 @@ def collate_pyg(
     *,
     increment: bool = False,
     add_batch: bool = False,
-    collate_fn_map: Optional[Dict[Union[Type, Tuple[Type, ...]], Callable]] = None,
 ) -> List[Dict[str, torch.Tensor]]:
     """Collates list of torch_geometric.data.Data objects for pytorch_geometric.data.InMemoryDataset format.
 

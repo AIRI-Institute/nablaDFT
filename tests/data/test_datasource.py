@@ -80,7 +80,7 @@ def test_sqlite_db_get_no_meta(datapath_hamiltonian):
     """Base elements retireval test for SQLite3-based datasources without metadata."""
     db = SQLite3Database(datapath_hamiltonian)
     # check that columns is all cols from data table
-    assert db.columns == ["Z", "R", "E", "F", "H", "S"]
+    assert db.columns == ["Z", "R", "E", "F", "H"]
     assert [*db._keys_map.keys()] == [*db._keys_map.values()]
     sample = db[0]
     assert isinstance(sample, dict)

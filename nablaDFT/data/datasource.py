@@ -136,13 +136,13 @@ class SQLite3Database:
 
         if not self.filepath.exists():
             self._create(filepath, metadata)
+            logger.info(f"Created new database: {filepath}")
         else:
             # check if `data` table exists
             if "data" not in self._get_tables_list():
                 raise ValueError("Table `data` not found in database")
             # parse sample schema and metadata
             self._parse_metadata(metadata)
-        logger.info(f"Created new database: {filepath}")
 
     def __getitem__(
         self, idx: Union[int, List[int], slice]

@@ -26,7 +26,7 @@ from tqdm import tqdm
 
 from ._collate import collate_pyg
 from ._convert import to_pyg_data
-from .utils import check_ds_len, merge_samples, slice_to_list
+from .utils import check_ds_keys_map, check_ds_len, merge_samples, slice_to_list
 
 logger = logging.getLogger(__name__)
 
@@ -89,6 +89,7 @@ class PyGDataset(InMemoryDataset):
         if not isinstance(datasources, list):
             datasources = [datasources]
         check_ds_len(datasources)
+        check_ds_keys_map(datasources)
         self.datasources = datasources
         self.in_memory = in_memory
         super().__init__(None, transform, pre_transform, pre_filter, False)

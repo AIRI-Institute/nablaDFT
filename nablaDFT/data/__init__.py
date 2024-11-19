@@ -21,7 +21,7 @@ from .registry import dataset_registry  # dataset splits registry
 
 # collate function should be added here
 default_collate_fn_map.update({pyg.data.data.BaseData: _collate_pyg_batch})
-# default_collate_fn_map.update({pyg.data.data.Data: _collate_pyg_batch})
+
 
 __all__ = [
     # deprecated

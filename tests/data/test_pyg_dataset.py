@@ -81,5 +81,5 @@ def test_pyg_collation(request, example_datasource):
     dataloader = DataLoader(dataset, batch_size=2)
     for batch in dataloader:
         assert isinstance(batch, Batch)
-        assert len(getattr(batch, "ptr")) == 3
-        assert len(getattr(batch, "ptr")) == 3
+        assert len(getattr(batch, "ptr")) == 2
+        assert len(getattr(batch, "batch")) == 3
