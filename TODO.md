@@ -1,7 +1,6 @@
 # TESTS
   - TODO: write tests for DatasourceCard.
   - TODO: write tests for convert functions.
-  - TODO: write tests for PLDataModule.
 
  # Dataflow
   - TODO: delegate download process to dataset registry.

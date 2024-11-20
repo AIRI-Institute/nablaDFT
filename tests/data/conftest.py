@@ -2,7 +2,7 @@ from pathlib import Path
 
 import nablaDFT
 import pytest
-from nablaDFT.data import EnergyDatabase, SQLite3Database
+from nablaDFT.data import EnergyDatabase, PyGDataset, SQLite3Database
 from nablaDFT.data._metadata import DatasourceCard
 
 
@@ -58,3 +58,8 @@ def test_datasources_list(datapath_hamiltonian, datapath_overlap, hamiltonian_me
         SQLite3Database(datapath_hamiltonian, hamiltonian_metadata),
         SQLite3Database(datapath_overlap, overlap_metadata),
     ]
+
+
+@pytest.fixture()
+def pyg_dataset(test_hamiltonian_db):
+    return PyGDataset(test_hamiltonian_db, in_memory=False)

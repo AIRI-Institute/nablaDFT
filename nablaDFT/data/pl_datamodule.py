@@ -68,10 +68,9 @@ class PLDataModule(LightningDataModule):
         if stage == "fit":
             if self.train_size is None:
                 raise ValueError("train_size and val_size must be set for fit stage")
-            val_size = 1 - self.train_size
             sizes = [
                 int(self.train_size * len(self.dataset)),
-                int(val_size * len(self.dataset)),
+                len(self.dataset) - int(self.train_size * len(self.dataset)),
             ]
             self.dataset_train, self.dataset_val = random_split(self.dataset, sizes)
         elif stage == "test":
