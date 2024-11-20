@@ -86,8 +86,7 @@ def test_in_memory_pyg_dataset_get(datapath_hamiltonian, hamiltonian_metadata, m
     dataset = PyGDataset(datasource, in_memory=True)
     assert (Path(tmp_path) / "processed").exists()
     assert (Path(tmp_path) / "processed").glob("*")
-    assert dataset.data
-    assert dataset.slices
+    assert len(dataset.data_list) == len(datasource)
     # single element
     datasource_sample = datasource[3]
     sample = dataset[3]

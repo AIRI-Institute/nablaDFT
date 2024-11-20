@@ -2,7 +2,6 @@
   - TODO: write tests for DatasourceCard.
   - TODO: write tests for convert functions.
   - TODO: write tests for PLDataModule.
-  - TODO: PyGDataset(in_memory=True) doesn't work for multi-index get!!! i think it's time to implement get in PyGDataset
 
  # Dataflow
   - TODO: delegate download process to dataset registry.
@@ -10,7 +9,6 @@
   - TODO (future): benchmark LMDB database for energy and hamiltonian split.
   - TODO: do not forget to update schema for hamiltonian databases.
 # Models
-
   - TODO: delegate checkpoint download to model registry.
   - TODO: define `BaseModel` protocol for further addition of models in nabla.
   - TODO: make `pytorch_lightning.Module` more generic in order to apply this module to all possible models from nabla.

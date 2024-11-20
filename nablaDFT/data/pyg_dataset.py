@@ -16,12 +16,14 @@ Examples:
 
 import logging
 import pathlib
+from operator import itemgetter
 from typing import Callable, Dict, List, Union
 
 import numpy as np
 import torch
-from torch_geometric.data import InMemoryDataset
+from torch_geometric.data import Dataset
 from torch_geometric.data.data import BaseData
+from torch_geometric.data.separate import separate
 from tqdm import tqdm
 
 from ._collate import collate_pyg
@@ -35,7 +37,7 @@ IndexType = Union[int, slice, List]
 SampleType = Union[torch.Tensor, np.ndarray]
 
 
-class PyGDataset(InMemoryDataset):
+class PyGDataset(Dataset):
     """Pytorch Geometric interface for datasets.
 
     Stores elements in memory, for more information check PyG `docs
@@ -48,7 +50,6 @@ class PyGDataset(InMemoryDataset):
         >>> sample = dataset[0]
         >>> Data(y=[...], pos[..., 3], forces[..., 3])
 
-    .. note:: datasources must be in the same directory.
     .. warn:: element index must belong to the same conformations/molecule in different data sources.
 
     Args:
@@ -94,16 +95,21 @@ class PyGDataset(InMemoryDataset):
         self.datasources = datasources
         self.in_memory = in_memory
         super().__init__(None, transform, pre_transform, pre_filter, False)
-        # TODO: just drop data and slices, instead separate each element and save it to data_list
-        # TODO: sampling will be easy with data_list
         if in_memory:
             data, slices = torch.load(self.processed_paths[0])
-            self.data = data
-            self.slices = slices
+            self.data_list: List[BaseData] = [None] * len(self.datasources[0])
+            for idx in tqdm(range(len(self.datasources[0])), total=(len(self.datasources[0])), desc="Uploading"):
+                self.data_list[idx] = separate(
+                    cls=data.__class__,
+                    batch=data,
+                    idx=idx,
+                    slice_dict=slices,
+                    decrement=False,
+                )
 
     def process(self):
         samples = []
-        for idx in tqdm(range(len(self.datasources[0])), total=len(self.datasources[0])):
+        for idx in tqdm(range(len(self.datasources[0])), total=len(self.datasources[0]), desc="Processing raw data"):
             data_dict = {}
             for datasource in self.datasources:
                 data_dict.update(datasource[idx])
@@ -115,7 +121,6 @@ class PyGDataset(InMemoryDataset):
         if self.pre_transform is not None:
             samples = [self.pre_transform(data) for data in samples]
         # TODO: maybe we even do not need to collate?
-        # TODO: instead just fill self.data_list
         data, slices, _ = collate_pyg(samples, increment=False, add_batch=False)
         torch.save((data, slices), self.processed_paths[0])
         logger.info(f"Saved processed dataset: {self.processed_paths[0]}")
@@ -124,8 +129,7 @@ class PyGDataset(InMemoryDataset):
         """Retrieve elements from dataset."""
         if isinstance(idx, int):
             if self.in_memory:
-                # TODO: make this self.data_list[idx]
-                return super().get(idx)  # just call get from InMemoryDataset
+                return self.data_list[idx]
             else:
                 data = {}
                 for datasource in self.datasources:
@@ -141,20 +145,29 @@ class PyGDataset(InMemoryDataset):
 
         Used by pytorch fetcher.
         """
-        # TODO: write multi-index for in_memory with data_list
         if isinstance(idxs, slice):
             idxs = slice_to_list(idxs)
         if self.in_memory:
-            pass
+            data = itemgetter(*idxs)(self.data_list)
         else:
             if len(self.datasources) == 1:
-                return to_pyg_data(self.datasources[0][idxs])
+                data = to_pyg_data(self.datasources[0][idxs])
             else:
                 raw_data = [datasource[idxs] for datasource in self.datasources]
                 data = to_pyg_data(merge_samples(raw_data))
-                data = [sample if self.transform is None else self.transform(sample) for sample in data]
-                return data
+        data = [sample if self.transform is None else self.transform(sample) for sample in data]
+        return data
 
     def __len__(self):
         """Returns length of dataset."""
-        return len(self.datasources[0])
+        if self.in_memory:
+            return len(self.data_list)
+        else:
+            return len(self.datasources[0])
+
+    # for inheritance from torch_geometric.data.Dataset we need to define len() and get()
+    def len(self):
+        return len(self)
+
+    def get(self, idx: IndexType):
+        return self.__getitem__(idx)
