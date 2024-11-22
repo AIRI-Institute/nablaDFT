@@ -1,8 +1,62 @@
 {
-    "nablaDFT_train_tiny": {
+    "nablaDFT_energy_train_tiny": {
         "type_cls": "EnergyDatabase",
         "url": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/train_2k_v2_formation_energy_w_forces.db",
         "etag": "1b01555922f5ca11231bc8ab7d687ae7-7",
+        "metadata": "nabla_energy.json"
+    },
+    "nablaDFT_energy_train_small": {
+        "type_cls": "EnergyDatabase",
+        "url": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/train_5k_v2_formation_energy_w_forces.db",
+        "etag": "d42733ea091f0b3069145da2a7fd790e-16",
+        "metadata": "nabla_energy.json"
+    },
+    "nablaDFT_energy_train_medium": {
+        "type_cls": "EnergyDatabase",
+        "url": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/train_10k_v2_formation_energy_w_forces.db",
+        "etag": "f170b71652bef017f620c2161ff190f5-27",
+        "metadata": "nabla_energy.json"
+    },
+    "nablaDFT_energy_train_large": {
+        "type_cls": "EnergyDatabase",
+        "url": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/train_100k_v2_formation_energy_w_forces.db",
+        "etag": "2f8c2fc98bee9274c5002f304f22cf29-274",
+        "metadata": "nabla_energy.json"
+    },
+    "nablaDFT_energy_train_full": {
+        "type_cls": "EnergyDatabase",
+        "url": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/train_full_v2_formation_energy.db",
+        "etag": "38d050da14081e2911e6c813176e1a96-2438",
+        "metadata": "nabla_energy.json"
+    },
+    "nablaDFT_energy_test_conformations_tiny": {
+        "type_cls": "EnergyDatabase",
+        "url": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/test_2k_conformers_v2_formation_energy_w_forces.db",
+        "etag": "92c4bdaf97d5c1d6f22ae33c46bf77ca-2",
+        "metadata": "nabla_energy.json"
+    },
+    "nablaDFT_energy_test_conformations_small": {
+        "type_cls": "EnergyDatabase",
+        "url": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/test_5k_conformers_v2_formation_energy_w_forces.db",
+        "etag": "df1a6b06e0637ad31769fcb64da863b6-3",
+        "metadata": "nabla_energy.json"
+    },
+    "nablaDFT_energy_test_conformations_medium": {
+        "type_cls": "EnergyDatabase",
+        "url": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/test_10k_conformers_v2_formation_energy_w_forces.db",
+        "etag": "1fd5e7e29ad31c98b4a988fd62453c39-6",
+        "metadata": "nabla_energy.json"
+    },
+    "nablaDFT_energy_test_conformations_large": {
+        "type_cls": "EnergyDatabase",
+        "url": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/test_100k_conformers_v2_formation_energy_w_forces.db",
+        "etag": "90c86e5c2e1e9d1056fa6eb3e552f14d-51",
+        "metadata": "nabla_energy.json"
+    },
+    "nablaDFT_energy_test_conformations_full": {
+        "type_cls": "EnergyDatabase",
+        "url": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/test_full_conformers_v2_formation_energy.db",
+        "etag": "71d08186724909cc94c207d772a8f99b-445",
         "metadata": "nabla_energy.json"
     }
 }

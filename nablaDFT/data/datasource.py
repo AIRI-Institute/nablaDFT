@@ -390,3 +390,34 @@ class SQLite3Database:
 
 
 Datasource = Union[EnergyDatabase, SQLite3Database]
+
+# TODO: define struct for keeping data from csv in memory.
+# TODO: possible variants: in-memory SQLIte3 temporary table.
+
+
+class CombinedDatasource:
+    def __init__(self, datasources: List[Datasource]):
+        pass
+
+    def __getitem__(self):
+        pass
+
+    def _combine(self):
+        pass
+
+    def _combine_metadata(self):
+        pass
+
+
+def combine_datasources(datasources: List[Datasource], keys_list: List[str] = None):
+    """Combines two or more datasource in single one.
+
+    Allows different datasources type to combine.
+    By default retrieves all data from combined datasources,
+    if `keys_list` not specified.
+
+    Args:
+        datasources (List(Datasource)): datasource to combine.
+        keys_list (List[str]): data keys to retrieve for each sample.
+    """
+    pass
