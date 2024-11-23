@@ -1,12 +1,9 @@
-"""Module defines Pytorch Lightning DataModule interfaces for nablaDFT datasets"""
-
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
 import numpy as np
 import torch
 from ase.db import connect
-from pytorch_lightning import LightningDataModule
 from schnetpack.data import (
     AtomsDataFormat,
     AtomsDataModule,
@@ -15,14 +12,10 @@ from schnetpack.data import (
     SplittingStrategy,
     load_dataset,
 )
-from torch.utils.data import random_split
-from torch_geometric.loader import DataLoader
 
 import nablaDFT
-from nablaDFT.data.registry import dataset_registry
+from nablaDFT.registry import dataset_registry
 from nablaDFT.utils import download_file
-
-from .pyg_datasets import PyGHamiltonianNablaDFT, PyGNablaDFT
 
 
 class ASENablaDFT(AtomsDataModule):

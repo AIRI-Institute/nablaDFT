@@ -58,5 +58,41 @@
         "url": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/test_full_conformers_v2_formation_energy.db",
         "etag": "71d08186724909cc94c207d772a8f99b-445",
         "metadata": "nabla_energy.json"
+    },
+    "nablaDFT_energy_test_structures": {
+        "type_cls": "EnergyDatabase",
+        "url": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/test_full_structures_v2_formation_energy_forces.db",
+        "etag": "41201314c183ac8662a8eafd38766755-629",
+        "metadata": "nabla_energy.json"
+    },
+    "nablaDFT_energy_test_scaffolds": {
+        "type_cls": "EnergyDatabase",
+        "url": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/test_full_scaffolds_v2_formation_energy_forces.db",
+        "etag": "ac6c9011539e6ea97e3212ace56dc384-617",
+        "metadata": "nabla_energy.json"
+    },
+    "nablaDFT_energy_test_trajectories_initial": {
+        "type_cls": "EnergyDatabase",
+        "url": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/test_trajectories_initial.db",
+        "etag": "09eaa0a63126356aab6ac03aacd36008-2",
+        "metadata": "nabla_energy.json"
+    },
+    "nablaDFT_energy_test_trajectories": {
+        "type_cls": "EnergyDatabase",
+        "url": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/test_trajectories.db",
+        "etag": "fb4c8054c698f46a1d44d1aceed759de-58",
+        "metadata": "nabla_energy.json"
+    },
+    "nablaDFT_energy_train_medium_trajectories": {
+        "type_cls": "EnergyDatabase",
+        "url": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/train_medium_v2_trajectories_wo_outliers.db",
+        "etag": "c13b7e62e4dcd5f5adbde719c3866e11-778",
+        "metadata": "nabla_energy.json"
+    },
+    "nablaDFT_energy_trajectories_additional": {
+        "type_cls": "EnergyDatabase",
+        "url": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/additional_trajectories.db",
+        "etag": "592b8e2c000612ea1baecb5220016944-751",
+        "metadata": "nabla_energy.json"
     }
 }

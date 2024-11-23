@@ -35,7 +35,7 @@ import numpy as np
 from ase import Atoms
 
 from ._convert import np_from_bytes, np_to_bytes
-from ._metadata import DatasourceCard
+from .metadata import DatasourceCard
 from .utils import slice_to_list
 
 logger = logging.getLogger(__name__)

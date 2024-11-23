@@ -3,7 +3,7 @@ from pathlib import Path
 import nablaDFT
 import pytest
 from nablaDFT.data import EnergyDatabase, PyGDataset, SQLite3Database
-from nablaDFT.data._metadata import DatasourceCard
+from nablaDFT.data.metadata import DatasourceCard
 
 
 @pytest.fixture()

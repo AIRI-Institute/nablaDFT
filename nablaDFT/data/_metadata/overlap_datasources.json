@@ -1,0 +1,74 @@
+{
+    "nablaDFT_overlap_train_tiny": {
+        "type_cls": "SQLite3Database",
+        "url": "",
+        "etag": "",
+        "metadata": "nabla_overlap.json"
+    },
+    "nablaDFT_overlap_train_small": {
+        "type_cls": "SQLite3Database",
+        "url": "",
+        "etag": "",
+        "metadata": "nabla_overlap.json"
+    },
+    "nablaDFT_overlap_train_medium": {
+        "type_cls": "SQLite3Database",
+        "url": "",
+        "etag": "",
+        "metadata": "nabla_overlap.json"
+    },
+    "nablaDFT_overlap_train_large": {
+        "type_cls": "SQLite3Database",
+        "url": "",
+        "etag": "",
+        "metadata": "nabla_overlap.json"
+    },
+    "nablaDFT_overlap_train_full": {
+        "type_cls": "SQLite3Database",
+        "url": "",
+        "etag": "",
+        "metadata": "nabla_overlap.json"
+    },
+    "nablaDFT_overlap_test_conformations_tiny": {
+        "type_cls": "SQLite3Database",
+        "url": "",
+        "etag": "",
+        "metadata": "nabla_overlap.json"
+    },
+    "nablaDFT_overlap_test_conformations_small": {
+        "type_cls": "SQLite3Database",
+        "url": "",
+        "etag": "",
+        "metadata": "nabla_overlap.json"
+    },
+    "nablaDFT_overlap_test_conformations_medium": {
+        "type_cls": "SQLite3Database",
+        "url": "",
+        "etag": "",
+        "metadata": "nabla_overlap.json"
+    },
+    "nablaDFT_overlap_test_conformations_large": {
+        "type_cls": "SQLite3Database",
+        "url": "",
+        "etag": "",
+        "metadata": "nabla_overlap.json"
+    },
+    "nablaDFT_overlap_test_conformations_full": {
+        "type_cls": "SQLite3Database",
+        "url": "",
+        "etag": "",
+        "metadata": "nabla_overlap.json"
+    },
+    "nablaDFT_overlap_test_structures": {
+        "type_cls": "SQLite3Database",
+        "url": "",
+        "etag": "",
+        "metadata": "nabla_overlap.json"
+    },
+    "nablaDFT_overlap_test_scaffolds": {
+        "type_cls": "SQLite3Database",
+        "url": "",
+        "etag": "",
+        "metadata": "nabla_overlap.json"
+    }
+}

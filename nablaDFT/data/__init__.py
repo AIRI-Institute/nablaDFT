@@ -17,7 +17,6 @@ from .pyg_dataset import PyGDataset  # PyTorch Geometric interfaces for datasets
 from .pyg_datasets import (
     PyGHamiltonianNablaDFT,
 )
-from .registry import dataset_registry  # dataset splits registry
 
 # collate function should be added here
 default_collate_fn_map.update({pyg.data.data.BaseData: _collate_pyg_batch})

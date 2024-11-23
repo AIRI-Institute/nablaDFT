@@ -1,0 +1,74 @@
+{
+    "nablaDFT_hamiltonian_train_tiny": {
+        "type_cls": "SQLite3Database",
+        "url": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/hamiltonian_databases/train_2k.db",
+        "etag": "068975858201ae70743d3d4427c55e47-1803",
+        "metadata": "nabla_hamiltonian.json"
+    },
+    "nablaDFT_hamiltonian_train_small": {
+        "type_cls": "SQLite3Database",
+        "url": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/hamiltonian_databases/train_5k.db",
+        "etag": "5e3cfa36b3f97251432fd37dbfbd2b34-4543",
+        "metadata": "nabla_hamiltonian.json"
+    },
+    "nablaDFT_hamiltonian_train_medium": {
+        "type_cls": "SQLite3Database",
+        "url": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/hamiltonian_databases/train_10k.db",
+        "etag": "41f03a745d88afa8689f7a41e0afb54f-8153",
+        "metadata": "nabla_hamiltonian.json"
+    },
+    "nablaDFT_hamiltonian_train_large": {
+        "type_cls": "SQLite3Database",
+        "url": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/hamiltonian_databases/train_100k.db",
+        "etag": "6c3fed0b67969a24c16035cbd06760fd-5283",
+        "metadata": "nabla_hamiltonian.json"
+    },
+    "nablaDFT_hamiltonian_train_full": {
+        "type_cls": "SQLite3Database",
+        "url": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/hamiltonian_databases/train_full.db",
+        "etag": "3e18346a7cfbc7205d553f3c07d428d5-5761",
+        "metadata": "nabla_hamiltonian.json"
+    },
+    "nablaDFT_hamiltonian_test_conformations_tiny": {
+        "type_cls": "SQLite3Database",
+        "url": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/hamiltonian_databases/test_2k_conformers.db",
+        "etag": "0b9a02f0e3d1dee44bb4d40353845a1c-370",
+        "metadata": "nabla_hamiltonian.json"
+    },
+    "nablaDFT_hamiltonian_test_conformations_small": {
+        "type_cls": "SQLite3Database",
+        "url": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/hamiltonian_databases/test_5k_conformers.db",
+        "etag": "c7fc0b0586d981c10daaee3daa94076a-818",
+        "metadata": "nabla_hamiltonian.json"
+    },
+    "nablaDFT_hamiltonian_test_conformations_medium": {
+        "type_cls": "SQLite3Database",
+        "url": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/hamiltonian_databases/test_10k_conformers.db",
+        "etag": "54b7085e86fa09db8d2d6a475c6f93ea-1436",
+        "metadata": "nabla_hamiltonian.json"
+    },
+    "nablaDFT_hamiltonian_test_conformations_large": {
+        "type_cls": "SQLite3Database",
+        "url": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/hamiltonian_databases/test_100k_conformers.db",
+        "etag": "2d63e4da9e43776f7d777743d38ee048-7339",
+        "metadata": "nabla_hamiltonian.json"
+    },
+    "nablaDFT_hamiltonian_test_conformations_full": {
+        "type_cls": "SQLite3Database",
+        "url": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/hamiltonian_databases/test_full_conformers.db",
+        "etag": "4d3f63fc6d0de1cfc8ffd133882bfad7-7483",
+        "metadata": "nabla_hamiltonian.json"
+    },
+    "nablaDFT_hamiltonian_test_structures": {
+        "type_cls": "SQLite3Database",
+        "url": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/hamiltonian_databases/test_structures.db",
+        "etag": "0dc0b44de85afb6eb4786917cb96e224-5943",
+        "metadata": "nabla_hamiltonian.json"
+    },
+    "nablaDFT_hamiltonian_test_scaffolds": {
+        "type_cls": "SQLite3Database",
+        "url": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/hamiltonian_databases/test_scaffolds.db",
+        "etag": "8278b49074aea9376f3a488c19298821",
+        "metadata": "nabla_hamiltonian.json"
+    }
+}
