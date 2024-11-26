@@ -10,6 +10,7 @@ import torch
 from ase.db import connect
 from torch_geometric.data import Data, Dataset, InMemoryDataset
 from tqdm import tqdm
+import lmdb
 
 from nablaDFT.dataset.registry import dataset_registry
 from nablaDFT.utils import download_file
@@ -107,6 +108,113 @@ class PyGNablaDFT(InMemoryDataset):
             y = torch.from_numpy(np.array(db_row.data["energy"])).float()
             forces = torch.from_numpy(np.array(db_row.data["forces"])).float()
             samples.append(Data(z=z, pos=positions, y=y, forces=forces))
+
+        if self.pre_filter is not None:
+            samples = [data for data in samples if self.pre_filter(data)]
+
+        if self.pre_transform is not None:
+            samples = [self.pre_transform(data) for data in samples]
+
+        data, slices = self.collate(samples)
+        torch.save((data, slices), self.processed_paths[0])
+        logger.info(f"Saved processed dataset: {self.processed_paths[0]}")
+
+
+class PyGFluoroDataset(InMemoryDataset):
+    """Pytorch Geometric interface for nablaDFT datasets.
+
+    Based on `MD17 implementation <https://github.com/atomicarchitects/equiformer/blob/master/datasets/pyg/md17.py>`_.
+
+    .. code-block:: python
+        from nablaDFT.dataset import PyGNablaDFT
+
+        dataset = PyGNablaDFT(
+            datapath="./datasets/",
+            dataset_name="dataset_train_tiny",
+            split="train",
+        )
+        sample = dataset[0]
+
+    .. note::
+        If split parameter is 'train' or 'test' and dataset name are ones from nablaDFT splits
+        (see nablaDFT/links/energy_databases.json), dataset will be downloaded automatically.
+
+    Args:
+        datapath (str): path to existing dataset directory or location for download.
+        dataset_name (str): split name from links .json or filename of existing file from datapath directory.
+        split (str): type of split, must be one of ['train', 'test', 'predict'].
+        transform (Callable): callable data transform, called on every access to element.
+        pre_transform (Callable): callable data transform, called on every element during process.
+    """
+
+    db_suffix = ".db"
+
+    @property
+    def raw_file_names(self) -> List[str]:
+        return [(self.dataset_name + self.db_suffix)]
+
+    @property
+    def processed_file_names(self) -> str:
+        return f"{self.dataset_name}_{self.split}.pt"
+
+    def __init__(
+        self,
+        datapath: str = "database",
+        dataset_name: str = "dataset_train_tiny",
+        split: str = "train",
+        transform: Callable = None,
+        pre_transform: Callable = None,
+    ):
+        self.dataset_name = dataset_name
+        self.datapath = datapath
+        self.split = split
+        self.data_all, self.slices_all = [], []
+        self.offsets = [0]
+        super(PyGNablaDFT, self).__init__(datapath, transform, pre_transform)
+
+        for path in self.processed_paths:
+            data, slices = torch.load(path)
+            self.data_all.append(data)
+            self.slices_all.append(slices)
+            self.offsets.append(len(slices[list(slices.keys())[0]]) - 1 + self.offsets[-1])
+
+    def len(self) -> int:
+        return sum(len(slices[list(slices.keys())[0]]) - 1 for slices in self.slices_all)
+
+    def get(self, idx):
+        data_idx = 0
+        while data_idx < len(self.data_all) - 1 and idx >= self.offsets[data_idx + 1]:
+            data_idx += 1
+        self.data = self.data_all[data_idx]
+        self.slices = self.slices_all[data_idx]
+        return super(PyGNablaDFT, self).get(idx - self.offsets[data_idx])
+
+    def download(self) -> None:
+        raise NotImplementedError
+
+    def process(self) -> None:
+        env_label_3D = lmdb.open(
+            path_to_lmdb,
+            subdir=False,
+            readonly=True,
+            lock=False,
+            readahead=False,
+            meminit=False,
+            max_readers=1,
+            map_size=int(100e9),
+        )
+
+        with env_label_3D.begin() as txn:
+            length = txn.stat()['entries']
+            samples = []
+            for key, value in tqdm(txn.cursor(), total=length):
+                dt = pickle.loads(gzip.decompress(value))
+                z = np.array([int(element(elem.capitalize()).atomic_number) for elem in dt['atoms']])
+                z = torch.from_numpy(z).long()
+                y = torch.from_numpy(np.array([dt['target']])).float()
+                for positions in dt['input_pos']:
+                    pos = torch.from_numpy(positions).float()
+                    samples.append(Data(z=z, pos=pos, y=y))
 
         if self.pre_filter is not None:
             samples = [data for data in samples if self.pre_filter(data)]

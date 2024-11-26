@@ -22,7 +22,7 @@ import nablaDFT
 from nablaDFT.dataset.registry import dataset_registry
 from nablaDFT.utils import download_file
 
-from .pyg_datasets import PyGHamiltonianNablaDFT, PyGNablaDFT
+from .pyg_datasets import PyGHamiltonianNablaDFT, PyGNablaDFT, PyGFluoroDataset
 
 
 class ASENablaDFT(AtomsDataModule):
@@ -365,3 +365,27 @@ class PyGNablaDFTDataModule(PyGDataModule):
             self.dataset_test = PyGNablaDFT(self.root, self.dataset_name, "test", **self.kwargs)
         elif stage == "predict":
             self.dataset_predict = PyGNablaDFT(self.root, self.dataset_name, "predict", **self.kwargs)
+
+
+class PyGFluoroDataModule(PyGDataModule):
+
+    def __init__(
+        self,
+        root: str,
+        dataset_name: str,
+        train_size: float = None,
+        val_size: float = None,
+        **kwargs,
+    ) -> None:
+        super().__init__(root, dataset_name, train_size, val_size, **kwargs)
+
+    def setup(self, stage: str) -> None:
+        if stage == "fit":
+            dataset = PyGFluoroDataset(self.root, self.dataset_name, "train", **self.kwargs)
+            self.dataset_train, self.dataset_val = random_split(
+                dataset, self.sizes, generator=torch.Generator().manual_seed(self.seed)
+            )
+        elif stage == "test":
+            self.dataset_test = PyGFluoroDataset(self.root, self.dataset_name, "test", **self.kwargs)
+        elif stage == "predict":
+            self.dataset_predict = PyGFluoroDataset(self.root, self.dataset_name, "predict", **self.kwargs)
