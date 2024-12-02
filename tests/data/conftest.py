@@ -8,19 +8,19 @@ from nablaDFT.data.metadata import DatasourceCard
 
 @pytest.fixture()
 def energy_metadata():
-    json_path = Path(nablaDFT.__path__[0]) / "data/_metadata/nabla_energy.json"
+    json_path = Path(nablaDFT.__path__[0]) / "data/_metadata/ds_meta/nabla_energy.json"
     return DatasourceCard.from_json(json_path)
 
 
 @pytest.fixture()
 def hamiltonian_metadata():
-    json_path = Path(nablaDFT.__path__[0]) / "data/_metadata/nabla_hamiltonian.json"
+    json_path = Path(nablaDFT.__path__[0]) / "data/_metadata/ds_meta/nabla_hamiltonian.json"
     return DatasourceCard.from_json(json_path)
 
 
 @pytest.fixture()
 def overlap_metadata():
-    json_path = Path(nablaDFT.__path__[0]) / "data/_metadata/nabla_overlap.json"
+    json_path = Path(nablaDFT.__path__[0]) / "data/_metadata/ds_meta/nabla_overlap.json"
     return DatasourceCard.from_json(json_path)
 
 

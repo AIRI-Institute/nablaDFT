@@ -32,6 +32,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import apsw  # way faster than sqlite3
 import ase
 import numpy as np
+import polars as pl
 from ase import Atoms
 
 from ._convert import np_from_bytes, np_to_bytes
@@ -116,12 +117,12 @@ class SQLite3Database:
         metadata (Optional[DatasetCard]): dataset metadata.
     """
 
-    type = ".db"
+    ext = ".db"
 
     def __init__(self, filepath: Union[pathlib.Path, str], metadata: Optional[DatasourceCard] = None) -> None:
         if isinstance(filepath, str):
             filepath = pathlib.Path(filepath)
-        if filepath.suffix != self.type:
+        if filepath.suffix != self.ext:
             raise ValueError(f"Invalid file type: {filepath.suffix}")
         self.filepath = filepath.absolute()
         # initialize metadata
@@ -393,6 +394,19 @@ Datasource = Union[EnergyDatabase, SQLite3Database]
 
 # TODO: define struct for keeping data from csv in memory.
 # TODO: possible variants: in-memory SQLIte3 temporary table.
+
+
+class CSVDatasource:
+    ext = ["csv", "csv.gz"]
+
+    def __init__(self, filepath: pathlib.Path):
+        self.df = pl.read_csv(filepath)
+
+    def _filter_by_uid(self, uids: List[str]):
+        pass
+
+    def _select_cols(self, cols: List[str]):
+        pass
 
 
 class CombinedDatasource:
