@@ -1,3 +1,3 @@
-from .painn import PaiNN, PaiNNLightning
+from .painn import PaiNN, PaiNNLightning, PaiNNnoforcesLightning
 
-__all__ = [PaiNN, PaiNNLightning]
+__all__ = [PaiNN, PaiNNLightning, PaiNNnoforcesLightning]

@@ -11,9 +11,11 @@ from ase.db import connect
 from torch_geometric.data import Data, Dataset, InMemoryDataset
 from tqdm import tqdm
 import lmdb
+import pickle
+import gzip
 
 from nablaDFT.dataset.registry import dataset_registry
-from nablaDFT.utils import download_file
+from nablaDFT.utils import download_file, get_atomic_number
 
 from .hamiltonian_dataset import HamiltonianDatabase
 
@@ -147,7 +149,7 @@ class PyGFluoroDataset(InMemoryDataset):
         pre_transform (Callable): callable data transform, called on every element during process.
     """
 
-    db_suffix = ".db"
+    db_suffix = ".lmdb"
 
     @property
     def raw_file_names(self) -> List[str]:
@@ -170,7 +172,7 @@ class PyGFluoroDataset(InMemoryDataset):
         self.split = split
         self.data_all, self.slices_all = [], []
         self.offsets = [0]
-        super(PyGNablaDFT, self).__init__(datapath, transform, pre_transform)
+        super(PyGFluoroDataset, self).__init__(datapath, transform, pre_transform)
 
         for path in self.processed_paths:
             data, slices = torch.load(path)
@@ -187,14 +189,14 @@ class PyGFluoroDataset(InMemoryDataset):
             data_idx += 1
         self.data = self.data_all[data_idx]
         self.slices = self.slices_all[data_idx]
-        return super(PyGNablaDFT, self).get(idx - self.offsets[data_idx])
+        return super(PyGFluoroDataset, self).get(idx - self.offsets[data_idx])
 
     def download(self) -> None:
         raise NotImplementedError
 
     def process(self) -> None:
         env_label_3D = lmdb.open(
-            path_to_lmdb,
+            self.raw_paths[0],
             subdir=False,
             readonly=True,
             lock=False,
@@ -209,12 +211,12 @@ class PyGFluoroDataset(InMemoryDataset):
             samples = []
             for key, value in tqdm(txn.cursor(), total=length):
                 dt = pickle.loads(gzip.decompress(value))
-                z = np.array([int(element(elem.capitalize()).atomic_number) for elem in dt['atoms']])
+                z = np.array([get_atomic_number(elem) for elem in dt['atoms']])
                 z = torch.from_numpy(z).long()
                 y = torch.from_numpy(np.array([dt['target']])).float()
-                for positions in dt['input_pos']:
-                    pos = torch.from_numpy(positions).float()
-                    samples.append(Data(z=z, pos=pos, y=y))
+                #for positions in dt['input_pos']:
+                pos = torch.from_numpy(dt['input_pos'][0]).float()
+                samples.append(Data(z=z, pos=pos, y=y))
 
         if self.pre_filter is not None:
             samples = [data for data in samples if self.pre_filter(data)]

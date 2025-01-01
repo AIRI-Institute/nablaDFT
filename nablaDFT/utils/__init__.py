@@ -1,3 +1,4 @@
+from .chem_utils import get_atomic_number
 from .download import download_file
 from .pipelines import (
     check_cfg_parameters,
@@ -20,4 +21,5 @@ __all__ = [
     set_additional_params,
     write_predictions_to_db,
     load_from_checkpoint,
+    get_atomic_number
 ]
