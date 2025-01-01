@@ -1,13 +1,13 @@
 {
   "databases": {
-    "dataset_train_full": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/train_full_v2_formation_energy.db",
+    "dataset_train_full": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/train_full_v2_formation_energy_w_forces_wo_outliers.db",
     "dataset_train_large": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/train_100k_v2_formation_energy_w_forces.db",
     "dataset_train_medium": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/train_10k_v2_formation_energy_w_forces.db",
     "dataset_train_small": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/train_5k_v2_formation_energy_w_forces.db",
     "dataset_train_tiny": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/train_2k_v2_formation_energy_w_forces.db",
     "dataset_test_structures": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/test_full_structures_v2_formation_energy_forces.db",
     "dataset_test_scaffolds": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/test_full_scaffolds_v2_formation_energy_forces.db",
-    "dataset_test_conformations_full": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/test_full_conformers_v2_formation_energy.db",
+    "dataset_test_conformations_full": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/test_full_conformers_v2_formation_energy_w_forces_wo_outliers.db",
     "dataset_test_conformations_large": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/test_100k_conformers_v2_formation_energy_w_forces.db",
     "dataset_test_conformations_medium": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/test_10k_conformers_v2_formation_energy_w_forces.db",
     "dataset_test_conformations_small": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/test_5k_conformers_v2_formation_energy_w_forces.db",
@@ -18,14 +18,14 @@
     "dataset_trajectories_additional": "https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/energy_databases/additional_trajectories.db"
   },
   "etag": {
-    "dataset_train_full": "38d050da14081e2911e6c813176e1a96-2438",
+    "dataset_train_full": "4db277ca0f8b6901faa5ba826add2c94-4699",
     "dataset_train_large": "2f8c2fc98bee9274c5002f304f22cf29-274",
     "dataset_train_medium": "f170b71652bef017f620c2161ff190f5-27",
     "dataset_train_small": "d42733ea091f0b3069145da2a7fd790e-16",
     "dataset_train_tiny": "1b01555922f5ca11231bc8ab7d687ae7-7",
     "dataset_test_structures": "41201314c183ac8662a8eafd38766755-629",
     "dataset_test_scaffolds": "ac6c9011539e6ea97e3212ace56dc384-617",
-    "dataset_test_conformations_full": "71d08186724909cc94c207d772a8f99b-445",
+    "dataset_test_conformations_full": "d94949a91fc6ae3781d92922ccfad078-835",
     "dataset_test_conformations_large": "90c86e5c2e1e9d1056fa6eb3e552f14d-51",
     "dataset_test_conformations_medium": "1fd5e7e29ad31c98b4a988fd62453c39-6",
     "dataset_test_conformations_small": "df1a6b06e0637ad31769fcb64da863b6-3",
