@@ -1,0 +1,51 @@
+_target_: nablaDFT.escn.eSCNnoforcesLightning
+
+model_name: "ESCN-OC"
+net:
+  _target_: nablaDFT.escn.eSCN
+  num_targets: 1
+  max_num_elements: 65
+  num_layers: 8
+  lmax_list: [6]
+  mmax_list: [2]
+  sphere_channels: 128
+  hidden_channels: 256
+  edge_channels: 128
+  use_grid: true
+  num_sphere_samples: 128
+  distance_function: gaussian
+  regress_forces: false
+  otf_graph: true
+  use_pbc: false
+  cutoff: 8.0
+  max_neighbors: 40
+  basis_width_scalar: 1.0
+  distance_resolution: 0.02
+  show_timing_info: false
+
+optimizer:
+  _target_: torch.optim.AdamW
+  _partial_: true
+  amsgrad: true
+  betas: [0.9, 0.95]
+  lr: 1e-3
+  weight_decay: 0
+
+lr_scheduler:
+  _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+  _partial_: true
+  factor: 0.8
+  patience: 10
+
+losses:
+  energy:
+    _target_: torch.nn.L1Loss
+loss_coefs:
+  energy: 1.0
+
+metric:
+  _target_: torchmetrics.MultitaskWrapper
+  _convert_: all
+  task_metrics:
+    energy:
+      _target_: torchmetrics.MeanAbsoluteError

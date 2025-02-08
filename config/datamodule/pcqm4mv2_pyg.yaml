@@ -1,0 +1,11 @@
+# Dataset config for torch geometric nablaDFT
+_target_: nablaDFT.dataset.PyGPCQM4Mv2DataModule
+
+root: ${root}
+dataset_name: ${dataset_name}
+seed: ${seed}
+# Dataloader args
+batch_size: ${batch_size}
+num_workers: ${num_workers}
+persistent_workers: True
+pin_memory: True

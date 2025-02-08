@@ -863,8 +863,8 @@ class PaiNNnoforcesLightning(pl.LightningModule):
         return loss
 
     def predict_step(self, data, **kwargs):
-        energy_out, forces_out = self(data)
-        return energy_out, forces_out
+        energy_out = self(data)
+        return energy_out
 
     def configure_optimizers(self):
         optimizer = self.hparams.optimizer(params=self.parameters())
