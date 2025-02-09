@@ -34,6 +34,8 @@ setup(
         "pyyaml",
         "hydra-core==1.2.0",
         "torch==2.2.0",
+        "torchvision==0.17.0",
+        "torchaudio==2.2.0",
         f"torch-scatter @ https://data.pyg.org/whl/torch-2.2.0%2Bcu121/torch_scatter-2.1.2%2Bpt22cu121-{PYTHON_VERSION}-{PYTHON_VERSION}-linux_x86_64.whl",
         f"torch-sparse @ https://data.pyg.org/whl/torch-2.2.0%2Bcu121/torch_sparse-0.6.18%2Bpt22cu121-{PYTHON_VERSION}-{PYTHON_VERSION}-linux_x86_64.whl",
         f"torch-cluster @ https://data.pyg.org/whl/torch-2.2.0%2Bcu121/torch_cluster-1.6.3%2Bpt22cu121-{PYTHON_VERSION}-{PYTHON_VERSION}-linux_x86_64.whl",
@@ -50,7 +52,8 @@ setup(
         "wandb==0.16.3",
         "e3nn==0.5.1",
         "lmdb==1.5.1",
-        "pandas==2.2.2"
+        "pandas==2.2.2",
+        "protobuf==3.20"
     ],
     license="MIT",
     description="$\nabla^2$ DFT: A Universal Quantum Chemistry Dataset of Drug-Like Molecules"
