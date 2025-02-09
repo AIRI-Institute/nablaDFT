@@ -49,6 +49,8 @@ setup(
         "python-dotenv",
         "wandb==0.16.3",
         "e3nn==0.5.1",
+        "lmdb==1.5.1",
+        "pandas==2.2.2"
     ],
     license="MIT",
     description="$\nabla^2$ DFT: A Universal Quantum Chemistry Dataset of Drug-Like Molecules"
