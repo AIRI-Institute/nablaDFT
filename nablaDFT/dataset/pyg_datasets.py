@@ -605,11 +605,15 @@ class PyGPQCDataset(InMemoryDataset):
             max_readers=1,
             map_size=int(100e9),
         )
-
+        bad_ids = set([421140, 458584, 464833, 527519, 595739, 631582, 675353, 704067, 1284231, 1716123])
         with env_label_3D.begin() as txn:
             length = txn.stat()['entries']
             samples = []
+            abs_id = 0
             for key, value in tqdm(txn.cursor(), total=length):
+                if abs_id in bad_ids:
+                    abs_id += 1
+                    continue
                 dt = json.loads(value.decode("utf-8"))
                 z = np.array(dt['elements'])
                 if len(z) == 1:
@@ -623,6 +627,7 @@ class PyGPQCDataset(InMemoryDataset):
                 positions = dt['coords_3d']
                 pos = torch.from_numpy(np.array(positions).reshape(-1,3)).float()
                 samples.append(Data(z=z, pos=pos, y=y))
+                abs_id += 1
 
         if self.pre_filter is not None:
             samples = [data for data in samples if self.pre_filter(data)]
