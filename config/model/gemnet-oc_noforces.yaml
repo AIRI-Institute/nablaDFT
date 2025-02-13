@@ -1,4 +1,4 @@
-_target_: nablaDFT.gemnet_oc.GemNetOCLightning
+_target_: nablaDFT.gemnet_oc.GemNetOCNoForcesLightning
 
 model_name: "GemNet-OC"
 net:
