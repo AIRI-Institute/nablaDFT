@@ -1,0 +1,38 @@
+# Global variables
+name: Pubchemqc-PaiNN-OC-3l-bs512-pat10
+dataset_name: molecule_data
+max_steps: 1000001
+job_type: train
+pretrained: null # name of pretrained split or 'null'
+ckpt_path: null # path to checkpoint for training resume or test run
+
+# Datamodule parameters
+root: /mnt/5tb/data/datasets/pubchemqc/${.job_type}
+batch_size: 16
+num_workers: 8
+
+# Devices
+devices: [1]
+
+# Trainer parameters
+gradient_clip_algorithm: norm
+gradient_clip_val: 5.0
+
+
+# configs
+defaults:
+  - _self_
+  - datamodule: pubchemqc_pyg.yaml  # dataset config
+  - model: gemnet-oc_noforces.yaml  # model config
+  - callbacks: default.yaml  # pl callbacks config
+  - loggers: wandb.yaml  # pl loggers config
+  - trainer: train.yaml  # trainer config
+
+# need this to set working dir as current dir
+hydra:
+  output_subdir: null
+  run:
+    dir: .
+original_work_dir: ${hydra:runtime.cwd}
+
+seed: 23
