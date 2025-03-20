@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 from nablaDFT.data import EnergyDatabase, SQLite3Database
 from nablaDFT.data._convert import _default_dtypes, _default_shapes
-from nablaDFT.data._metadata import DatasourceCard
+from nablaDFT.data.metadata import DatasourceCard
 
 
 @pytest.mark.data

@@ -16,5 +16,18 @@
             "software": "psi4",
             "software_version": "1.4"
         }
+    },
+    "columns": ["E", "Z", "R", "F"],
+    "_dtypes": {
+        "E": "float32",
+        "Z": "int32",
+        "R": "float32",
+        "F": "float32"
+    },
+    "_keys_map": {
+        "y": "E",
+        "z": "Z",
+        "pos": "R",
+        "forces": "F"
     }
 }

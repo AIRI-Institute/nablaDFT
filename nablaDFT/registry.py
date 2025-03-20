@@ -1,14 +1,19 @@
 import json
 import logging
+from importlib import import_module
 from pathlib import Path
 from typing import List, Mapping, Optional
 
 import nablaDFT
 
+DATASOURCES_LIST = sorted((Path(nablaDFT.__path__[0]) / "data/_metadata").glob("*.json"))
+METADATA = [
+    filename.name for filename in sorted((Path(nablaDFT.__path__[0]) / "data/_metadata/ds_meta").glob("*.json"))
+]
 logger = logging.getLogger()
 
 
-class _DatasourceRegistry:
+class DatasourceRegistry:
     def __init__(self) -> None:
         pass
 
@@ -17,23 +22,13 @@ class _DatasourceRegistry:
 
     def _download(self, name: str, path: Path) -> None:
         if path.exists():
+            # TODO: add hashes comparison?
             logger.info(f"{name} already downloaded and saved in {path}")
             return
 
 
 class DatasetRegistry:
     """Source of dataset splits links."""
-
-    def __init__(self) -> None:
-        self.hamiltonian_datasets = {}
-        with open(nablaDFT.__path__[0] + "/links/energy_databases.json") as fin:
-            content = json.load(fin)
-        self.energy_datasets = content["databases"]
-        self.energy_datasets_etag = content["etag"]
-        with open(nablaDFT.__path__[0] + "/links/hamiltonian_databases.json") as fin:
-            content = json.load(fin)
-        self.hamiltonian_datasets = content["databases"]
-        self.hamiltonian_datasets_etag = content["etag"]
 
     def get_dataset_url(self, task_type: str, name: str) -> Optional[str]:
         """Returns URL for given dataset split task and name.
@@ -94,5 +89,8 @@ def list_datasource():
     pass
 
 
-def _get_datasource_builder(type_cls: str):
-    pass
+def _build_datasource(type_cls: str, **kwargs):
+    module = import_module("nablaDFT.data")
+    cls_ = getattr(module, type_cls)
+    datasource = cls_(**kwargs)
+    return datasource

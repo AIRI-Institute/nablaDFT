@@ -4,9 +4,10 @@
 
  # Dataflow
   - TODO: delegate download process to dataset registry.
-  - TODO: add retry to download
+  - TODO: add retry to download.
   - TODO (future): benchmark LMDB database for energy and hamiltonian split.
   - TODO: do not forget to update schema for hamiltonian databases.
+  - TODO: think about json dir structure.
 # Models
   - TODO: delegate checkpoint download to model registry.
   - TODO: define `BaseModel` protocol for further addition of models in nabla.
