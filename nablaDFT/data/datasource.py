@@ -32,10 +32,11 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import apsw  # way faster than sqlite3
 import ase
 import numpy as np
+import polars as pl
 from ase import Atoms
 
 from ._convert import np_from_bytes, np_to_bytes
-from ._metadata import DatasourceCard
+from .metadata import DatasourceCard
 from .utils import slice_to_list
 
 logger = logging.getLogger(__name__)
@@ -116,12 +117,12 @@ class SQLite3Database:
         metadata (Optional[DatasetCard]): dataset metadata.
     """
 
-    type = ".db"
+    ext = ".db"
 
     def __init__(self, filepath: Union[pathlib.Path, str], metadata: Optional[DatasourceCard] = None) -> None:
         if isinstance(filepath, str):
             filepath = pathlib.Path(filepath)
-        if filepath.suffix != self.type:
+        if filepath.suffix != self.ext:
             raise ValueError(f"Invalid file type: {filepath.suffix}")
         self.filepath = filepath.absolute()
         # initialize metadata
@@ -390,3 +391,47 @@ class SQLite3Database:
 
 
 Datasource = Union[EnergyDatabase, SQLite3Database]
+
+# TODO: define struct for keeping data from csv in memory.
+# TODO: possible variants: in-memory SQLIte3 temporary table.
+
+
+class CSVDatasource:
+    ext = ["csv", "csv.gz"]
+
+    def __init__(self, filepath: pathlib.Path):
+        self.df = pl.read_csv(filepath)
+
+    def _filter_by_uid(self, uids: List[str]):
+        pass
+
+    def _select_cols(self, cols: List[str]):
+        pass
+
+
+class CombinedDatasource:
+    def __init__(self, datasources: List[Datasource]):
+        pass
+
+    def __getitem__(self):
+        pass
+
+    def _combine(self):
+        pass
+
+    def _combine_metadata(self):
+        pass
+
+
+def combine_datasources(datasources: List[Datasource], keys_list: List[str] = None):
+    """Combines two or more datasource in single one.
+
+    Allows different datasources type to combine.
+    By default retrieves all data from combined datasources,
+    if `keys_list` not specified.
+
+    Args:
+        datasources (List(Datasource)): datasource to combine.
+        keys_list (List[str]): data keys to retrieve for each sample.
+    """
+    pass
