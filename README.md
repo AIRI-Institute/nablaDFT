@@ -71,11 +71,11 @@ Links to  hamiltonian databases including different train and test subsets are i
 Links to energy databases including different train and test subsets are in file [Energy databases](./nablaDFT/links/energy_databases.json)
 
 #### Raw psi4 wave functions
-Csv file with links to 7z archives: [wave functions](https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/wfns.csv.gz)
-Each archive consists of `npy` files within 'npys/' directory named in the following manner: '{moses_id}_{conformation_id}.npy'
+Csv file with links to 7z archives: [wfns.csv.gz](https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/wfns.csv.gz).  
+Each archive consists of `npy` files within `npys/` directory named in the following manner: `{moses_id}_{conformation_id}.npy`
 
 #### Summary file
-The csv file with conformations index, SMILES, atomic DFT properties : [summary.csv](https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/summary.csv.gz)
+The csv file with conformations index, SMILES, atomic DFT properties : [summary.csv.gz](https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/summary.csv.gz)
 
 The csv file with conformations index, energies and forces for optimization trajectories: [trajectories_summary.csv](https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/summary_relaxation_trajectories.csv.gz)
 #### Conformations files
@@ -108,8 +108,7 @@ from ase.db import connect
 train = connect("train_2k_v2_formation_energy_w_forces.db")
 atoms_data = train.get(1)
 ```
-#### Working with raw psi4 wavefunctions
-Downloading of the smallest file (6,8 Gb):
+#### Working with raw psi4 wavefunctions  
 ```bash
 wget https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/moses_wfns_compressed/wfns_moses_conformers_archive_0.7z
 7z x wfns_moses_conformers_archive_0.7z
@@ -119,7 +118,7 @@ A variety of properties can be loaded directly from the wavefunction files.
 See main paper for more details. Properties include DFT matrices:
 ```python
 import numpy as np
-wfn = np.load('wfn_conf_50000_0.npy', allow_pickle=True).tolist()
+wfn = np.load('50000_0.npy', allow_pickle=True).tolist()
 orbital_matrix_a = wfn["matrix"]["Ca"]        # alpha orbital coefficients
 orbital_matrix_b = wfn["matrix"]["Cb"]        # beta orbital coefficients
 density_matrix_a = wfn["matrix"]["Da"]        # alpha electonic density
@@ -132,7 +131,7 @@ fock_matrix_b = wfn["matrix"]["Fb"]           # DFT betta Fock matrix
 and bond orders for covalent and non-covalent interactions and atomic charges:
 ```python
 import psi4
-wfn = psi4.core.Wavefunction.from_file('wfn_conf_50000_0.npy')
+wfn = psi4.core.Wavefunction.from_file('50000_0.npy')
 psi4.oeprop(wfn, "MAYER_INDICES")
 psi4.oeprop(wfn, "WIBERG_LOWDIN_INDICES")
 psi4.oeprop(wfn, "MULLIKEN_CHARGES")
