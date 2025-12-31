@@ -71,10 +71,11 @@ Links to  hamiltonian databases including different train and test subsets are i
 Links to energy databases including different train and test subsets are in file [Energy databases](./nablaDFT/links/energy_databases.json)
 
 #### Raw psi4 wave functions
-Links to tarballs: [wave functions](./nablaDFT/links/nablaDFT_psi4wfn_links.txt)
+Csv file with links to 7z archives: [wave functions](https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/wfns.csv.gz)
+Each archive consists of `npy` files within 'npys/' directory named in the following manner: '{moses_id}_{conformation_id}.npy'
 
 #### Summary file
-The csv file with conformations index, SMILES, atomic DFT properties and wfn archive names: [summary.csv](https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/summary.csv.gz)
+The csv file with conformations index, SMILES, atomic DFT properties : [summary.csv](https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/summary.csv.gz)
 
 The csv file with conformations index, energies and forces for optimization trajectories: [trajectories_summary.csv](https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/nablaDFTv2/summary_relaxation_trajectories.csv.gz)
 #### Conformations files
@@ -110,9 +111,9 @@ atoms_data = train.get(1)
 #### Working with raw psi4 wavefunctions
 Downloading of the smallest file (6,8 Gb):
 ```bash
-https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/moses_wfns_big/wfns_moses_conformers_archive_0.tar
-tar -xf wfns_moses_conformers_archive_0.tar
-cd mnt/sdd/data/moses_wfns_big/
+wget https://a002dlils-kadurin-nabladft.obs.ru-moscow-1.hc.sbercloud.ru/data/moses_wfns_compressed/wfns_moses_conformers_archive_0.7z
+7z x wfns_moses_conformers_archive_0.7z
+cd npys/
 ```
 A variety of properties can be loaded directly from the wavefunction files.
 See main paper for more details. Properties include DFT matrices:
