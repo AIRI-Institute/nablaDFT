@@ -1,6 +1,5 @@
-from .calculator import PyGBatchwiseCalculator, SpkBatchwiseCalculator
-from .optimizers import ASEBatchwiseLBFGS
+from .calculator import PyGBatchwiseCalculator
 from .pyg_ase_interface import PYGAseInterface
 from .task import BatchwiseOptimizeTask
-
-__all__ = [PyGBatchwiseCalculator, SpkBatchwiseCalculator, ASEBatchwiseLBFGS, PYGAseInterface, BatchwiseOptimizeTask]
+from .optimizers import ASEBatchwiseLBFGS
+__all__ = [PyGBatchwiseCalculator, PYGAseInterface, BatchwiseOptimizeTask, ASEBatchwiseLBFGS]

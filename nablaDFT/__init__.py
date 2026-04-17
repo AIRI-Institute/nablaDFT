@@ -1,5 +1,4 @@
 from . import (
-    ase_model,
     dataset,
     dimenetplusplus,
     equiformer_v2,
@@ -13,7 +12,6 @@ from . import (
 from .model_registry import model_registry
 
 __all__ = [
-    ase_model,
     dataset,
     dimenetplusplus,
     equiformer_v2,

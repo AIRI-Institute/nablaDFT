@@ -72,7 +72,7 @@ class PyGNablaDFT(InMemoryDataset):
         super(PyGNablaDFT, self).__init__(datapath, transform, pre_transform)
 
         for path in self.processed_paths:
-            data, slices = torch.load(path)
+            data, slices = torch.load(path, weights_only=False)
             self.data_all.append(data)
             self.slices_all.append(slices)
             self.offsets.append(len(slices[list(slices.keys())[0]]) - 1 + self.offsets[-1])

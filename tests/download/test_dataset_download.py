@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import pytest
-from nablaDFT.dataset import ASENablaDFT, PyGNablaDFT
+from nablaDFT.dataset import PyGNablaDFT
 
 
 @pytest.mark.download
@@ -15,16 +15,6 @@ def test_pyg_download_path(tmp_path, monkeypatch):
 
 
 @pytest.mark.download
-def test_spk_downloading_path(tmp_path, monkeypatch):
-    monkeypatch.chdir(tmp_path)
-    dirpath = "./datasets/nablaDFT/train"
-    dataset = ASENablaDFT("dataset_train_tiny", "train", dirpath, batch_size=2)
-    dataset.prepare_data()
-    assert (Path(tmp_path) / dirpath / "dataset_train_tiny.db").exists()
-    monkeypatch.undo()
-
-
-@pytest.mark.download
 def test_pyg_download_local_dir(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     dirpath = "."
@@ -33,12 +23,3 @@ def test_pyg_download_local_dir(tmp_path, monkeypatch):
     assert (Path(tmp_path) / "processed/dataset_train_tiny_train.pt").exists()
     monkeypatch.undo()
 
-
-@pytest.mark.download
-def test_spk_download_local_dir(tmp_path, monkeypatch):
-    monkeypatch.chdir(tmp_path)
-    dirpath = "."
-    dataset = ASENablaDFT("dataset_train_tiny", "train", dirpath, batch_size=2)
-    dataset.prepare_data()
-    assert (Path(tmp_path) / "dataset_train_tiny.db").exists()
-    monkeypatch.undo()

@@ -13,8 +13,6 @@ from omegaconf import OmegaConf, open_dict
         "escn-oc.yaml",
         "gemnet-oc.yaml",
         "graphormer3d.yaml",
-        "painn.yaml",
-        "schnet.yaml",
     ]
 )
 def train_config(request):
@@ -47,8 +45,6 @@ def train_ddp_config(train_config):
         "escn-oc.yaml",
         "gemnet-oc.yaml",
         "graphormer3d.yaml",
-        "painn.yaml",
-        "schnet.yaml",
     ]
 )
 def test_config(request):
@@ -74,8 +70,6 @@ def test_config(request):
         "equiformer_v2_oc20.yaml",
         "escn-oc.yaml",
         "graphormer3d.yaml",
-        "painn.yaml",
-        "schnet.yaml",
     ]
 )
 def predict_config(request, tmp_path):

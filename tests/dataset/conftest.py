@@ -4,7 +4,6 @@ from pathlib import Path
 
 import nablaDFT
 import pytest
-from nablaDFT.dataset.split import TestSplit
 
 BATCH_SIZE = 8
 NUM_WORKERS = 4
@@ -63,44 +62,6 @@ def dataset_hamiltonian_torch_params():
         "max_squares": 4802,
     }
     return params
-
-
-@pytest.fixture()
-def dataset_spk_params():
-    datapath = Path(nablaDFT.__path__[0]) / "../tests/data/raw"
-    dataset_name = "test_database"
-    params = {
-        "root": str(datapath),
-        "dataset_name": dataset_name,
-        "batch_size": BATCH_SIZE,
-        "num_workers": NUM_WORKERS,
-        "pin_memory": True,
-    }
-    return params
-
-
-@pytest.fixture()
-def dataset_spk_params_train(dataset_spk_params):
-    dataset_spk_params["train_ratio"] = 0.9
-    dataset_spk_params["val_ratio"] = 0.1
-    dataset_spk_params["split"] = "train"
-    return dataset_spk_params
-
-
-@pytest.fixture()
-def dataset_spk_params_test(dataset_spk_params):
-    dataset_spk_params["test_ratio"] = 1.0
-    dataset_spk_params["train_ratio"] = 0.0
-    dataset_spk_params["val_ratio"] = 0.0
-    dataset_spk_params["split"] = "test"
-    dataset_spk_params["splitting"] = TestSplit()
-    return dataset_spk_params
-
-
-@pytest.fixture()
-def dataset_spk_params_predict(dataset_spk_params_test):
-    dataset_spk_params_test["split"] = "predict"
-    return dataset_spk_params_test
 
 
 @pytest.fixture()

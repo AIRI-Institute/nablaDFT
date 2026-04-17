@@ -93,7 +93,7 @@ class ModelRegistry:
             model: torch.nn.Module = hydra.utils.instantiate(cfg.model)
         else:
             model: torch.nn.Module = hydra.utils.instantiate(cfg.net)
-        state_dict = self._rebuild_state_dict(torch.load(ckpt_path)["state_dict"])
+        state_dict = self._rebuild_state_dict(torch.load(ckpt_path, map_location=torch.device("cpu"), weights_only=False)["state_dict"])
         model.load_state_dict(state_dict)
         return model
 
@@ -121,7 +121,7 @@ class ModelRegistry:
             kwargs = {}
             kwargs["loss"] = hydra.utils.instantiate(cfg["loss"])
             torch_model: torch.nn.Module = hydra.utils.instantiate(cfg.net)
-            model = model_cls.load_from_checkpoint(ckpt_path, net=torch_model, **kwargs)
+            model = model_cls.load_from_checkpoint(ckpt_path, net=torch_model, weights_only=False, map_location=torch.device("cpu"), **kwargs)
         elif "DimeNet++" in cfg.model_name:
             kwargs = {}
             torch_model: torch.nn.Module = hydra.utils.instantiate(cfg.net)
@@ -132,11 +132,12 @@ class ModelRegistry:
                 net=torch_model,
                 energy_loss_coef=cfg.energy_loss_coef,
                 forces_loss_coef=cfg.forces_loss_coef,
+                weights_only=False,
                 **kwargs,
             )
         else:
             torch_model: torch.nn.Module = hydra.utils.instantiate(cfg.net)
-            model = model_cls.load_from_checkpoint(ckpt_path, net=torch_model)
+            model = model_cls.load_from_checkpoint(ckpt_path, net=torch_model, weights_only=False, map_location=torch.device("cpu"))
         return model
 
     def _rebuild_state_dict(self, state_dict: Dict):

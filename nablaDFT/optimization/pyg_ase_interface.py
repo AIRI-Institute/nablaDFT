@@ -18,8 +18,10 @@ from ase.md.velocitydistribution import (
 from ase.optimize import QuasiNewton
 from ase.vibrations import Vibrations
 from omegaconf import DictConfig
-from schnetpack.units import convert_units
 from torch_geometric.data import Batch, Data
+
+from .spk_utils import convert_units
+
 
 log = logging.getLogger(__name__)
 

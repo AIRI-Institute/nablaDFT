@@ -14,7 +14,6 @@ from pytorch_lightning import (
 from pytorch_lightning.loggers import Logger
 
 from nablaDFT import model_registry
-from nablaDFT.dataset import ASENablaDFT
 from nablaDFT.optimization import BatchwiseOptimizeTask
 from nablaDFT.utils import (
     check_cfg_parameters,
@@ -43,10 +42,7 @@ def predict(
     trainer.logger = False  # need this to disable save_hyperparameters during predict,
     # otherwise OmegaConf DictConf can't be dumped to YAML
     output_db_path = Path(output_dir) / f"{model_name}_{datamodule.dataset_name}.db"
-    if isinstance(datamodule, ASENablaDFT):
-        input_db_path = Path(datamodule.datapath).parent / f"raw/{datamodule.dataset_name}.db"
-    else:
-        input_db_path = Path(datamodule.root) / f"raw/{datamodule.dataset_name}.db"
+    input_db_path = Path(datamodule.root) / f"raw/{datamodule.dataset_name}.db"
     predictions = trainer.predict(model=model, datamodule=datamodule, ckpt_path=ckpt_path)
     write_predictions_to_db(input_db_path, output_db_path, predictions)
 

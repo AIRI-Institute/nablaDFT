@@ -3,12 +3,11 @@ from typing import List, Optional
 import ase
 import numpy as np
 import torch
-from schnetpack.interfaces.ase_interface import AtomsConverter, AtomsConverterError
-from schnetpack.units import convert_units
+#from schnetpack.units import convert_units
 from torch import nn
 
 from .opt_utils import atoms_list_to_PYG
-
+from .spk_utils import convert_units
 from copy import deepcopy
 
 
@@ -132,51 +131,3 @@ class PyGBatchwiseCalculator(BatchwiseCalculator):
         self.atoms = deepcopy(atoms)
 
 
-class SpkBatchwiseCalculator(BatchwiseCalculator):
-    """Batchwise calculator for SchNetPack models for batchwise optimization.
-
-    Args:
-        model (nn.Module): loaded train schnetpack model.
-        atoms_converter (AtomsConverter): Class used to convert ase Atoms objects to schnetpack input.
-    """
-
-    def __init__(
-        self,
-        model: nn.Module,
-        atoms_converter: AtomsConverter,
-        device: str = "cpu",
-        energy_key: str = "energy",
-        force_key: str = "forces",
-        energy_unit: str = "eV",
-        position_unit: str = "Ang",
-        dtype: torch.dtype = torch.float32,
-    ):
-        super().__init__(
-            model=model,
-            device=device,
-            energy_key=energy_key,
-            force_key=force_key,
-            energy_unit=energy_unit,
-            position_unit=position_unit,
-            dtype=dtype,
-        )
-        self.atoms_converter = atoms_converter
-
-    def calculate(self, atoms: List[ase.Atoms]) -> None:
-        property_keys = list(self.property_units.keys())
-        results = {}
-        model_inputs = self.atoms_converter(atoms)
-        model_results = self.model(model_inputs)
-
-        results = {}
-        # store model results in calculator
-        for prop in property_keys:
-            if prop in model_results:
-                results[prop] = model_results[prop].detach().cpu().numpy() * self.property_units[prop]
-            else:
-                raise AtomsConverterError(
-                    f"'{prop:s}' is not a property of your model. Please " "check the model " "properties!"
-                )
-
-        self.results = results
-        self.atoms = atoms.copy()
